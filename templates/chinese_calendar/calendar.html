@@ -5,13 +5,12 @@
 {% block content %}
 <div class="container mt-4">
     <div class="row">
-        <div class="col-md-12">
-            <div class="text-center mb-5">
-                <h1 class="zen-section-title">
-                    <i class="fas fa-calendar-alt zen-icon"></i> 黄历智询
-                </h1>
+        <div class="col-md-12">            <div class="text-center mb-5">
+                <h1 class="zen-section-title">黄历智询</h1>
                 <p class="zen-section-subtitle">观天时知宜忌，择良辰启吉运</p>
-            </div>            <!-- 快速导航 -->
+            </div>
+            
+            <!-- 快速导航 -->
             <div class="zen-card mb-4">
                 <div class="zen-card-header">
                     <h5 class="zen-subtitle"><i class="fas fa-sun zen-icon"></i> 时光选择</h5>
@@ -29,24 +28,27 @@
                                 <button class="zen-btn zen-btn-outline" onclick="setTomorrow()">明天</button>
                                 <button class="zen-btn zen-btn-outline" onclick="setNextWeek()">下周</button>
                             </div>
-                        </div>
-                        <div class="col-md-4">
+                        </div>                        <div class="col-md-4">
+                            <label class="zen-form-label">&nbsp;</label>
                             <button class="zen-btn zen-btn-primary w-100" onclick="queryCalendar()">
                                 <i class="fas fa-search me-2"></i> 查询黄历
                             </button>
                         </div>
                     </div>
                 </div>
-            </div>            <!-- 加载提示 -->
+            </div>
+            
+            <!-- 加载提示 -->
             <div id="loading" class="text-center py-5" style="display: none;">
                 <div class="zen-loading">
-                    <i class="fas fa-lotus fa-spin fa-2x zen-text-accent mb-3"></i>
+                    <i class="fas fa-seedling fa-spin fa-2x zen-text-accent mb-3"></i>
                     <p class="zen-text-secondary">正在查询黄历信息...</p>
                 </div>
-            </div>            <!-- 黄历结果 -->
+            </div>
+            
+            <!-- 黄历结果 -->
             <div id="calendar-result" class="row">
-                <!-- 基本信息 -->
-                <div class="col-lg-8">
+                <!-- 基本信息 -->                <div class="col-lg-8">
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="zen-card h-100">
@@ -95,7 +97,9 @@
                                 </div>
                             </div>
                         </div>
-                    </div>                    <!-- 宜忌事项 -->
+                    </div>
+                    
+                    <!-- 宜忌事项 -->
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="zen-card h-100">
@@ -105,7 +109,7 @@
                                 <div class="zen-card-body">
                                     <div id="suitable-activities">
                                         <div class="text-center zen-text-secondary">
-                                            <i class="fas fa-lotus fa-spin zen-text-accent"></i>
+                                            <i class="fas fa-seedling fa-spin zen-text-accent"></i>
                                             <p class="mt-2">加载中...</p>
                                         </div>
                                     </div>
@@ -121,15 +125,16 @@
                                 <div class="zen-card-body">
                                     <div id="avoid-activities">
                                         <div class="text-center zen-text-secondary">
-                                            <i class="fas fa-lotus fa-spin zen-text-accent"></i>
+                                            <i class="fas fa-seedling fa-spin zen-text-accent"></i>
                                             <p class="mt-2">加载中...</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>                <!-- 侧边栏 -->
+                        </div>                    </div>
+                </div>
+                
+                <!-- 侧边栏 -->
                 <div class="col-lg-4">
                     <!-- 今日运势评分 -->
                     <div class="zen-card mb-4">
@@ -195,21 +200,29 @@
                                 </button>
                                 <button class="zen-btn zen-btn-outline" onclick="printCalendar()">
                                     <i class="fas fa-print me-2"></i>打印黄历
-                                </button>
-                            </div>
+                                </button>                            </div>
                         </div>
                     </div>
-
+                    
                     <!-- 相关建议 -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h5><i class="fas fa-lightbulb"></i> 今日建议</h5>
+                    <div class="zen-card">
+                        <div class="zen-card-header">
+                            <h5 class="zen-subtitle"><i class="fas fa-lightbulb zen-icon"></i> 今日建议</h5>
                         </div>
-                        <div class="card-body">
-                            <div class="small">
-                                <p><strong>穿衣建议：</strong>宜穿绿色或蓝色服装，有助于提升运势。</p>
-                                <p><strong>方位建议：</strong>今日宜朝东南方向，不宜朝西北方向。</p>
-                                <p><strong>饮食建议：</strong>宜食用清淡食物，忌辛辣刺激。</p>
+                        <div class="zen-card-body">
+                            <div class="zen-text-secondary">
+                                <div class="mb-3">
+                                    <span class="zen-badge zen-badge-accent mb-1">穿衣建议</span>
+                                    <p class="mb-0">宜穿绿色或蓝色服装，有助于提升运势。</p>
+                                </div>
+                                <div class="mb-3">
+                                    <span class="zen-badge zen-badge-decoration mb-1">方位建议</span>
+                                    <p class="mb-0">今日宜朝东南方向，不宜朝西北方向。</p>
+                                </div>
+                                <div>
+                                    <span class="zen-badge zen-badge-primary mb-1">饮食建议</span>
+                                    <p class="mb-0">宜食用清淡食物，忌辛辣刺激。</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -217,15 +230,15 @@
             </div>
 
             <!-- 时辰吉凶 -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h5><i class="fas fa-clock"></i> 十二时辰吉凶</h5>
+            <div class="zen-card mt-4">
+                <div class="zen-card-header">
+                    <h5 class="zen-subtitle"><i class="fas fa-clock zen-icon"></i> 十二时辰吉凶</h5>
                 </div>
-                <div class="card-body">
+                <div class="zen-card-body">
                     <div class="row g-2" id="hourly-fortune">
                         <!-- 时辰数据将通过JavaScript动态加载 -->
-                        <div class="col-12 text-center text-muted">
-                            <div class="spinner-border" role="status"></div>
+                        <div class="col-12 text-center zen-text-secondary">
+                            <i class="fas fa-seedling fa-spin zen-text-accent"></i>
                             <p class="mt-2">正在加载时辰信息...</p>
                         </div>
                     </div>
@@ -236,36 +249,35 @@
 </div>
 
 <style>
-.bg-gradient {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.zen-bg-gradient {
+    background: var(--zen-gradient-accent);
 }
 
-.fortune-score .progress {
+.fortune-score .zen-progress {
     height: 8px;
 }
 
-.time-card {
+.zen-card {
     transition: transform 0.2s ease;
-    cursor: pointer;
 }
 
-.time-card:hover {
+.zen-card:hover {
     transform: translateY(-2px);
 }
 
-.time-card.lucky {
-    background-color: #d4edda;
-    border-color: #c3e6cb;
+.lucky-card {
+    background-color: rgba(231, 218, 198, 0.1);
+    border-color: var(--zen-accent);
 }
 
-.time-card.normal {
-    background-color: #fff3cd;
-    border-color: #ffeaa7;
+.normal-card {
+    background-color: rgba(200, 184, 158, 0.1);
+    border-color: var(--zen-decoration);
 }
 
-.time-card.unlucky {
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
+.unlucky-card {
+    background-color: rgba(168, 158, 146, 0.1);
+    border-color: var(--zen-secondary);
 }
 </style>
 
@@ -298,10 +310,9 @@ function queryCalendar() {
         alert('请选择日期');
         return;
     }
+      showLoading();
     
-    showLoading();
-    
-    fetch(`/chinese_calendar/api/calendar/${date}/`)
+    fetch(`/calendar/api/calendar/${date}/`)
         .then(response => response.json())
         .then(data => {
             hideLoading();
@@ -328,13 +339,12 @@ function updateCalendarDisplay(data) {
     // 更新宜忌事项
     const suitableDiv = document.getElementById('suitable-activities');
     const avoidDiv = document.getElementById('avoid-activities');
-    
-    suitableDiv.innerHTML = '<div class="d-flex flex-wrap gap-2">' + 
-        (data.suitable || []).map(item => `<span class="badge bg-success-subtle text-success px-3 py-2">${item}</span>`).join('') + 
+      suitableDiv.innerHTML = '<div class="d-flex flex-wrap gap-2">' + 
+        (data.suitable || []).map(item => `<span class="zen-badge zen-badge-accent px-3 py-2">${item}</span>`).join('') + 
         '</div>';
     
     avoidDiv.innerHTML = '<div class="d-flex flex-wrap gap-2">' + 
-        (data.avoid || []).map(item => `<span class="badge bg-danger-subtle text-danger px-3 py-2">${item}</span>`).join('') + 
+        (data.avoid || []).map(item => `<span class="zen-badge zen-badge-secondary px-3 py-2">${item}</span>`).join('') + 
         '</div>';
 }
 
@@ -351,22 +361,32 @@ function updateHourlyFortune() {
         {name: '申时', time: '15:00-17:00', status: 'normal'},
         {name: '酉时', time: '17:00-19:00', status: 'lucky'},
         {name: '戌时', time: '19:00-21:00', status: 'unlucky'},
-        {name: '亥时', time: '21:00-23:00', status: 'normal'}
-    ];
+        {name: '亥时', time: '21:00-23:00', status: 'normal'}    ];
     
     const hourlyDiv = document.getElementById('hourly-fortune');
     hourlyDiv.innerHTML = hours.map(hour => {
-        const badgeClass = hour.status === 'lucky' ? 'bg-success' : 
-                          hour.status === 'normal' ? 'bg-warning' : 'bg-danger';
-        const statusText = hour.status === 'lucky' ? '吉' : 
-                          hour.status === 'normal' ? '平' : '凶';
+        let badgeClass, textClass, statusText;
+        
+        if (hour.status === 'lucky') {
+            badgeClass = 'zen-badge-accent';
+            textClass = 'zen-text-accent';
+            statusText = '吉';
+        } else if (hour.status === 'normal') {
+            badgeClass = 'zen-badge-decoration';
+            textClass = 'zen-text-decoration';
+            statusText = '平';
+        } else {
+            badgeClass = 'zen-badge-secondary';
+            textClass = 'zen-text-secondary';
+            statusText = '凶';
+        }
         
         return `
-            <div class="col-lg-3 col-md-4 col-sm-6">
-                <div class="time-card card border ${hour.status} text-center p-3 h-100">
-                    <div class="fw-bold">${hour.name}</div>
-                    <div class="small text-muted">${hour.time}</div>
-                    <div class="badge ${badgeClass} mt-2">${statusText}</div>
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                <div class="zen-card text-center p-3 h-100 ${hour.status}-card">
+                    <div class="fw-bold ${textClass}">${hour.name}</div>
+                    <div class="small zen-text-secondary">${hour.time}</div>
+                    <div class="zen-badge ${badgeClass} mt-2">${statusText}</div>
                 </div>
             </div>
         `;

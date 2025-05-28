@@ -21,7 +21,7 @@
                     </p>
                     <div class="zen-hero-actions">
                         <a href="{% url 'divination:bazi' %}" class="zen-btn zen-btn-primary">
-                            <i class="fas fa-lotus me-2"></i>开始占卜
+                            <i class="fas fa-seedling me-2"></i>开始占卜
                         </a>
                         <a href="#features" class="zen-btn zen-btn-outline">
                             <i class="fas fa-leaf me-2"></i>了解更多
@@ -57,8 +57,7 @@
             </div>
             <div class="col-md-3">
                 <div class="zen-stat-card">
-                    <div class="zen-stat-icon">
-                        <i class="fas fa-lotus"></i>
+                    <div class="zen-stat-icon">                        <i class="fas fa-seedling"></i>
                     </div>
                     <div class="zen-stat-number">{{ total_divinations|default:0 }}</div>
                     <div class="zen-stat-label">心灵探索次数</div>
@@ -126,8 +125,7 @@
             </div>
             <div class="col-md-6 col-lg-3">
                 <div class="zen-feature-card">
-                    <div class="zen-feature-icon">
-                        <i class="fas fa-lotus"></i>
+                    <div class="zen-feature-icon">                        <i class="fas fa-seedling"></i>
                     </div>
                     <h5 class="zen-feature-title">塔罗指引</h5>
                     <p class="zen-feature-description">
@@ -190,7 +188,7 @@
                             </span>
                         {% elif record.divination_type == 'tarot' %}
                             <span class="zen-badge zen-badge-purple">
-                                <i class="fas fa-lotus me-1"></i>{{ record.get_divination_type_display }}
+                                <i class="fas fa-seedling me-1"></i>{{ record.get_divination_type_display }}
                             </span>
                         {% elif record.divination_type == 'yijing' %}
                             <span class="zen-badge zen-badge-blue">
