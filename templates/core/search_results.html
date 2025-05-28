@@ -1,0 +1,398 @@
+{% extends 'base.html' %}
+
+{% block title %}搜索结果 - 灵汐命理平台{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="zen-title"><i class="fas fa-search zen-icon"></i> 智慧寻踪</h2>
+                <a href="{% url 'core:profile' %}" class="zen-btn zen-btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 返回档案
+                </a>
+            </div>            <!-- 搜索表单 -->
+            <div class="zen-card mb-4">
+                <div class="zen-card-header">
+                    <h5 class="zen-subtitle"><i class="fas fa-filter zen-icon"></i> 灵感筛选</h5>
+                </div>
+                <div class="zen-card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="q" class="zen-form-label">关键词</label>
+                            <input type="text" class="zen-form-control" id="q" name="q" value="{{ query }}" placeholder="搜索问题或结果">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="type" class="zen-form-label">占卜类型</label>
+                            <select class="zen-form-control" id="type" name="type">
+                                <option value="">全部类型</option>
+                                {% for value, label in divination_types %}
+                                <option value="{{ value }}" {% if value == divination_type %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="date_from" class="zen-form-label">开始日期</label>
+                            <input type="date" class="zen-form-control" id="date_from" name="date_from" value="{{ date_from }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="date_to" class="zen-form-label">结束日期</label>
+                            <input type="date" class="zen-form-control" id="date_to" name="date_to" value="{{ date_to }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="zen-form-label">&nbsp;</label>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="zen-btn zen-btn-primary">
+                                    <i class="fas fa-search"></i> 搜索
+                                </button>
+                                <a href="{% url 'core:search_records' %}" class="zen-btn zen-btn-secondary">
+                                    <i class="fas fa-refresh"></i> 重置
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 搜索结果统计 -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <span class="text-muted">
+                        找到 <strong>{{ page_obj.paginator.count }}</strong> 条记录
+                        {% if query %}
+                            包含 "<strong>{{ query }}</strong>"
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="btn-group" role="group">
+                    <a href="{% url 'core:export_records' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" 
+                       class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-download"></i> 导出CSV
+                    </a>
+                    <button class="btn btn-outline-danger btn-sm" onclick="deleteSelected()">
+                        <i class="fas fa-trash"></i> 批量删除
+                    </button>
+                </div>
+            </div>
+
+            <!-- 搜索结果列表 -->
+            {% if page_obj %}
+                <div class="row">
+                    {% for record in page_obj %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 record-card" data-record-id="{{ record.id }}">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    {% if record.divination_type == 'bazi' %}
+                                        <span class="badge bg-primary"><i class="fas fa-calendar-alt me-1"></i>{{ record.get_divination_type_display }}</span>
+                                    {% elif record.divination_type == 'meihua' %}
+                                        <span class="badge bg-success"><i class="fas fa-leaf me-1"></i>{{ record.get_divination_type_display }}</span>
+                                    {% elif record.divination_type == 'tarot' %}
+                                        <span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>{{ record.get_divination_type_display }}</span>
+                                    {% elif record.divination_type == 'yijing' %}
+                                        <span class="badge bg-info"><i class="fas fa-yin-yang me-1"></i>{{ record.get_divination_type_display }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#" onclick="viewDetails({{ record.id }})">
+                                            <i class="fas fa-eye me-2"></i>查看详情
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="shareRecord({{ record.id }})">
+                                            <i class="fas fa-share me-2"></i>分享记录
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="#" onclick="deleteRecord({{ record.id }})">
+                                            <i class="fas fa-trash me-2"></i>删除记录
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>{{ record.created_at|date:"Y-m-d H:i" }}
+                                    </small>
+                                </div>
+                                {% if record.question %}
+                                    <h6 class="card-title text-primary">
+                                        <i class="fas fa-question-circle me-1"></i>{{ record.question|truncatechars:50 }}
+                                    </h6>
+                                {% endif %}
+                                <p class="card-text">{{ record.result|truncatechars:120 }}</p>
+                                
+                                <!-- 高亮搜索关键词 -->
+                                {% if query %}
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        highlightText('{{ query }}', '.card-text, .card-title');
+                                    });
+                                </script>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer text-muted d-flex justify-content-between align-items-center">
+                                <small>记录ID: #{{ record.id }}</small>
+                                <div class="form-check">
+                                    <input class="form-check-input record-checkbox" type="checkbox" value="{{ record.id }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- 分页导航 -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="搜索结果分页">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                    <i class="fas fa-chevron-left"></i> 上一页
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for page_num in page_obj.paginator.page_range %}
+                            {% if page_num == page_obj.number %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% elif page_num > page_obj.number|add:'-3' and page_num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_num }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">{{ page_num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                    下一页 <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5>没有找到匹配的记录</h5>
+                        <p class="text-muted">请尝试调整搜索条件或关键词</p>
+                        <a href="{% url 'core:profile' %}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i>返回个人档案
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- 记录详情模态框 -->
+<div class="modal fade" id="recordModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">占卜记录详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="recordModalBody">
+                <!-- 详情内容将通过JavaScript加载 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="printRecord()">打印记录</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.record-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.record-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.highlight {
+    background-color: yellow;
+    padding: 1px 2px;
+    border-radius: 2px;
+}
+
+.selected-record {
+    border: 2px solid #007bff;
+    background-color: rgba(0,123,255,0.1);
+}
+</style>
+
+<script>
+function highlightText(searchTerm, selector) {
+    if (!searchTerm) return;
+    
+    const elements = document.querySelectorAll(selector);
+    elements.forEach(element => {
+        const innerHTML = element.innerHTML;
+        const regex = new RegExp(`(${searchTerm})`, 'gi');
+        element.innerHTML = innerHTML.replace(regex, '<span class="highlight">$1</span>');
+    });
+}
+
+function deleteRecord(recordId) {
+    if (confirm('确定要删除这条记录吗？此操作不可恢复。')) {
+        fetch(`/core/delete-record/${recordId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value || ''
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.querySelector(`[data-record-id="${recordId}"]`).closest('.col-md-6').remove();
+                showNotification('记录已删除', 'success');
+            } else {
+                showNotification(data.message || '删除失败', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('删除失败，请稍后重试', 'error');
+        });
+    }
+}
+
+function deleteSelected() {
+    const selectedCheckboxes = document.querySelectorAll('.record-checkbox:checked');
+    if (selectedCheckboxes.length === 0) {
+        alert('请先选择要删除的记录');
+        return;
+    }
+    
+    if (confirm(`确定要删除选中的 ${selectedCheckboxes.length} 条记录吗？此操作不可恢复。`)) {
+        const promises = Array.from(selectedCheckboxes).map(checkbox => {
+            return fetch(`/core/delete-record/${checkbox.value}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value || ''
+                }
+            });
+        });
+        
+        Promise.all(promises)
+            .then(() => {
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('批量删除失败，请稍后重试', 'error');
+            });
+    }
+}
+
+function viewDetails(recordId) {
+    // 这里可以加载详细信息到模态框
+    document.getElementById('recordModalBody').innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div><p class="mt-2">加载中...</p></div>';
+    
+    const modal = new bootstrap.Modal(document.getElementById('recordModal'));
+    modal.show();
+    
+    // 模拟加载详情
+    setTimeout(() => {
+        document.getElementById('recordModalBody').innerHTML = `
+            <h6>记录详细信息</h6>
+            <p>这里显示记录 #${recordId} 的详细内容...</p>
+        `;
+    }, 1000);
+}
+
+function shareRecord(recordId) {
+    const url = `${window.location.origin}/record/${recordId}/`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: '占卜记录分享',
+            text: '查看我的占卜记录',
+            url: url
+        });
+    } else {
+        navigator.clipboard.writeText(url).then(() => {
+            showNotification('链接已复制到剪贴板', 'success');
+        });
+    }
+}
+
+function showNotification(message, type = 'info') {
+    const alertClass = type === 'success' ? 'alert-success' : 
+                      type === 'error' ? 'alert-danger' : 'alert-info';
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+
+function printRecord() {
+    window.print();
+}
+
+// 全选/取消全选功能
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllBtn = document.createElement('button');
+    selectAllBtn.className = 'btn btn-outline-primary btn-sm me-2';
+    selectAllBtn.innerHTML = '<i class="fas fa-check-square"></i> 全选';
+    selectAllBtn.onclick = function() {
+        const checkboxes = document.querySelectorAll('.record-checkbox');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        
+        checkboxes.forEach(cb => {
+            cb.checked = !allChecked;
+            toggleRecordSelection(cb);
+        });
+        
+        this.innerHTML = allChecked ? 
+            '<i class="fas fa-check-square"></i> 全选' : 
+            '<i class="fas fa-square"></i> 取消全选';
+    };
+    
+    const buttonGroup = document.querySelector('.btn-group[role="group"]');
+    if (buttonGroup) {
+        buttonGroup.insertBefore(selectAllBtn, buttonGroup.firstChild);
+    }
+    
+    // 为复选框添加事件监听
+    document.querySelectorAll('.record-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            toggleRecordSelection(this);
+        });
+    });
+});
+
+function toggleRecordSelection(checkbox) {
+    const recordCard = checkbox.closest('.record-card');
+    if (checkbox.checked) {
+        recordCard.classList.add('selected-record');
+    } else {
+        recordCard.classList.remove('selected-record');
+    }
+}
+</script>
+{% endblock %}

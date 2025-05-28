@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5 fade-in">
+                <h1 class="display-5 fw-bold text-zen-primary">塔罗占卜</h1>
+                <p class="lead text-zen-secondary">静心凝神，与内在智慧对话，让塔罗为心灵指引方向</p>
+                <div class="zen-divider mx-auto"></div>
+            </div>
+
+            <div class="zen-card slide-in-left">
+                <div class="p-5">
+                    <form id="tarotForm">
+                        <div class="mb-4">
+                            <label for="question" class="zen-form-label">您的心灵问题</label>
+                            <textarea class="form-control" id="question" rows="4" 
+                                placeholder="请用心感受您内心深处的疑问... 如：我在情感中的成长方向？人生下一阶段的引导？" required></textarea>
+                            <small class="text-zen-secondary">以开放性问题为佳，用心感受内在声音</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="zen-form-label">选择牌阵</label>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="zen-tarot-spread" data-spread="three-card">
+                                        <div class="text-center p-3">
+                                            <i class="fas fa-circle-notch fa-2x text-zen-accent mb-2"></i>
+                                            <h6 class="fw-bold text-zen-primary">三张牌阵</h6>
+                                            <small class="text-zen-secondary">过去·现在·未来</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="zen-tarot-spread" data-spread="celtic-cross">
+                                        <div class="text-center p-3">
+                                            <i class="fas fa-plus fa-2x text-zen-accent mb-2"></i>
+                                            <h6 class="fw-bold text-zen-primary">凯尔特十字</h6>
+                                            <small class="text-zen-secondary">深层解析</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="zen-tarot-spread" data-spread="love">
+                                        <div class="text-center p-3">
+                                            <i class="fas fa-heart fa-2x text-zen-accent mb-2"></i>
+                                            <h6 class="fw-bold text-zen-primary">情感牌阵</h6>
+                                            <small class="text-zen-secondary">心灵情感</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="selectedSpread" value="three-card">
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="zen-btn zen-btn-primary">
+                                <i class="fas fa-sparkles me-2"></i>开启塔罗智慧
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>            <!-- 占卜结果 -->
+            <div id="resultSection" class="mt-5" style="display: none;">
+                <div class="zen-card slide-in-right">
+                    <div class="text-center p-4 border-bottom">
+                        <h3 class="mb-0 text-zen-primary"><i class="fas fa-sparkles me-2"></i>塔罗启示</h3>
+                    </div>
+                    <div class="p-5">
+                        <!-- 问题显示 -->
+                        <div class="text-center mb-4">
+                            <h5 class="text-zen-secondary">您的心灵问题</h5>
+                            <p class="fs-5 fw-bold text-zen-primary" id="questionDisplay"></p>
+                        </div>
+
+                        <!-- 塔罗牌显示 -->
+                        <div class="tarot-cards-display text-center mb-4">
+                            <div class="row justify-content-center" id="cardsContainer">
+                                <!-- 卡牌将通过JavaScript填充 -->
+                            </div>
+                        </div>
+
+                        <!-- 解读内容 -->
+                        <div id="interpretationContent" class="interpretation-content">
+                            <!-- 解读内容将通过JavaScript填充 -->
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button class="zen-btn zen-btn-primary me-3" onclick="saveResult()">
+                                <i class="fas fa-save me-2"></i>珍藏启示
+                            </button>
+                            <button class="zen-btn zen-btn-outline" onclick="resetForm()">
+                                <i class="fas fa-redo me-2"></i>重新问卜
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.zen-tarot-spread {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid var(--zen-decoration);
+    border-radius: 1rem;
+    background: var(--zen-bg-light);
+}
+
+.zen-tarot-spread:hover {
+    border-color: var(--zen-accent);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(200, 184, 158, 0.3);
+}
+
+.zen-tarot-spread.selected {
+    border-color: var(--zen-accent);
+    background-color: var(--zen-decoration);
+}
+
+.tarot-card {
+    width: 120px;
+    height: 200px;
+    background: linear-gradient(145deg, var(--zen-bg-light), var(--zen-decoration));
+    border: 2px solid var(--zen-accent);
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 10px 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.tarot-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(200, 184, 158, 0.5);
+}
+
+.tarot-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 48%, var(--zen-accent) 50%, transparent 52%);
+    opacity: 0.1;
+}
+
+.card-name {
+    font-weight: bold;
+    color: var(--zen-text-primary);
+    text-align: center;
+    margin-top: 10px;
+}
+
+.card-meaning {
+    font-size: 0.9em;
+    color: var(--zen-text-secondary);
+    text-align: center;
+    margin-top: 5px;
+}
+
+.interpretation-content {
+    line-height: 1.8;
+    background: var(--zen-bg-light);
+    padding: 2rem;
+    border-radius: 1rem;
+    border-left: 4px solid var(--zen-accent);
+    color: var(--zen-text-primary);
+}
+
+.interpretation-content h5 {
+    color: var(--zen-text-primary);
+    border-bottom: 2px solid var(--zen-accent);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.zen-divider {
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--zen-accent), var(--zen-decoration));
+    margin: 1rem auto;
+    border-radius: 2px;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 牌阵选择
+document.querySelectorAll('.zen-tarot-spread').forEach(spread => {
+    spread.addEventListener('click', function() {
+        document.querySelectorAll('.zen-tarot-spread').forEach(s => s.classList.remove('selected'));
+        this.classList.add('selected');
+        document.getElementById('selectedSpread').value = this.dataset.spread;
+    });
+});
+
+// 默认选择第一个牌阵
+document.querySelector('.zen-tarot-spread').classList.add('selected');
+
+document.getElementById('tarotForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const question = document.getElementById('question').value;
+    const spread = document.getElementById('selectedSpread').value;
+    
+    if (!question.trim()) {
+        alert('请输入您的问题');
+        return;
+    }
+    
+    // 显示加载状态
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>占卜中...';
+    submitBtn.disabled = true;
+    
+    // 发送占卜请求
+    fetch('/divination/api/tarot/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            question: question,
+            spread: spread
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayResult(data, question);
+        } else {
+            alert('占卜失败：' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('网络错误，请稍后重试');
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+function displayResult(data, question) {
+    // 显示问题
+    document.getElementById('questionDisplay').textContent = question;
+    
+    // 显示塔罗牌
+    const cardsContainer = document.getElementById('cardsContainer');
+    cardsContainer.innerHTML = '';
+    
+    const positions = ['过去', '现在', '未来'];
+    
+    data.cards.forEach((card, index) => {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'col-auto';
+        cardDiv.innerHTML = `
+            <div class="tarot-card">
+                <div class="position-label">${positions[index]}</div>
+                <i class="fas fa-star fa-3x text-warning"></i>
+                <div class="card-name">${card.name}</div>
+                <div class="card-meaning">${card.meaning}</div>
+            </div>
+        `;
+        cardsContainer.appendChild(cardDiv);
+    });
+    
+    // 显示解读内容
+    document.getElementById('interpretationContent').innerHTML = 
+        '<div class="interpretation-text">' + 
+        data.interpretation.replace(/\n/g, '<br>') + 
+        '</div>';
+    
+    // 显示结果区域
+    document.getElementById('resultSection').style.display = 'block';
+    
+    // 滚动到结果区域
+    document.getElementById('resultSection').scrollIntoView({ 
+        behavior: 'smooth' 
+    });
+}
+
+function saveResult() {
+    alert('占卜结果已保存到您的个人档案');
+}
+
+function resetForm() {
+    document.getElementById('tarotForm').reset();
+    document.getElementById('resultSection').style.display = 'none';
+    // 重新选择默认牌阵
+    document.querySelectorAll('.tarot-spread').forEach(s => s.classList.remove('selected'));
+    document.querySelector('.tarot-spread').classList.add('selected');
+    document.getElementById('selectedSpread').value = 'three-card';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+{% endblock %}

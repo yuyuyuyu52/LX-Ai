@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}静心注册{% endblock %}
+
+{% block extra_css %}
+<style>
+    .zen-auth-container {
+        max-width: 450px;
+        margin: 50px auto;
+        padding: 40px;
+        border-radius: 20px;
+        background: var(--zen-bg-primary);
+        border: 1px solid var(--zen-decoration);
+        box-shadow: 0 20px 60px rgba(200, 184, 158, 0.2);
+    }
+    
+    .zen-auth-form {
+        padding: 0;
+    }
+    
+    .zen-auth-title {
+        color: var(--zen-text-primary);
+        text-align: center;
+        margin-bottom: 2rem;
+        font-family: 'Noto Serif SC', serif;
+    }
+    
+    .zen-form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .zen-form-control {
+        background: var(--zen-bg-light);
+        border: 1px solid var(--zen-decoration);
+        color: var(--zen-text-primary);
+        border-radius: 12px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .zen-form-control::placeholder {
+        color: var(--zen-text-secondary);
+    }
+    
+    .zen-form-control:focus {
+        background: var(--zen-bg-primary);
+        border-color: var(--zen-accent);
+        color: var(--zen-text-primary);
+        box-shadow: 0 0 0 0.2rem rgba(200, 184, 158, 0.25);
+        outline: none;
+    }
+    
+    .zen-btn-auth {
+        background: linear-gradient(135deg, var(--zen-accent), var(--zen-decoration));
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-weight: 600;
+        color: var(--zen-text-primary);
+        transition: all 0.3s ease;
+        width: 100%;
+    }    
+    .zen-btn-auth:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(200, 184, 158, 0.4);
+    }
+    
+    .zen-auth-link {
+        color: var(--zen-text-secondary);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    
+    .zen-auth-link:hover {
+        color: var(--zen-accent);
+    }
+    
+    .zen-divider {
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--zen-accent), var(--zen-decoration));
+        margin: 1.5rem auto;
+        border-radius: 2px;
+    }
+    
+    .zen-errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 5px 0;
+    }
+    
+    .zen-errorlist li {
+        background: rgba(220, 53, 69, 0.1);
+        color: var(--zen-text-primary);
+        padding: 8px 12px;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        font-size: 0.875rem;
+        border-left: 3px solid #dc3545;
+    }    
+    .zen-helptext {
+        font-size: 0.75rem;
+        color: var(--zen-text-secondary);
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="zen-auth-container fade-in">
+        <h2 class="zen-auth-title">
+            <i class="fas fa-seedling me-2"></i>
+            静心注册
+        </h2>
+        <div class="zen-divider"></div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+          <form method="post" class="zen-auth-form">
+            {% csrf_token %}
+            
+            <div class="zen-form-group">
+                <label for="{{ form.username.id_for_label }}" class="zen-form-label text-zen-secondary">用户名</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <ul class="zen-errorlist">
+                        {% for error in form.username.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {% if form.username.help_text %}
+                    <div class="zen-helptext">{{ form.username.help_text }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="zen-form-group">
+                <label for="{{ form.email.id_for_label }}" class="zen-form-label text-zen-secondary">邮箱地址</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <ul class="zen-errorlist">
+                        {% for error in form.email.errors %}
+                            <li>{{ error }}</li>                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <div class="zen-form-group">
+                <label for="{{ form.password1.id_for_label }}" class="zen-form-label text-zen-secondary">密码</label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                    <ul class="zen-errorlist">
+                        {% for error in form.password1.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {% if form.password1.help_text %}
+                    <div class="zen-helptext">{{ form.password1.help_text }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="zen-form-group">
+                <label for="{{ form.password2.id_for_label }}" class="zen-form-label text-zen-secondary">确认密码</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                    <ul class="zen-errorlist">
+                        {% for error in form.password2.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {% if form.password2.help_text %}
+                    <div class="zen-helptext">{{ form.password2.help_text }}</div>
+                {% endif %}
+            </div>
+            
+            <!-- 可选的个人信息 -->
+            <div class="zen-form-group">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="showOptional">
+                    <label class="form-check-label text-zen-secondary" for="showOptional">
+                        填写个人信息（用于更精准的命理分析）
+                    </label>
+                </div>
+            </div>
+            
+            <div id="optionalFields" style="display: none;">
+                <div class="zen-form-group">
+                    <label for="{{ form.birth_date.id_for_label }}" class="zen-form-label text-zen-secondary">出生时间</label>
+                    {{ form.birth_date }}
+                    {% if form.birth_date.errors %}                        <ul class="zen-errorlist">
+                            {% for error in form.birth_date.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="zen-form-group">
+                    <label for="{{ form.birth_place.id_for_label }}" class="zen-form-label text-zen-secondary">出生地点</label>
+                    {{ form.birth_place }}
+                    {% if form.birth_place.errors %}
+                        <ul class="zen-errorlist">
+                            {% for error in form.birth_place.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="zen-form-group">
+                    <label for="{{ form.gender.id_for_label }}" class="zen-form-label text-zen-secondary">性别</label>
+                    {{ form.gender }}
+                    {% if form.gender.errors %}
+                        <ul class="zen-errorlist">
+                            {% for error in form.gender.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="d-grid mb-3">
+                <button type="submit" class="zen-btn-auth">
+                    <i class="fas fa-seedling me-2"></i>
+                    静心注册
+                </button>
+            </div>
+            
+            <div class="text-center">
+                <p class="mb-0 text-zen-secondary">已有账户？
+                    <a href="{% url 'core:login' %}" class="zen-auth-link">
+                        <i class="fas fa-leaf me-1"></i>
+                        静心登录
+                    </a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 可选字段显示/隐藏
+    const showOptional = document.getElementById('showOptional');
+    const optionalFields = document.getElementById('optionalFields');
+    
+    showOptional.addEventListener('change', function() {
+        if (this.checked) {
+            optionalFields.style.display = 'block';
+            optionalFields.style.opacity = '0';
+            setTimeout(() => {
+                optionalFields.style.transition = 'opacity 0.3s ease';
+                optionalFields.style.opacity = '1';
+            }, 10);
+        } else {
+            optionalFields.style.transition = 'opacity 0.3s ease';
+            optionalFields.style.opacity = '0';
+            setTimeout(() => {
+                optionalFields.style.display = 'none';
+            }, 300);
+        }
+    });
+    
+    // 设置表单字段属性
+    const formFields = {
+        'id_username': {
+            placeholder: '请输入用户名（4-20个字符）',
+            class: 'form-control'
+        },
+        'id_email': {
+            placeholder: '请输入邮箱地址',
+            class: 'form-control'
+        },
+        'id_password1': {
+            placeholder: '请输入密码（至少8个字符）',
+            class: 'form-control'
+        },
+        'id_password2': {
+            placeholder: '请再次输入密码',
+            class: 'form-control'
+        },
+        'id_birth_place': {
+            placeholder: '如：北京市朝阳区',
+            class: 'form-control'
+        }
+    };
+    
+    Object.keys(formFields).forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            Object.keys(formFields[fieldId]).forEach(attr => {
+                field.setAttribute(attr, formFields[fieldId][attr]);
+            });
+        }
+    });
+    
+    // 添加输入动画效果
+    const inputs = document.querySelectorAll('.form-control');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentNode.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            if (!this.value) {
+                this.parentNode.classList.remove('focused');
+            }
+        });
+    });
+    
+    // 表单动画
+    const form = document.querySelector('.auth-form');
+    form.style.opacity = '0';
+    form.style.transform = 'translateY(20px)';
+    
+    setTimeout(() => {
+        form.style.transition = 'all 0.6s ease';
+        form.style.opacity = '1';
+        form.style.transform = 'translateY(0)';
+    }, 200);
+});
+</script>
+{% endblock %}

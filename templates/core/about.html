@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}关于我们 - 灵汐命理平台{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5">
+                <h1 class="zen-section-title">关于灵汐</h1>
+                <p class="zen-section-subtitle">以东方智慧，温暖现代心灵</p>
+            </div>            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="zen-feature-card">
+                        <div class="zen-feature-icon">
+                            <i class="fas fa-lotus"></i>
+                        </div>
+                        <h5 class="zen-feature-title">东方美学传承</h5>
+                        <p class="zen-feature-description">
+                            秉承千年东方智慧，将传统命理学的深邃内涵，
+                            融入现代生活，为心灵寻找宁静的归宿。
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="zen-feature-card">
+                        <div class="zen-feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h5 class="zen-feature-title">隐私守护</h5>
+                        <p class="zen-feature-description">
+                            如守护心灵秘密般，我们严格保护每一位用户的隐私，
+                            让您在安全的环境中探索内心世界。
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="zen-feature-card">
+                        <div class="zen-feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h5 class="zen-feature-title">温暖团队</h5>
+                        <p class="zen-feature-description">
+                            我们的团队由资深导师和技术匠人组成，
+                            以温和而专业的方式，为您的心灵之旅提供指引。
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="zen-feature-card">
+                        <div class="zen-feature-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>                        <h5 class="zen-feature-title">用心陪伴</h5>
+                        <p class="zen-feature-description">
+                            以真诚的心对待每一位寻求者，
+                            在您的人生路上提供温暖的陪伴与智慧的引导。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <div class="zen-today-card">
+                    <h3 class="zen-today-title">
+                        <i class="fas fa-lotus zen-sun-icon"></i>
+                        我们的使命
+                    </h3>
+                    <p class="zen-section-subtitle">
+                        让古老的东方智慧在现代社会中焕发新的光彩，<br>
+                        帮助每个人在繁忙的生活中找到内心的平静，<br>
+                        在人生的十字路口获得温和而智慧的指引。
+                    </p>
+                    <div class="mt-4">
+                        <a href="{% url 'core:home' %}" class="zen-btn zen-btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i>返回首页
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

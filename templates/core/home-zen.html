@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}灵汐命理平台 - 东方智慧，现代解读{% endblock %}
+
+{% block content %}
+<!-- Hero区域 -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h1 class="hero-title fade-in">
+                    探寻命运轨迹
+                    <span class="zen-decoration"></span>
+                    感知人生智慧
+                </h1>
+                <p class="hero-subtitle fade-in" style="animation-delay: 0.2s;">
+                    融合东方传统智慧与现代解读方式，为您揭示生命密码
+                </p>
+                <div class="fade-in" style="animation-delay: 0.4s;">
+                    <a href="#features" class="btn btn-zen-filled btn-lg me-3">
+                        <i class="fas fa-compass me-2"></i>开启探索
+                    </a>
+                    <a href="{% url 'core:about' %}" class="btn btn-zen btn-lg">
+                        <i class="fas fa-info-circle me-2"></i>了解更多
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 统计数据 -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3 col-6">
+                <div class="stats-card slide-in-left">
+                    <div class="stat-number gentle-float">{{ total_users|default:8 }}</div>
+                    <div class="stat-label">用户信赖</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stats-card slide-in-left" style="animation-delay: 0.1s;">
+                    <div class="stat-number gentle-float" style="animation-delay: 0.5s;">{{ total_records|default:6 }}</div>
+                    <div class="stat-label">占卜记录</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stats-card slide-in-left" style="animation-delay: 0.2s;">
+                    <div class="stat-number gentle-float" style="animation-delay: 1s;">{{ total_notifications|default:17 }}</div>
+                    <div class="stat-label">每日洞察</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stats-card slide-in-left" style="animation-delay: 0.3s;">
+                    <div class="stat-number gentle-float" style="animation-delay: 1.5s;">99%</div>
+                    <div class="stat-label">用户满意度</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 功能特色 -->
+<section class="py-5" id="features">
+    <div class="container">
+        <div class="zen-title fade-in">
+            <h2>
+                <i class="fas fa-lotus me-3 text-zen-decoration"></i>
+                灵汐服务
+            </h2>
+            <p class="text-zen-secondary">传承东方智慧，洞察人生轨迹</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card slide-in-left">
+                    <div class="feature-icon">
+                        <i class="fas fa-yin-yang fa-3x"></i>
+                    </div>
+                    <h5 class="text-zen-primary mb-3">八字分析</h5>
+                    <p class="text-zen-secondary mb-4">精准解读生辰八字，洞察性格特征，预见运势走向</p>
+                    <a href="{% url 'divination:bazi' %}" class="btn btn-zen">
+                        <i class="fas fa-arrow-right me-2"></i>开始分析
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card slide-in-left" style="animation-delay: 0.1s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-leaf fa-3x"></i>
+                    </div>
+                    <h5 class="text-zen-primary mb-3">梅花易数</h5>
+                    <p class="text-zen-secondary mb-4">古老的占卜智慧，探寻万物变化规律，预测事物发展</p>
+                    <a href="{% url 'divination:meihua' %}" class="btn btn-zen">
+                        <i class="fas fa-arrow-right me-2"></i>开始占卜
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card slide-in-right">
+                    <div class="feature-icon">
+                        <i class="fas fa-star fa-3x"></i>
+                    </div>
+                    <h5 class="text-zen-primary mb-3">塔罗占卜</h5>
+                    <p class="text-zen-secondary mb-4">神秘的塔罗牌阵，揭示心灵密码，指引人生方向</p>
+                    <a href="{% url 'divination:tarot' %}" class="btn btn-zen">
+                        <i class="fas fa-arrow-right me-2"></i>开始占卜
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card slide-in-right" style="animation-delay: 0.1s;">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-alt fa-3x"></i>
+                    </div>
+                    <h5 class="text-zen-primary mb-3">黄历查询</h5>
+                    <p class="text-zen-secondary mb-4">传统黄历智慧，选择吉日良辰，趋吉避凶</p>
+                    <a href="{% url 'chinese_calendar:calendar' %}" class="btn btn-zen">
+                        <i class="fas fa-arrow-right me-2"></i>查看黄历
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 最新占卜记录 -->
+{% if recent_records %}
+<section class="py-5 zen-bg-pattern">
+    <div class="container">
+        <div class="zen-title fade-in">
+            <h2>
+                <i class="fas fa-history me-3 text-zen-decoration"></i>
+                灵汐见证
+            </h2>
+            <p class="text-zen-secondary">他们在灵汐平台探寻命运轨迹</p>
+        </div>
+        <div class="row g-4">
+            {% for record in recent_records %}
+            <div class="col-md-6 col-lg-4">
+                <div class="zen-card slide-in-left" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="avatar-circle text-zen-white d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; border-radius: 50%; background: var(--zen-accent);">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 text-zen-accent">{{ record.user.username|default:"神秘访客" }}</h6>
+                                <small class="text-zen-secondary">{{ record.created_at|timesince }}前的探索</small>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            {% if record.divination_type == 'bazi' %}
+                                <span class="badge rounded-pill" style="background: var(--zen-accent); color: var(--zen-white);"><i class="fas fa-yin-yang me-1"></i>{{ record.get_divination_type_display }}</span>
+                            {% elif record.divination_type == 'meihua' %}
+                                <span class="badge rounded-pill" style="background: var(--zen-decoration); color: var(--zen-primary);"><i class="fas fa-leaf me-1"></i>{{ record.get_divination_type_display }}</span>
+                            {% elif record.divination_type == 'tarot' %}
+                                <span class="badge rounded-pill" style="background: var(--zen-secondary); color: var(--zen-white);"><i class="fas fa-star me-1"></i>{{ record.get_divination_type_display }}</span>
+                            {% elif record.divination_type == 'yijing' %}
+                                <span class="badge rounded-pill" style="background: var(--zen-primary); color: var(--zen-white);"><i class="fas fa-yin-yang me-1"></i>{{ record.get_divination_type_display }}</span>
+                            {% endif %}
+                        </div>
+                        {% if record.question %}
+                            <p class="text-zen-secondary small mb-2"><strong>问：</strong>{{ record.question|truncatechars:50 }}</p>
+                        {% endif %}
+                        <p class="card-text text-zen-primary">{{ record.result|truncatechars:80 }}</p>
+                        <div class="text-end">
+                            <small class="text-zen-secondary">{{ record.created_at|date:"Y-m-d H:i" }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- 今日运势 -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="fade-in">
+                    <h2 class="mb-4 text-zen-primary">
+                        <i class="fas fa-sun me-3 text-zen-decoration"></i>今日灵汐
+                    </h2>
+                    <div class="zen-card p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-calendar-alt fa-2x text-zen-accent me-3"></i>
+                            <h5 class="mb-0 text-zen-primary">{{ today_date|date:"Y年m月d日" }}</h5>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <p class="text-zen-primary"><i class="fas fa-moon me-2 text-zen-decoration"></i><strong>农历：</strong>甲辰年 四月 廿一</p>
+                                <p class="text-zen-primary"><i class="fas fa-yin-yang me-2 text-zen-decoration"></i><strong>干支：</strong>甲子年</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <p class="text-zen-primary"><i class="fas fa-check-circle me-2 text-zen-accent"></i><strong>宜：</strong>祭祀 祈福 纳采</p>
+                                <p class="text-zen-primary"><i class="fas fa-times-circle me-2 text-zen-secondary"></i><strong>忌：</strong>开市 动土 安葬</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="slide-in-right">
+                    <a href="{% url 'chinese_calendar:today' %}" class="btn btn-zen-filled btn-lg">
+                        <i class="fas fa-calendar-day me-2"></i>探寻今日奥秘
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* 页面特定样式 */
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--zen-accent);
+    display: flex;
+    align-items: center;
+    justify-content-center;
+    color: var(--zen-white);
+}
+
+/* 装饰性元素 */
+.lotus-decoration {
+    opacity: 0.1;
+    position: absolute;
+    font-size: 6rem;
+    color: var(--zen-decoration);
+    top: 50%;
+    right: -50px;
+    transform: translateY(-50%);
+    z-index: -1;
+}
+</style>
+{% endblock %}

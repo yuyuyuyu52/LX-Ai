@@ -1,0 +1,1493 @@
+/* 灵汐命理平台 - 东方美学·治愈系风格 */
+
+/* 配色方案和基础变量 */
+:root {
+    /* 主要配色方案 */
+    --zen-bg: #FDF9F3;           /* 背景色 - 米白/奶油白 */
+    --zen-primary: #3E2C1D;      /* 主文字色 - 深咖色 */
+    --zen-secondary: #A89E92;    /* 次文字色 - 浅棕灰 */
+    --zen-accent: #C8B89E;       /* 按钮边框 - 浅金棕 */
+    --zen-decoration: #E7DAC6;   /* 装饰色 - 淡金米黄 */
+    --zen-white: #FFFFFF;        /* 纯白 */
+    --zen-shadow: rgba(62, 44, 29, 0.08);  /* 极淡阴影 */
+    --zen-border: rgba(200, 184, 158, 0.3); /* 淡边框 */
+    
+    /* 渐变色 */
+    --zen-gradient-warm: linear-gradient(135deg, #FDF9F3 0%, #F5F0E8 100%);
+    --zen-gradient-accent: linear-gradient(135deg, #E7DAC6 0%, #D4C4B0 100%);
+    --zen-gradient-subtle: linear-gradient(135deg, rgba(231, 218, 198, 0.1) 0%, rgba(168, 158, 146, 0.1) 100%);
+    
+    /* 字体 */
+    --font-title: 'Noto Serif SC', 'Source Han Serif SC', serif;
+    --font-body: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+    
+    /* 间距和圆角 */
+    --zen-radius: 16px;
+    --zen-radius-large: 24px;
+    --zen-spacing: 1.5rem;
+    --zen-spacing-large: 3rem;
+    --zen-line-height: 1.8;
+}
+
+/* 全局样式重置 */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-body);
+    line-height: var(--zen-line-height);
+    color: var(--zen-primary);
+    background-color: var(--zen-bg);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 导航栏样式 - 极简设计 */
+.navbar {
+    background: rgba(253, 249, 243, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--zen-border);
+    box-shadow: 0 2px 16px var(--zen-shadow);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-family: var(--font-title);
+    font-size: 1.5rem;
+    color: var(--zen-primary) !important;
+    font-weight: 500;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+}
+
+.brand-text {
+    font-size: 1.2em;
+    color: var(--zen-accent);
+    margin-right: 8px;
+}
+
+.brand-sub {
+    font-size: 0.7em;
+    color: var(--zen-secondary);
+    font-weight: 400;
+}
+
+.navbar-nav .nav-link {
+    color: var(--zen-primary) !important;
+    font-weight: 400;
+    margin: 0 12px;
+    padding: 8px 16px !important;
+    border-radius: var(--zen-radius);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--zen-accent) !important;
+    background-color: rgba(231, 218, 198, 0.2);
+    transform: translateY(-1px);
+}
+
+.navbar-toggler {
+    border: none;
+    color: var(--zen-primary);
+}
+
+/* 主要内容区域 */
+.main-content {
+    min-height: calc(100vh - 200px);
+    padding-top: 2rem;
+}
+
+/* 卡片样式 - 简洁优雅 */
+.card {
+    background: var(--zen-white);
+    border: 1px solid var(--zen-border);
+    border-radius: var(--zen-radius-large);
+    box-shadow: 0 8px 32px var(--zen-shadow);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    margin-bottom: var(--zen-spacing);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 48px rgba(62, 44, 29, 0.12);
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* 禅意卡片样式 */
+.zen-card {
+    background: var(--zen-white);
+    border: 1px solid var(--zen-border);
+    border-radius: var(--zen-radius-large);
+    box-shadow: 0 8px 32px var(--zen-shadow);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: var(--zen-spacing);
+}
+
+.zen-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--zen-gradient-accent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.zen-card:hover::before {
+    opacity: 1;
+}
+
+.zen-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 64px rgba(62, 44, 29, 0.15);
+}
+
+/* 按钮样式 - 温和圆润 */
+.btn {
+    font-family: var(--font-body);
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    border-radius: 24px;
+    padding: 12px 24px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-zen {
+    background: transparent;
+    border: 2px solid var(--zen-accent);
+    color: var(--zen-accent);
+}
+
+.btn-zen:hover {
+    background: var(--zen-accent);
+    color: var(--zen-white);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(200, 184, 158, 0.3);
+}
+
+.btn-zen-filled {
+    background: var(--zen-accent);
+    border: 2px solid var(--zen-accent);
+    color: var(--zen-white);
+}
+
+.btn-zen-filled:hover {
+    background: var(--zen-primary);
+    border-color: var(--zen-primary);
+    color: var(--zen-white);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(62, 44, 29, 0.3);
+}
+
+.btn-zen-subtle {
+    background: rgba(231, 218, 198, 0.2);
+    border: 1px solid var(--zen-border);
+    color: var(--zen-primary);
+}
+
+.btn-zen-subtle:hover {
+    background: rgba(231, 218, 198, 0.4);
+    color: var(--zen-primary);
+    transform: translateY(-1px);
+}
+
+/* 按钮系统 - 禅意风格 */
+.zen-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--zen-radius);
+    border: 1px solid var(--zen-accent);
+    color: var(--zen-accent);
+    background: transparent;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    font-family: var(--font-body);
+    cursor: pointer;
+}
+
+.zen-btn:hover {
+    background: var(--zen-accent);
+    color: var(--zen-white);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--zen-shadow);
+    text-decoration: none;
+}
+
+.zen-btn-primary {
+    background: var(--zen-accent);
+    color: var(--zen-white);
+    border-color: var(--zen-accent);
+}
+
+.zen-btn-primary:hover {
+    background: var(--zen-primary);
+    border-color: var(--zen-primary);
+    color: var(--zen-white);
+}
+
+.zen-btn-outline {
+    background: transparent;
+    color: var(--zen-secondary);
+    border-color: var(--zen-border);
+}
+
+.zen-btn-outline:hover {
+    background: var(--zen-decoration);
+    color: var(--zen-primary);
+    border-color: var(--zen-accent);
+}
+
+.zen-btn-secondary {
+    background: var(--zen-decoration);
+    color: var(--zen-primary);
+    border-color: var(--zen-decoration);
+}
+
+.zen-btn-secondary:hover {
+    background: var(--zen-accent);
+    color: var(--zen-white);
+    border-color: var(--zen-accent);
+}
+
+/* 按钮尺寸 */
+.zen-btn.btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+.zen-btn.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+/* 表单样式 */
+.form-control {
+    border: 1px solid var(--zen-border);
+    border-radius: var(--zen-radius);
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    color: var(--zen-primary);
+    background-color: var(--zen-white);
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--zen-accent);
+    box-shadow: 0 0 0 0.2rem rgba(200, 184, 158, 0.25);
+    background-color: var(--zen-white);
+    color: var(--zen-primary);
+}
+
+.form-control::placeholder {
+    color: var(--zen-secondary);
+}
+
+.form-select {
+    border: 1px solid var(--zen-border);
+    border-radius: var(--zen-radius);
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    color: var(--zen-primary);
+    background-color: var(--zen-white);
+    transition: all 0.3s ease;
+}
+
+.form-select:focus {
+    border-color: var(--zen-accent);
+    box-shadow: 0 0 0 0.2rem rgba(200, 184, 158, 0.25);
+    background-color: var(--zen-white);
+    color: var(--zen-primary);
+}
+
+/* Profile页面专用样式 */
+.zen-alert {
+    background: rgba(139, 195, 74, 0.1);
+    border: 1px solid rgba(139, 195, 74, 0.3);
+    color: var(--zen-primary);
+    border-radius: var(--zen-radius);
+}
+
+.zen-form-label {
+    color: var(--zen-primary);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.zen-form-text {
+    color: var(--zen-secondary);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+/* 标题样式 */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-title);
+    color: var(--zen-primary);
+    font-weight: 500;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+}
+
+h2 {
+    font-size: 2rem;
+    letter-spacing: 1px;
+}
+
+h3 {
+    font-size: 1.5rem;
+}
+
+/* 文本颜色工具类 */
+.text-zen-primary {
+    color: var(--zen-primary) !important;
+}
+
+.text-zen-secondary {
+    color: var(--zen-secondary) !important;
+}
+
+.text-zen-accent {
+    color: var(--zen-accent) !important;
+}
+
+.text-zen-decoration {
+    color: var(--zen-decoration) !important;
+}
+
+.text-zen-white {
+    color: var(--zen-white) !important;
+}
+
+.zen-text-primary {
+    color: var(--zen-primary);
+}
+
+.zen-text-secondary {
+    color: var(--zen-secondary);
+}
+
+.zen-text-accent {
+    color: var(--zen-accent);
+}
+
+.zen-text-decoration {
+    color: var(--zen-decoration);
+}
+
+.zen-text-white {
+    color: var(--zen-white);
+}
+
+/* 图标样式 */
+.zen-icon {
+    color: var(--zen-accent);
+    margin-right: 0.5rem;
+}
+
+/* 其他通用工具类 */
+.zen-title {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.zen-title h2 {
+    font-family: var(--font-title);
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: var(--zen-primary);
+    margin-bottom: 1rem;
+}
+
+.zen-card {
+    background: var(--zen-white);
+    border-radius: var(--zen-radius);
+    border: 1px solid var(--zen-border);
+    transition: all 0.3s ease;
+}
+
+.zen-card:hover {
+    box-shadow: 0 8px 24px var(--zen-shadow);
+    transform: translateY(-2px);
+}
+
+/* Feature card styles for home-zen.html */
+.feature-card {
+    background: var(--zen-white);
+    border-radius: var(--zen-radius-large);
+    padding: 2rem;
+    text-align: center;
+    border: 1px solid var(--zen-border);
+    transition: all 0.3s ease;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px var(--zen-shadow);
+    border-color: var(--zen-accent);
+}
+
+.feature-icon {
+    font-size: 3rem;
+    color: var(--zen-accent);
+    margin-bottom: 1.5rem;
+}
+
+.stats-card {
+    background: var(--zen-gradient-subtle);
+    border-radius: var(--zen-radius);
+    padding: 2rem;
+    text-align: center;
+    border: 1px solid var(--zen-border);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.stats-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px var(--zen-shadow);
+}
+
+.stat-number {
+    font-family: var(--font-title);
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: var(--zen-primary);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--zen-secondary);
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+/* Hero Section for home-zen.html */
+.hero-section {
+    min-height: 80vh;
+    background: var(--zen-gradient-warm);
+    display: flex;
+    align-items: center;
+    padding: 4rem 0;
+}
+
+.hero-title {
+    font-family: var(--font-title);
+    font-size: 3.5rem;
+    font-weight: 300;
+    color: var(--zen-primary);
+    line-height: 1.2;
+    margin-bottom: 2rem;
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    color: var(--zen-secondary);
+    line-height: var(--zen-line-height);
+    margin-bottom: 3rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.zen-decoration {
+    display: block;
+    width: 50px;
+    height: 2px;
+    background: var(--zen-accent);
+    margin: 1rem auto;
+}
+
+.btn-zen-filled {
+    background: var(--zen-accent);
+    color: var(--zen-white);
+    border: 1px solid var(--zen-accent);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--zen-radius);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-zen-filled:hover {
+    background: var(--zen-primary);
+    border-color: var(--zen-primary);
+    color: var(--zen-white);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--zen-shadow);
+    text-decoration: none;
+}
+
+.btn-zen {
+    background: transparent;
+    color: var(--zen-accent);
+    border: 1px solid var(--zen-accent);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--zen-radius);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-zen:hover {
+    background: var(--zen-accent);
+    color: var(--zen-white);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--zen-shadow);
+    text-decoration: none;
+}
+
+/* 进度条样式 */
+.zen-progress {
+    height: 8px;
+    background-color: var(--zen-bg-light);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.zen-progress-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+}
+
+.zen-progress-primary {
+    background: linear-gradient(90deg, var(--zen-primary), var(--zen-accent));
+}
+
+.zen-progress-accent {
+    background: linear-gradient(90deg, var(--zen-accent), var(--zen-decoration));
+}
+
+.zen-progress-decoration {
+    background: linear-gradient(90deg, var(--zen-decoration), var(--zen-accent));
+}
+
+.zen-progress-secondary {
+    background: linear-gradient(90deg, var(--zen-secondary), var(--zen-primary));
+}
+
+/* 加载动画 */
+.zen-loading {
+    padding: 2rem;
+    text-align: center;
+}
+
+.zen-loading i {
+    animation: zen-pulse 2s ease-in-out infinite;
+}
+
+@keyframes zen-pulse {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+/* 黄历特定样式 */
+.zen-calendar-section {
+    background: linear-gradient(135deg, var(--zen-bg-primary) 0%, var(--zen-bg-light) 100%);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--zen-border);
+}
+
+.zen-wuxing-badge {
+    background: linear-gradient(45deg, var(--zen-accent), var(--zen-decoration));
+    color: var(--zen-text-primary);
+    border-radius: 1rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.zen-lucky-item {
+    background: var(--zen-bg-light);
+    border: 1px solid var(--zen-decoration);
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    margin: 0.25rem;
+    display: inline-block;
+    font-size: 0.875rem;
+    color: var(--zen-text-primary);
+    transition: all 0.3s ease;
+}
+
+.zen-lucky-item:hover {
+    background: var(--zen-decoration);
+    transform: translateY(-2px);
+}
+
+/* 动画效果 */
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+.slide-in-left {
+    opacity: 0;
+    transform: translateX(-30px);
+    animation: slideInLeft 0.8s ease-out forwards;
+}
+
+.slide-in-right {
+    opacity: 0;
+    transform: translateX(30px);
+    animation: slideInRight 0.8s ease-out forwards;
+}
+
+.gentle-float {
+    animation: gentleFloat 3s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes gentleFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+}
+
+/* 统计数据区域样式 */
+.zen-stats-section {
+    background: var(--zen-white);
+    border-top: 1px solid var(--zen-border);
+}
+
+.zen-stat-card {
+    text-align: center;
+    padding: var(--zen-spacing);
+    background: var(--zen-gradient-subtle);
+    border-radius: var(--zen-radius);
+    border: 1px solid var(--zen-border);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.zen-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px var(--zen-shadow);
+}
+
+.zen-stat-icon {
+    font-size: 2.5rem;
+    color: var(--zen-accent);
+    margin-bottom: 1rem;
+}
+
+.zen-stat-number {
+    font-family: var(--font-title);
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: var(--zen-primary);
+    margin-bottom: 0.5rem;
+}
+
+.zen-stat-label {
+    color: var(--zen-secondary);
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+/* 功能特色区域样式 */
+.zen-features-section {
+    background: var(--zen-gradient-warm);
+    padding: var(--zen-spacing-large) 0;
+}
+
+.zen-section-title {
+    font-family: var(--font-title);
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: var(--zen-primary);
+    margin-bottom: 1rem;
+}
+
+.zen-section-subtitle {
+    font-size: 1.2rem;
+    color: var(--zen-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.zen-feature-card {
+    background: var(--zen-white);
+    border-radius: var(--zen-radius-large);
+    padding: 2rem;
+    text-align: center;
+    border: 1px solid var(--zen-border);
+    transition: all 0.3s ease;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.zen-feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px var(--zen-shadow);
+    border-color: var(--zen-accent);
+}
+
+.zen-feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--zen-gradient-accent);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.zen-feature-card:hover::before {
+    transform: scaleX(1);
+}
+
+.zen-feature-icon {
+    font-size: 3rem;
+    color: var(--zen-accent);
+    margin-bottom: 1.5rem;
+}
+
+.zen-feature-title {
+    font-family: var(--font-title);
+    font-size: 1.3rem;
+    color: var(--zen-primary);
+    margin-bottom: 1rem;
+}
+
+.zen-feature-description {
+    color: var(--zen-secondary);
+    line-height: var(--zen-line-height);
+    margin-bottom: 1.5rem;
+}
+
+.zen-feature-link {
+    color: var(--zen-accent);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+}
+
+.zen-feature-link:hover {
+    color: var(--zen-primary);
+    transform: translateX(3px);
+}
+
+/* 最新记录区域样式 */
+.zen-recent-section {
+    background: var(--zen-white);
+    border-top: 1px solid var(--zen-border);
+}
+
+.zen-record-card {
+    background: var(--zen-gradient-subtle);
+    border-radius: var(--zen-radius);
+    padding: 1.5rem;
+    border: 1px solid var(--zen-border);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.zen-record-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--zen-shadow);
+}
+
+.zen-record-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.zen-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--zen-gradient-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--zen-white);
+    margin-right: 12px;
+    font-size: 1.2rem;
+}
+
+.zen-record-name {
+    color: var(--zen-primary);
+    margin: 0;
+    font-weight: 500;
+}
+
+.zen-record-time {
+    color: var(--zen-secondary);
+    font-size: 0.9rem;
+}
+
+.zen-record-type {
+    margin-bottom: 1rem;
+}
+
+.zen-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+}
+
+.zen-badge-gold {
+    background: rgba(200, 184, 158, 0.2);
+    color: var(--zen-accent);
+}
+
+.zen-badge-green {
+    background: rgba(139, 195, 74, 0.15);
+    color: #689F38;
+}
+
+.zen-badge-purple {
+    background: rgba(156, 39, 176, 0.15);
+    color: #7B1FA2;
+}
+
+.zen-badge-blue {
+    background: rgba(33, 150, 243, 0.15);
+    color: #1976D2;
+}
+
+.zen-record-question {
+    color: var(--zen-secondary);
+    font-style: italic;
+    margin-bottom: 0.8rem;
+    font-size: 0.95rem;
+}
+
+.zen-record-result {
+    color: var(--zen-primary);
+    margin-bottom: 1rem;
+    line-height: var(--zen-line-height);
+}
+
+.zen-record-date {
+    color: var(--zen-secondary);
+    font-size: 0.9rem;
+    text-align: right;
+    border-top: 1px solid var(--zen-border);
+    padding-top: 0.8rem;
+}
+
+/* 今日心境区域样式 */
+.zen-today-section {
+    background: var(--zen-gradient-warm);
+    border-top: 1px solid var(--zen-border);
+}
+
+.zen-today-card {
+    background: var(--zen-white);
+    border-radius: var(--zen-radius-large);
+    padding: 2rem;
+    border: 1px solid var(--zen-border);
+    box-shadow: 0 4px 16px var(--zen-shadow);
+}
+
+.zen-today-title {
+    font-family: var(--font-title);
+    font-size: 1.8rem;
+    color: var(--zen-primary);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.zen-sun-icon {
+    color: var(--zen-accent);
+    margin-right: 12px;
+    font-size: 2rem;
+}
+
+.zen-today-content {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.zen-date-section {
+    text-align: center;
+    padding-right: 2rem;
+    border-right: 1px solid var(--zen-border);
+}
+
+.zen-date-main {
+    font-family: var(--font-title);
+    font-size: 2.5rem;
+    color: var(--zen-primary);
+    font-weight: 300;
+}
+
+.zen-date-lunar {
+    color: var(--zen-secondary);
+    font-size: 1rem;
+    margin-top: 0.5rem;
+}
+
+.zen-fortune-section {
+    flex: 1;
+}
+
+.zen-fortune-item {
+    display: flex;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.zen-fortune-label {
+    width: 60px;
+    color: var(--zen-secondary);
+    font-weight: 500;
+}
+
+.zen-fortune-value {
+    color: var(--zen-primary);
+    flex: 1;
+}
+
+.zen-today-action {
+    text-align: center;
+}
+
+.zen-today-quote {
+    font-family: var(--font-title);
+    font-style: italic;
+    color: var(--zen-secondary);
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+}
+
+/* 表单标签样式 */
+.zen-form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: var(--zen-text-primary);
+    font-size: 0.95rem;
+}
+
+/* 塔罗牌阵选择器 */
+.zen-tarot-spread {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid var(--zen-decoration);
+    border-radius: 1rem;
+    background: var(--zen-bg-light);
+}
+
+.zen-tarot-spread:hover {
+    border-color: var(--zen-accent);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(200, 184, 158, 0.3);
+}
+
+.zen-tarot-spread.selected {
+    border-color: var(--zen-accent);
+    background-color: var(--zen-decoration);
+}
+
+/* 易经硬币样式 */
+.zen-coin {
+    width: 60px;
+    height: 60px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 1s;
+    cursor: pointer;
+}
+
+.zen-coin.flipping {
+    animation: zenCoinFlip 1s ease-in-out;
+}
+
+@keyframes zenCoinFlip {
+    0% { transform: rotateY(0deg); }
+    50% { transform: rotateY(1800deg) scale(1.1); }
+    100% { transform: rotateY(3600deg); }
+}
+
+/* 六爻卦象显示 */
+.zen-hexagram-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 20px 0;
+    padding: 20px;
+    background: var(--zen-bg-light);
+    border-radius: 1rem;
+    border: 1px solid var(--zen-decoration);
+}
+
+.yao-line {
+    width: 100px;
+    height: 8px;
+    background: var(--zen-accent);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.yao-line.broken {
+    background: linear-gradient(90deg, var(--zen-accent) 35%, transparent 35%, transparent 65%, var(--zen-accent) 65%);
+}
+
+/* 六十四卦名称样式 */
+.zen-hexagram-card {
+    min-width: 150px;
+    background: var(--zen-decoration);
+    border: 1px solid var(--zen-accent);
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+}
+
+.zen-hexagram-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(200, 184, 158, 0.3);
+}
+
+/* 错误列表样式 */
+.zen-errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 5px 0;
+}
+
+.zen-errorlist li {
+    background: rgba(220, 53, 69, 0.1);
+    color: var(--zen-text-primary);
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    font-size: 0.875rem;
+    border-left: 3px solid #dc3545;
+}
+
+/* 帮助文本样式 */
+.zen-helptext {
+    font-size: 0.75rem;
+    color: var(--zen-text-secondary);
+    margin-top: 5px;
+}
+
+/* 认证容器样式 */
+.zen-auth-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 40px;
+    border-radius: 20px;
+    background: var(--zen-bg-primary);
+    border: 1px solid var(--zen-decoration);
+    box-shadow: 0 20px 60px rgba(200, 184, 158, 0.2);
+}
+
+.zen-auth-form {
+    padding: 0;
+}
+
+.zen-auth-title {
+    color: var(--zen-text-primary);
+    text-align: center;
+    margin-bottom: 2rem;
+    font-family: 'Noto Serif SC', serif;
+}
+
+.zen-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.zen-form-control {
+    background: var(--zen-bg-light);
+    border: 1px solid var(--zen-decoration);
+    color: var(--zen-text-primary);
+    border-radius: 12px;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.zen-form-control::placeholder {
+    color: var(--zen-text-secondary);
+}
+
+.zen-form-control:focus {
+    background: var(--zen-bg-primary);
+    border-color: var(--zen-accent);
+    color: var(--zen-text-primary);
+    box-shadow: 0 0 0 0.2rem rgba(200, 184, 158, 0.25);
+    outline: none;
+}
+
+.zen-btn-auth {
+    background: linear-gradient(135deg, var(--zen-accent), var(--zen-decoration));
+    border: none;
+    border-radius: 25px;
+    padding: 12px 30px;
+    font-weight: 600;
+    color: var(--zen-text-primary);
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.zen-btn-auth:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(200, 184, 158, 0.4);
+}
+
+.zen-auth-link {
+    color: var(--zen-text-secondary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.zen-auth-link:hover {
+    color: var(--zen-accent);
+}
+
+/* 时辰运势卡片 */
+.zen-time-fortune-card {
+    text-align: center;
+    padding: 1rem;
+    border-radius: 1rem;
+    border: 1px solid var(--zen-border);
+    transition: all 0.3s ease;
+    background: var(--zen-bg-light);
+}
+
+.zen-time-fortune-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(62, 44, 29, 0.1);
+}
+
+.zen-fortune-good {
+    background: linear-gradient(135deg, rgba(200, 184, 158, 0.1), rgba(231, 218, 198, 0.2));
+    border-color: var(--zen-accent);
+}
+
+.zen-fortune-normal {
+    background: linear-gradient(135deg, rgba(231, 218, 198, 0.1), rgba(253, 249, 243, 0.2));
+    border-color: var(--zen-decoration);
+}
+
+.zen-fortune-bad {
+    background: linear-gradient(135deg, rgba(168, 158, 146, 0.1), rgba(231, 218, 198, 0.1));
+    border-color: var(--zen-secondary);
+}
+
+/* 黄历专用徽章 */
+.zen-badge-decoration {
+    background-color: var(--zen-decoration);
+    color: var(--zen-text-primary);
+}
+
+.zen-badge-secondary {
+    background-color: var(--zen-secondary);
+    color: var(--zen-bg-primary);
+}
+
+/* 今日运势专用样式 */
+.zen-today-overview {
+    background: linear-gradient(135deg, var(--zen-bg-primary) 0%, var(--zen-bg-light) 100%);
+    border-radius: 2rem;
+    padding: 3rem 2rem;
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.zen-today-overview::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(200, 184, 158, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    :root {
+        --zen-spacing: 1rem;
+        --zen-spacing-large: 2rem;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .feature-card {
+        padding: 1.5rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+
+    .brand-text {
+        font-size: 1em;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-title {
+        font-size: 1.8rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .feature-card {
+        padding: 1rem;
+    }
+}
+
+/* 辅助类 */
+.zen-shadow {
+    box-shadow: 0 8px 32px var(--zen-shadow);
+}
+
+.zen-shadow-hover:hover {
+    box-shadow: 0 12px 48px rgba(62, 44, 29, 0.12);
+}
+
+.zen-border {
+    border: 1px solid var(--zen-border);
+}
+
+.zen-bg {
+    background-color: var(--zen-bg);
+}
+
+.zen-bg-white {
+    background-color: var(--zen-white);
+}
+
+.zen-rounded {
+    border-radius: var(--zen-radius);
+}
+
+.zen-rounded-large {
+    border-radius: var(--zen-radius-large);
+}
+
+/* 特殊效果 */
+.zen-glow {
+    box-shadow: 0 0 24px rgba(231, 218, 198, 0.4);
+}
+
+.zen-text-shadow {
+    text-shadow: 0 2px 8px var(--zen-shadow);
+}
+
+/* 禅意背景样式 */
+.zen-bg-pattern {
+    background-image: 
+        radial-gradient(circle at 25% 25%, rgba(231, 218, 198, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(168, 158, 146, 0.05) 0%, transparent 50%);
+}
+
+/* 加载状态 */
+.zen-loading {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.zen-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid var(--zen-border);
+    border-top-color: var(--zen-accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* === Fortune Item Components === */
+.zen-fortune-item {
+    margin-bottom: 1.5rem;
+}
+
+.zen-fortune-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.zen-fortune-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--zen-primary);
+    margin-left: 0.5rem;
+}
+
+/* === Button Group === */
+.zen-btn-group {
+    display: inline-flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.zen-btn-group .zen-btn {
+    flex: 0 0 auto;
+}
+
+/* === Notification Component === */
+.zen-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--zen-white);
+    color: var(--zen-primary);
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--zen-accent);
+    box-shadow: 0 8px 32px rgba(62, 44, 29, 0.15);
+    z-index: 9999;
+    animation: zen-slide-in 0.3s ease-out;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+@keyframes zen-slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* === 八字分析专用样式 === */
+.zen-bazi-pillar {
+    background: var(--zen-decoration);
+    border: 1px solid var(--zen-accent);
+    border-radius: var(--zen-radius);
+    transition: all 0.3s ease;
+    min-width: 80px;
+}
+
+.zen-bazi-pillar:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px var(--zen-shadow);
+    background: var(--zen-accent);
+}
+
+.zen-bazi-pillar:hover .zen-text-secondary {
+    color: var(--zen-white) !important;
+}
+
+.zen-bazi-pillar:hover .zen-text-accent {
+    color: var(--zen-white) !important;
+}
+
+.zen-analysis-content {
+    margin-top: 2rem;
+}
+
+.zen-analysis-section {
+    background: var(--zen-decoration);
+    border-radius: var(--zen-radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--zen-accent);
+}
+
+.zen-analysis-title {
+    color: var(--zen-primary);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-family: var(--font-title);
+}
+
+.zen-analysis-text {
+    color: var(--zen-secondary);
+    line-height: var(--zen-line-height);
+}

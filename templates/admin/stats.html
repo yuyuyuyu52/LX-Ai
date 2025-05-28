@@ -1,0 +1,159 @@
+{% extends "admin/base_site.html" %}
+{% load admin_urls static admin_modify %}
+
+{% block title %}数据统计 | {{ site_title }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">首页</a> &rsaquo; 数据统计
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-stats">
+    <h1>系统数据统计</h1>
+    
+    <!-- 总体统计 -->
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0;">
+        <div class="stat-card" style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #007cba;">
+            <h3 style="margin: 0; color: #007cba;">{{ total_users }}</h3>
+            <p style="margin: 5px 0 0; color: #666;">总用户数</p>
+            <small style="color: #28a745;">今日新增: {{ today_users }}</small>
+        </div>
+        
+        <div class="stat-card" style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #28a745;">
+            <h3 style="margin: 0; color: #28a745;">{{ total_divinations }}</h3>
+            <p style="margin: 5px 0 0; color: #666;">总占卜次数</p>
+            <small style="color: #28a745;">今日新增: {{ today_divinations }}</small>
+        </div>
+        
+        <div class="stat-card" style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <h3 style="margin: 0; color: #ffc107;">{{ total_notifications }}</h3>
+            <p style="margin: 5px 0 0; color: #666;">总通知数</p>
+            <small style="color: #dc3545;">未读: {{ unread_notifications }}</small>
+        </div>
+    </div>
+    
+    <!-- 占卜类型统计 -->
+    <div class="module" style="margin: 30px 0;">
+        <h2>占卜类型统计</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f8f9fa;">
+                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">占卜类型</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">次数</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">占比</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in divination_stats %}
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;">
+                        {% if stat.divination_type == 'bazi' %}八字分析
+                        {% elif stat.divination_type == 'tarot' %}塔罗占卜
+                        {% elif stat.divination_type == 'meihua' %}梅花易数
+                        {% elif stat.divination_type == 'yijing' %}易经卜卦
+                        {% else %}{{ stat.divination_type }}
+                        {% endif %}
+                    </td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">{{ stat.count }}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">
+                        {% widthratio stat.count total_divinations 100 %}%
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" style="padding: 10px; border: 1px solid #ddd; text-align: center; color: #666;">暂无数据</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- 最近7天活动 -->
+    <div class="module" style="margin: 30px 0;">
+        <h2>最近7天活动</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f8f9fa;">
+                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">日期</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">新用户</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">占卜次数</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for day in last_7_days %}
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;">{{ day.date|date:"Y-m-d" }}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">{{ day.users }}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">{{ day.divinations }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- 活跃用户 -->
+    <div class="module" style="margin: 30px 0;">
+        <h2>活跃用户榜（占卜次数TOP10）</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f8f9fa;">
+                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">排名</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">用户名</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">占卜次数</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">注册时间</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in top_users %}
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;">{{ forloop.counter }}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">
+                        <a href="{% url 'admin:auth_user_change' user.id %}">{{ user.username }}</a>
+                    </td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">{{ user.divination_count }}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">{{ user.date_joined|date:"Y-m-d" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="padding: 10px; border: 1px solid #ddd; text-align: center; color: #666;">暂无数据</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.dashboard-stats h1 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.stat-card h3 {
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.module {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.module h2 {
+    background: #f8f9fa;
+    margin: 0;
+    padding: 15px 20px;
+    border-bottom: 1px solid #ddd;
+    color: #333;
+    font-size: 1.2em;
+}
+
+.module table {
+    margin: 0;
+}
+</style>
+{% endblock %}

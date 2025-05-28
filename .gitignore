@@ -1,0 +1,350 @@
+# 灵汐命理平台 - Git忽略文件配置
+# ==========================================
+
+# Python 相关
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# 单元测试 / 覆盖率报告
+# ==========================================
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Django 相关
+# ==========================================
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# 如果使用MySQL/PostgreSQL，保留这些行的注释状态
+# mysql-connector-python==*
+# psycopg2==*
+
+# Django 静态文件 (如果使用collectstatic)
+# /static/
+/staticfiles/
+
+# Django 媒体文件
+/media/
+
+# Django 迁移文件 (可选择性提交)
+# */migrations/
+# !*/migrations/__init__.py
+
+# Django 会话和缓存
+django_cache/
+.django_cache/
+
+# Celery 相关 (如果使用)
+celerybeat-schedule
+celerybeat.pid
+
+# 环境变量文件
+# ==========================================
+.env
+.env.local
+.env.development
+.env.production
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE 和编辑器
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# PyCharm
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.tmp
+*.bak
+
+# 操作系统相关
+# ==========================================
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# 前端相关 (如果有)
+# ==========================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# 项目特定文件
+# ==========================================
+# 配置文件备份
+*.conf.bak
+*.ini.bak
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# 日志文件
+*.log
+logs/
+*.log.*
+
+# 数据库备份
+*.sql
+*.dump
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# 图片缓存和临时文件
+*.cache
+thumbs/
+.thumbnails/
+
+# SSL 证书 (敏感文件)
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+
+# 密钥和凭证文件
+secrets.json
+credentials.json
+*.secret
+.secrets/
+
+# 文档生成
+docs/_build/
+doc/_build/
+.readthedocs.yml
+
+# 备份和版本控制
+*.orig
+*.rej
+.git/
+.svn/
+.hg/
+
+# 自定义忽略 (灵汐命理平台特定)
+# ==========================================
+# 用户上传的占卜记录
+/uploads/divination_records/
+/uploads/user_avatars/
+
+# 缓存文件
+/cache/
+.cache/
+
+# 临时分析结果
+/temp_analysis/
+/tmp/
+
+# 备份数据
+backup_*.json
+backup_*.sql
+
+# 测试数据
+test_data/
+mock_data/
+
+# 性能分析文件
+*.prof
+profiling/
+
+# 本地开发配置
+local_config.py
+development_settings.py
+
+# 部署相关
+deploy/
+deployment/
+docker-compose.override.yml
+.dockerignore
+
+# API 密钥和第三方服务配置
+api_keys.json
+third_party_config.json
+
+# 用户生成的内容示例
+sample_readings/
+example_charts/
+
+# 错误报告
+error_reports/
+crash_dumps/
+
+# 监控和日志
+monitoring/
+*.access.log
+*.error.log
+
+# 占卜算法训练数据 (如果有机器学习组件)
+training_data/
+ml_models/
+*.model
+*.pkl
+*.joblib
+
+# 统计和分析数据
+analytics/
+reports/
+statistics/
+
+# 邮件模板测试
+email_test/
+mail_debug/
+
+# 国际化编译文件
+*.mo
+
+# Sphinx 文档
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# PEP 582
+__pypackages__/
+
+# SageMath parsed files
+*.sage.py
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# 结束标记
+# ==========================================

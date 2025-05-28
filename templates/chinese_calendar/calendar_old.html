@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}黄历查询 - FateMaster{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="text-center mb-4">
+                <h2 class="display-5"><i class="fas fa-calendar-alt text-warning"></i> 黄历查询</h2>
+                <p class="lead">查询每日宜忌，选择吉祥时辰</p>
+            </div>
+
+            <!-- 快速导航 -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <label for="calendar-date" class="form-label fw-bold">选择日期</label>
+                            <input type="date" class="form-control form-control-lg" id="calendar-date" value="{{ today|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">快速选择</label>
+                            <div class="btn-group d-block" role="group">
+                                <button class="btn btn-outline-primary btn-sm" onclick="setToday()">今天</button>
+                                <button class="btn btn-outline-primary btn-sm" onclick="setTomorrow()">明天</button>
+                                <button class="btn btn-outline-primary btn-sm" onclick="setNextWeek()">下周</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">&nbsp;</label>
+                            <button class="btn btn-primary btn-lg d-block w-100" onclick="queryCalendar()">
+                                <i class="fas fa-search me-2"></i> 查询黄历
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 加载提示 -->
+            <div id="loading" class="text-center py-4" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">正在查询黄历信息...</p>
+            </div>
+
+            <!-- 黄历结果 -->
+            <div id="calendar-result" class="row">
+                <div class="col-md-6">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h5><i class="fas fa-check-circle"></i> 今日概况</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong>公历：</strong>{{ today|date:'Y年m月d日' }} {{ today|date:'l' }}
+                            </div>
+                            <div class="mb-3">
+                                <strong>农历：</strong><span id="lunar-date">{{ lunar_date }}</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>干支：</strong><span id="ganzhi">{{ ganzhi }}</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>星座：</strong><span id="constellation">{{ constellation }}</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>节气：</strong><span id="solar-term">{{ solar_term }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <h5><i class="fas fa-yin-yang"></i> 五行分析</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong>今日五行：</strong><span id="wuxing" class="badge bg-primary">{{ wuxing }}</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>旺衰：</strong><span id="prosperity">{{ prosperity }}</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>幸运色：</strong>
+                                <span class="badge" style="background-color: {{ lucky_color }};" id="lucky-color">{{ lucky_color_name }}</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>幸运数字：</strong><span id="lucky-number" class="fw-bold text-primary">{{ lucky_number }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 宜忌事项 -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h5><i class="fas fa-thumbs-up"></i> 宜做事项</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="suitable-activities">
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for activity in suitable_activities %}
+                                    <span class="badge bg-success">{{ activity }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h5><i class="fas fa-thumbs-down"></i> 忌做事项</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="avoid-activities">
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for activity in avoid_activities %}
+                                    <span class="badge bg-danger">{{ activity }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 时辰吉凶 -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-clock"></i> 时辰吉凶</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="hourly-fortune">
+                        {% for hour in hourly_fortune %}
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="text-center p-3 rounded {{ hour.class }}">
+                                <div class="fw-bold">{{ hour.name }}</div>
+                                <div class="small">{{ hour.time }}</div>
+                                <div class="badge {{ hour.badge_class }}">{{ hour.status }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function queryCalendar() {
+    const date = document.getElementById('calendar-date').value;
+    if (!date) {
+        alert('请选择日期');
+        return;
+    }
+    
+    showLoading();
+    
+    fetch(`/chinese_calendar/api/calendar/${date}/`)
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            updateCalendarDisplay(data);
+        })
+        .catch(error => {
+            hideLoading();
+            console.error('查询失败:', error);
+            alert('查询失败，请稍后重试');
+        });
+}
+
+function updateCalendarDisplay(data) {
+    // 更新基本信息
+    document.getElementById('lunar-date').textContent = data.lunar_date || '未知';
+    document.getElementById('ganzhi').textContent = data.ganzhi || '未知';
+    document.getElementById('constellation').textContent = data.constellation || '未知';
+    document.getElementById('solar-term').textContent = data.solar_term || '无';
+    document.getElementById('wuxing').textContent = data.wuxing || '未知';
+    document.getElementById('prosperity').textContent = data.prosperity || '未知';
+    document.getElementById('lucky-number').textContent = data.lucky_number || '未知';
+    
+    // 更新宜忌事项
+    const suitableDiv = document.getElementById('suitable-activities');
+    const avoidDiv = document.getElementById('avoid-activities');
+    
+    suitableDiv.innerHTML = '<div class="d-flex flex-wrap gap-2">' + 
+        (data.suitable || []).map(item => `<span class="badge bg-success">${item}</span>`).join('') + 
+        '</div>';
+    
+    avoidDiv.innerHTML = '<div class="d-flex flex-wrap gap-2">' + 
+        (data.avoid || []).map(item => `<span class="badge bg-danger">${item}</span>`).join('') + 
+        '</div>';
+}
+</script>
+{% endblock %}

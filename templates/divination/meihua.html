@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5 fade-in">
+                <h1 class="display-5 fw-bold text-zen-primary">梅花易数</h1>
+                <p class="lead text-zen-secondary">易数之精妙，见微知著，于微观中洞察乾坤变化</p>
+                <div class="zen-divider mx-auto"></div>
+            </div>
+
+            <div class="zen-card slide-in-left">
+                <div class="p-5">
+                    <form id="meihuaForm">
+                        <div class="mb-4">
+                            <label for="questionMeihua" class="zen-form-label">请诚心输入您的疑问</label>
+                            <textarea class="form-control" id="questionMeihua" rows="3" 
+                                placeholder="静心思考，用心感受... 如：最近的人生方向如何调整？" required></textarea>
+                            <small class="text-zen-secondary">建议以开放性问题为主，心诚则灵</small>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="number1" class="zen-form-label">上卦数字 (1-8)</label>
+                                <input type="number" class="form-control" id="number1" 
+                                       min="1" max="8" placeholder="请凭直觉输入" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="number2" class="zen-form-label">下卦数字 (1-8)</label>
+                                <input type="number" class="form-control" id="number2" 
+                                       min="1" max="8" placeholder="请凭直觉输入" required>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="zen-btn zen-btn-primary">
+                                <i class="fas fa-yin-yang me-2"></i>开启易数智慧
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>            <!-- 占卜结果 -->
+            <div id="meihuaResult" class="mt-5" style="display: none;">
+                <div class="zen-card slide-in-right">
+                    <div class="text-center p-4 border-bottom">
+                        <h3 class="mb-0 text-zen-primary"><i class="fas fa-yin-yang me-2"></i>梅花易数解析</h3>
+                    </div>
+                    <div class="p-5">
+                        <div class="text-center mb-4">
+                            <h5 class="text-zen-secondary">您的问题</h5>
+                            <p class="fs-5 fw-bold text-zen-primary" id="questionDisplay"></p>
+                        </div>
+
+                        <div class="hexagram-display text-center mb-4">
+                            <div class="row justify-content-center">
+                                <div class="col-auto">
+                                    <div class="zen-hexagram-card p-4">
+                                        <h6 class="text-zen-secondary">本卦</h6>
+                                        <div class="hexagram-name fs-3 fw-bold text-zen-primary" id="mainHexagram">-</div>
+                                    </div>
+                                </div>
+                                <div class="col-auto d-flex align-items-center">
+                                    <i class="fas fa-arrow-right fa-2x text-zen-accent"></i>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="zen-hexagram-card p-4">
+                                        <h6 class="text-zen-secondary">变卦</h6>
+                                        <div class="hexagram-name fs-3 fw-bold text-zen-primary" id="changeHexagram">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="interpretationContent" class="interpretation-content">
+                            <!-- 解读内容将通过JavaScript填充 -->
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button class="zen-btn zen-btn-primary me-3" onclick="saveResult()">
+                                <i class="fas fa-save me-2"></i>珍藏此悟
+                            </button>
+                            <button class="zen-btn zen-btn-outline" onclick="resetForm()">
+                                <i class="fas fa-redo me-2"></i>重新问卦
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.zen-hexagram-card {
+    min-width: 150px;
+    background: var(--zen-decoration);
+    border: 1px solid var(--zen-accent);
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+}
+
+.zen-hexagram-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(200, 184, 158, 0.3);
+}
+
+.interpretation-content {
+    line-height: 1.8;
+    background: var(--zen-bg-light);
+    padding: 2rem;
+    border-radius: 1rem;
+    border-left: 4px solid var(--zen-accent);
+    color: var(--zen-text-primary);
+}
+
+.zen-divider {
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--zen-accent), var(--zen-decoration));
+    margin: 1rem auto;
+    border-radius: 2px;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('meihuaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const question = document.getElementById('questionMeihua').value;
+    const number1 = document.getElementById('number1').value;
+    const number2 = document.getElementById('number2').value;
+    
+    if (!question.trim() || !number1 || !number2) {
+        alert('请填写完整信息');
+        return;
+    }
+    
+    // 显示加载状态
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>占卜中...';
+    submitBtn.disabled = true;
+    
+    // 模拟梅花易数计算
+    setTimeout(() => {
+        const hexagrams = ['乾', '兑', '离', '震', '巽', '坎', '艮', '坤'];
+        const mainHex = hexagrams[parseInt(number1) - 1];
+        const changeHex = hexagrams[parseInt(number2) - 1];
+        
+        const interpretation = generateMeihuaInterpretation(mainHex, changeHex, question);
+        
+        displayMeihuaResult(question, mainHex, changeHex, interpretation);
+        
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }, 2000);
+});
+
+function generateMeihuaInterpretation(mainHex, changeHex, question) {
+    const interpretations = {
+        '乾': '代表天，象征刚健、进取、领导力',
+        '兑': '代表泽，象征喜悦、交流、收获',
+        '离': '代表火，象征光明、智慧、美丽',
+        '震': '代表雷，象征震动、行动、新开始',
+        '巽': '代表风，象征温和、渗透、顺应',
+        '坎': '代表水，象征困险、流动、智慧',
+        '艮': '代表山，象征止静、稳重、阻碍',
+        '坤': '代表地，象征柔顺、包容、厚德'
+    };
+    
+    return `
+        <h5>卦象解析</h5>
+        <p><strong>本卦${mainHex}：</strong>${interpretations[mainHex]}</p>
+        <p><strong>变卦${changeHex}：</strong>${interpretations[changeHex]}</p>
+        
+        <h5>占卜解读</h5>
+        <p>根据您的问题和所得卦象，当前情况显示${mainHex}的特质比较明显。这表明您目前所处的环境或状态具有${interpretations[mainHex].split('，')[1]}的特点。</p>
+        
+        <p>而变卦${changeHex}则预示着未来的发展趋势，${interpretations[changeHex].split('，')[1]}将是关键因素。</p>
+        
+        <h5>建议与指导</h5>
+        <p>建议您在处理相关事务时，既要发挥${mainHex}的优势，也要注意向${changeHex}的方向调整策略。保持积极的心态，顺应时势的变化，必能取得良好的结果。</p>
+        
+        <p class="text-muted"><small>* 此解读仅供参考娱乐，具体决策请结合实际情况理性判断。</small></p>
+    `;
+}
+
+function displayMeihuaResult(question, mainHex, changeHex, interpretation) {
+    document.getElementById('questionDisplay').textContent = question;
+    document.getElementById('mainHexagram').textContent = mainHex;
+    document.getElementById('changeHexagram').textContent = changeHex;
+    document.getElementById('interpretationContent').innerHTML = interpretation;
+    
+    document.getElementById('meihuaResult').style.display = 'block';
+    document.getElementById('meihuaResult').scrollIntoView({ behavior: 'smooth' });
+}
+
+function saveResult() {
+    alert('占卜结果已保存到您的个人档案');
+}
+
+function resetForm() {
+    document.getElementById('meihuaForm').reset();
+    document.getElementById('meihuaResult').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+{% endblock %}

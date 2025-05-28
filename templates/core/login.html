@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}静心登录{% endblock %}
+
+{% block extra_css %}
+<style>
+    .zen-auth-container {
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 40px;
+        border-radius: 20px;
+        background: var(--zen-bg-primary);
+        border: 1px solid var(--zen-decoration);
+        box-shadow: 0 20px 60px rgba(200, 184, 158, 0.2);
+    }
+    
+    .zen-auth-form {
+        padding: 0;
+    }
+    
+    .zen-auth-title {
+        color: var(--zen-text-primary);
+        text-align: center;
+        margin-bottom: 2rem;
+        font-family: 'Noto Serif SC', serif;
+    }
+    
+    .zen-form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .zen-form-control {
+        background: var(--zen-bg-light);
+        border: 1px solid var(--zen-decoration);
+        color: var(--zen-text-primary);
+        border-radius: 12px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .zen-form-control::placeholder {
+        color: var(--zen-text-secondary);
+    }
+    
+    .zen-form-control:focus {
+        background: var(--zen-bg-primary);
+        border-color: var(--zen-accent);
+        color: var(--zen-text-primary);
+        box-shadow: 0 0 0 0.2rem rgba(200, 184, 158, 0.25);
+        outline: none;
+    }
+    
+    .zen-btn-auth {
+        background: linear-gradient(135deg, var(--zen-accent), var(--zen-decoration));
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-weight: 600;
+        color: var(--zen-text-primary);
+        transition: all 0.3s ease;
+        width: 100%;
+    }    
+    .zen-btn-auth:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(200, 184, 158, 0.4);
+    }
+    
+    .zen-auth-link {
+        color: var(--zen-text-secondary);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    
+    .zen-auth-link:hover {
+        color: var(--zen-accent);
+    }
+    
+    .zen-divider {
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--zen-accent), var(--zen-decoration));
+        margin: 1.5rem auto;
+        border-radius: 2px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="zen-auth-container fade-in">
+        <h2 class="zen-auth-title">
+            <i class="fas fa-leaf me-2"></i>
+            静心登录
+        </h2>
+        <div class="zen-divider"></div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}        
+        <form method="post" class="zen-auth-form">
+            {% csrf_token %}
+            <div class="zen-form-group">
+                <label for="username" class="zen-form-label text-zen-secondary">用户名</label>
+                <input type="text" class="zen-form-control" id="username" name="username" 
+                       placeholder="请输入您的用户名" required>
+            </div>
+            
+            <div class="zen-form-group">
+                <label for="password" class="zen-form-label text-zen-secondary">密码</label>
+                <input type="password" class="zen-form-control" id="password" name="password" 
+                       placeholder="请输入您的密码" required>
+            </div>
+            
+            <div class="d-grid mb-3">                <button type="submit" class="zen-btn-auth">
+                    <i class="fas fa-leaf me-2"></i>
+                    静心登录
+                </button>
+            </div>
+            
+            <div class="text-center">
+                <p class="mb-0 text-zen-secondary">还没有账户？
+                    <a href="{% url 'core:register' %}" class="zen-auth-link">
+                        <i class="fas fa-seedling me-1"></i>
+                        静心注册
+                    </a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 添加输入动画效果
+    const inputs = document.querySelectorAll('.zen-form-control');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentNode.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            if (!this.value) {
+                this.parentNode.classList.remove('focused');
+            }
+        });
+    });
+    
+    // 登录表单动画
+    const form = document.querySelector('.zen-auth-form');
+    if (form) {
+        form.style.opacity = '0';
+        form.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            form.style.transition = 'all 0.6s ease';
+            form.style.opacity = '1';
+            form.style.transform = 'translateY(0)';
+        }, 200);
+    }
+});
+</script>
+{% endblock %}

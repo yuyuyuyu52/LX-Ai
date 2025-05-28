@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}灵汐命理平台 - 静心观命，感悟人生智慧{% endblock %}
+
+{% block content %}
+<!-- 禅意Hero Section -->
+<section class="zen-hero-section">
+    <div class="container py-5">
+        <div class="row align-items-center min-vh-75">
+            <div class="col-lg-6">
+                <div class="zen-hero-content">
+                    <h1 class="zen-hero-title">
+                        静心观命
+                        <span class="zen-subtitle">感悟人生智慧</span>
+                    </h1>
+                    <p class="zen-hero-description">
+                        承千年易学精髓，融现代理性思考。
+                        以温和的方式探索内心，寻找生命的平衡与和谐。
+                        让古老智慧为现代生活带来宁静与启发。
+                    </p>
+                    <div class="zen-hero-actions">
+                        <a href="{% url 'divination:bazi' %}" class="zen-btn zen-btn-primary">
+                            <i class="fas fa-lotus me-2"></i>开始占卜
+                        </a>
+                        <a href="#features" class="zen-btn zen-btn-outline">
+                            <i class="fas fa-leaf me-2"></i>了解更多
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="zen-hero-visual">
+                    <div class="zen-circle-ornament">
+                        <div class="zen-inner-circle">
+                            <i class="fas fa-moon zen-moon-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 统计数据 - 禅意风格 -->
+<section class="zen-stats-section py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="zen-stat-card">
+                    <div class="zen-stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="zen-stat-number">{{ total_users|default:0 }}</div>
+                    <div class="zen-stat-label">信任的朋友</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="zen-stat-card">
+                    <div class="zen-stat-icon">
+                        <i class="fas fa-lotus"></i>
+                    </div>
+                    <div class="zen-stat-number">{{ total_divinations|default:0 }}</div>
+                    <div class="zen-stat-label">心灵探索次数</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="zen-stat-card">
+                    <div class="zen-stat-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div class="zen-stat-number">{{ total_notifications|default:0 }}</div>
+                    <div class="zen-stat-label">温暖提醒</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="zen-stat-card">
+                    <div class="zen-stat-icon">
+                        <i class="fas fa-yin-yang"></i>
+                    </div>
+                    <div class="zen-stat-number">4</div>
+                    <div class="zen-stat-label">智慧方式</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 功能特色 - 禅意设计 -->
+<section id="features" class="zen-features-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="zen-section-title">心灵之径</h2>
+            <p class="zen-section-subtitle">四种方式，引导内心探索，感受生命智慧</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="zen-feature-card">
+                    <div class="zen-feature-icon">
+                        <i class="fas fa-yin-yang"></i>
+                    </div>
+                    <h5 class="zen-feature-title">八字分析</h5>
+                    <p class="zen-feature-description">
+                        探寻生命密码，理解性格特质，
+                        在天时地利人和中寻找内心平衡
+                    </p>
+                    <a href="{% url 'divination:bazi' %}" class="zen-feature-link">
+                        开始探索 <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="zen-feature-card">
+                    <div class="zen-feature-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h5 class="zen-feature-title">梅花易数</h5>
+                    <p class="zen-feature-description">
+                        观察万物变化，感受自然韵律，
+                        从细微处洞察事物发展规律
+                    </p>
+                    <a href="{% url 'divination:meihua' %}" class="zen-feature-link">
+                        开始观察 <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="zen-feature-card">
+                    <div class="zen-feature-icon">
+                        <i class="fas fa-lotus"></i>
+                    </div>
+                    <h5 class="zen-feature-title">塔罗指引</h5>
+                    <p class="zen-feature-description">
+                        倾听内心声音，解读心灵密码，
+                        在静谧中找到前进的方向
+                    </p>
+                    <a href="{% url 'divination:tarot' %}" class="zen-feature-link">
+                        开始倾听 <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="zen-feature-card">
+                    <div class="zen-feature-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h5 class="zen-feature-title">黄历日程</h5>
+                    <p class="zen-feature-description">
+                        顺应天时节律，选择合适时机，
+                        让生活与自然和谐共振
+                    </p>
+                    <a href="{% url 'chinese_calendar:calendar' %}" class="zen-feature-link">
+                        查看日程 <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 最新探索记录 - 禅意风格 -->
+{% if recent_records %}
+<section class="zen-recent-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="zen-section-title">心灵足迹</h2>
+            <p class="zen-section-subtitle">他们在这里找到了内心的宁静与启发</p>
+        </div>
+        <div class="row g-4">
+            {% for record in recent_records %}
+            <div class="col-md-6 col-lg-4">
+                <div class="zen-record-card">
+                    <div class="zen-record-header">
+                        <div class="zen-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="zen-record-info">
+                            <h6 class="zen-record-name">{{ record.user.username|default:"静心者" }}</h6>
+                            <small class="zen-record-time">{{ record.created_at|timesince }}前</small>
+                        </div>
+                    </div>
+                    <div class="zen-record-type">
+                        {% if record.divination_type == 'bazi' %}
+                            <span class="zen-badge zen-badge-gold">
+                                <i class="fas fa-yin-yang me-1"></i>{{ record.get_divination_type_display }}
+                            </span>
+                        {% elif record.divination_type == 'meihua' %}
+                            <span class="zen-badge zen-badge-green">
+                                <i class="fas fa-leaf me-1"></i>{{ record.get_divination_type_display }}
+                            </span>
+                        {% elif record.divination_type == 'tarot' %}
+                            <span class="zen-badge zen-badge-purple">
+                                <i class="fas fa-lotus me-1"></i>{{ record.get_divination_type_display }}
+                            </span>
+                        {% elif record.divination_type == 'yijing' %}
+                            <span class="zen-badge zen-badge-blue">
+                                <i class="fas fa-yin-yang me-1"></i>{{ record.get_divination_type_display }}
+                            </span>
+                        {% endif %}
+                    </div>
+                    {% if record.question %}
+                        <p class="zen-record-question">{{ record.question|truncatechars:40 }}</p>
+                    {% endif %}
+                    <p class="zen-record-result">{{ record.result|truncatechars:60 }}</p>
+                    <div class="zen-record-date">{{ record.created_at|date:"m月d日 H:i" }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- 今日心境 - 禅意风格 -->
+<section class="zen-today-section py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="zen-today-card">
+                    <h2 class="zen-today-title">
+                        <i class="fas fa-sun zen-sun-icon"></i>
+                        今日心境
+                    </h2>
+                    <div class="zen-today-content">
+                        <div class="zen-date-section">
+                            <div class="zen-date-main">{{ today_date|date:"m月d日" }}</div>
+                            <div class="zen-date-lunar">农历四月廿一</div>
+                        </div>
+                        <div class="zen-fortune-section">
+                            <div class="zen-fortune-item">
+                                <span class="zen-fortune-label">适宜</span>
+                                <span class="zen-fortune-value">静思 冥想 阅读</span>
+                            </div>
+                            <div class="zen-fortune-item">
+                                <span class="zen-fortune-label">避免</span>
+                                <span class="zen-fortune-value">急躁 焦虑 争执</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="zen-today-action">
+                    <p class="zen-today-quote">
+                        "心如止水，自然澄明"
+                    </p>
+                    <a href="{% url 'chinese_calendar:today' %}" class="zen-btn zen-btn-secondary">
+                        <i class="fas fa-calendar-day me-2"></i>查看详细
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* 页面特定的补充样式 */
+.zen-hero-section {
+    min-height: 80vh;
+    background: var(--zen-gradient-warm);
+    display: flex;
+    align-items: center;
+}
+
+.zen-hero-title {
+    font-family: var(--font-title);
+    font-size: 3.5rem;
+    font-weight: 300;
+    color: var(--zen-primary);
+    line-height: 1.2;
+    margin-bottom: 2rem;
+}
+
+.zen-subtitle {
+    display: block;
+    font-size: 1.5rem;
+    color: var(--zen-secondary);
+    margin-top: 1rem;
+}
+
+.zen-hero-description {
+    font-size: 1.2rem;
+    color: var(--zen-secondary);
+    line-height: var(--zen-line-height);
+    margin-bottom: 3rem;
+    max-width: 500px;
+}
+
+.zen-hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.zen-hero-visual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 400px;
+}
+
+.zen-circle-ornament {
+    width: 300px;
+    height: 300px;
+    border: 3px solid var(--zen-decoration);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(231,218,198,0.3) 100%);
+    position: relative;
+    animation: zen-float 6s ease-in-out infinite;
+}
+
+.zen-inner-circle {
+    width: 200px;
+    height: 200px;
+    border: 2px solid var(--zen-accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--zen-white);
+}
+
+.zen-moon-icon {
+    font-size: 4rem;
+    color: var(--zen-accent);
+}
+
+@keyframes zen-float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .zen-hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .zen-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .zen-hero-actions {
+        justify-content: center;
+    }
+    
+    .zen-circle-ornament {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .zen-inner-circle {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .zen-moon-icon {
+        font-size: 2.5rem;
+    }
+}
+</style>
+{% endblock %}
