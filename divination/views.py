@@ -216,3 +216,152 @@ def tarot_api(request):
         })
     
     return JsonResponse({'success': False, 'error': '请求方法错误'})
+
+@csrf_exempt
+def meihua_api(request):
+    """梅花易数API"""
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        question = data.get('question', '')
+        number1 = int(data.get('number1', 1))
+        number2 = int(data.get('number2', 1))
+        
+        # 八卦对应
+        hexagrams = ['乾', '兑', '离', '震', '巽', '坎', '艮', '坤']
+        main_hex = hexagrams[number1 - 1]
+        change_hex = hexagrams[number2 - 1]
+        
+        # 八卦解释
+        interpretations = {
+            '乾': '代表天，象征刚健、进取、领导力',
+            '兑': '代表泽，象征喜悦、交流、收获',
+            '离': '代表火，象征光明、智慧、美丽',
+            '震': '代表雷，象征震动、行动、新开始',
+            '巽': '代表风，象征温和、渗透、顺应',
+            '坎': '代表水，象征困险、流动、智慧',
+            '艮': '代表山，象征止静、稳重、阻碍',
+            '坤': '代表地，象征柔顺、包容、厚德'
+        }
+        
+        # 生成解读
+        interpretation = f"""
+【卦象解析】
+本卦{main_hex}：{interpretations[main_hex]}
+变卦{change_hex}：{interpretations[change_hex]}
+
+【占卜解读】
+根据您的问题和所得卦象，当前情况显示{main_hex}的特质比较明显。这表明您目前所处的环境或状态具有{interpretations[main_hex].split('，')[1]}的特点。
+
+而变卦{change_hex}则预示着未来的发展趋势，{interpretations[change_hex].split('，')[1]}将是关键因素。
+
+【建议与指导】
+建议您在处理相关事务时，既要发挥{main_hex}的优势，也要注意向{change_hex}的方向调整策略。保持积极的心态，顺应时势的变化，必能取得良好的结果。
+
+【注意事项】
+- 保持内心平静，理性分析问题
+- 顺应自然规律，不可强求
+- 注意时机的把握，该进则进，该退则退
+- 以诚待人，以正行事
+
+* 此解读仅供参考娱乐，具体决策请结合实际情况理性判断。
+        """
+        
+        # 保存占卜记录
+        if request.user.is_authenticated:
+            DivinationRecord.objects.create(
+                user=request.user,
+                divination_type='meihua',
+                question=question,
+                result=interpretation
+            )
+            
+            # 创建占卜完成通知
+            from core.models import Notification
+            Notification.objects.create(
+                user=request.user,
+                title='梅花易数完成',
+                message=f'您关于"{question[:20]}..."的梅花易数占卜已完成，快来查看结果吧！',
+                notification_type='success'
+            )
+        
+        return JsonResponse({
+            'success': True,
+            'main_hex': main_hex,
+            'change_hex': change_hex,
+            'interpretation': interpretation
+        })
+    
+    return JsonResponse({'success': False, 'error': '请求方法错误'})
+
+@csrf_exempt
+def yijing_api(request):
+    """易经卜卦API"""
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        question = data.get('question', '')
+        
+        # 64卦数据（简化版）
+        hexagram_data = [
+            {'name': '乾', 'number': 1, 'lines': [1,1,1,1,1,1], 'meaning': '刚健中正', 'judgment': '元亨利贞'},
+            {'name': '坤', 'number': 2, 'lines': [0,0,0,0,0,0], 'meaning': '柔顺厚德', 'judgment': '利牝马之贞'},
+            {'name': '屯', 'number': 3, 'lines': [1,0,0,0,1,0], 'meaning': '始生之难', 'judgment': '元亨利贞'},
+            {'name': '蒙', 'number': 4, 'lines': [0,1,0,0,0,1], 'meaning': '启蒙教育', 'judgment': '亨'},
+            {'name': '需', 'number': 5, 'lines': [1,1,1,0,1,0], 'meaning': '需要等待', 'judgment': '有孚，光亨'},
+            {'name': '讼', 'number': 6, 'lines': [0,1,0,1,1,1], 'meaning': '争讼纠纷', 'judgment': '有孚，窒'},
+            {'name': '师', 'number': 7, 'lines': [0,1,0,0,0,0], 'meaning': '军队出征', 'judgment': '贞，丈人吉'},
+            {'name': '比', 'number': 8, 'lines': [0,0,0,0,1,0], 'meaning': '亲密团结', 'judgment': '吉'}
+        ]
+        
+        # 随机选择一个卦象
+        selected_hexagram = random.choice(hexagram_data)
+        
+        # 生成解读
+        interpretation = f"""
+【卦象信息】
+卦名：{selected_hexagram['name']}卦（第{selected_hexagram['number']}卦）
+卦意：{selected_hexagram['meaning']}
+卦辞：{selected_hexagram['judgment']}
+
+【卦象分析】
+针对您的问题"{question}"，得到{selected_hexagram['name']}卦。此卦象征着{selected_hexagram['meaning']}的状态。
+
+【现状分析】
+当前情况呈现出{selected_hexagram['name']}卦的特征，表明您正处在一个{selected_hexagram['meaning']}的阶段。这提示您需要以相应的态度和方式来应对当前的局面。
+
+【发展趋势】
+根据卦象显示，未来的发展方向总体是{'积极向上' if '亨' in selected_hexagram['judgment'] or '吉' in selected_hexagram['judgment'] else '需要谨慎应对'}的。
+
+【行动建议】
+建议您在处理相关事务时，要把握好分寸，顺应自然规律，以诚待人，以正行事。
+
+【总结】
+易经提醒我们，万事万物都在变化之中，把握变化的规律，顺应天道，是获得成功的关键。希望这次卜卦能为您提供有益的启示。
+
+* 易经卜卦仅供参考娱乐，人生路上还需理性思考，积极行动。
+        """
+        
+        # 保存占卜记录
+        if request.user.is_authenticated:
+            DivinationRecord.objects.create(
+                user=request.user,
+                divination_type='yijing',
+                question=question,
+                result=interpretation
+            )
+            
+            # 创建占卜完成通知
+            from core.models import Notification
+            Notification.objects.create(
+                user=request.user,
+                title='易经卜卦完成',
+                message=f'您关于"{question[:20]}..."的易经卜卦已完成，得到{selected_hexagram["name"]}卦！',
+                notification_type='success'
+            )
+        
+        return JsonResponse({
+            'success': True,
+            'hexagram': selected_hexagram,
+            'interpretation': interpretation
+        })
+    
+    return JsonResponse({'success': False, 'error': '请求方法错误'})

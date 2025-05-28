@@ -7,10 +7,15 @@
     --zen-primary: #3E2C1D;      /* 主文字色 - 深咖色 */
     --zen-secondary: #A89E92;    /* 次文字色 - 浅棕灰 */
     --zen-accent: #C8B89E;       /* 按钮边框 - 浅金棕 */
-    --zen-decoration: #E7DAC6;   /* 装饰色 - 淡金米黄 */
-    --zen-white: #FFFFFF;        /* 纯白 */
+    --zen-decoration: #E7DAC6;   /* 装饰色 - 淡金米黄 */    --zen-white: #FFFFFF;        /* 纯白 */
     --zen-shadow: rgba(62, 44, 29, 0.08);  /* 极淡阴影 */
     --zen-border: rgba(200, 184, 158, 0.3); /* 淡边框 */
+    
+    /* 扩展配色 - 为八字分析页面添加 */
+    --zen-bg-light: #FFFEFA;     /* 更浅的背景色 */
+    --zen-bg-primary: #F9F5EF;   /* 主要区域背景 */
+    --zen-text-primary: #3E2C1D; /* 主文字色 (同--zen-primary) */
+    --zen-text-secondary: #A89E92; /* 次要文字色 (同--zen-secondary) */
     
     /* 渐变色 */
     --zen-gradient-warm: linear-gradient(135deg, #FDF9F3 0%, #F5F0E8 100%);

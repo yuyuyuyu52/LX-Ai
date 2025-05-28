@@ -1,0 +1,448 @@
+{% extends 'base.html' %}
+
+{% block title %}黄历查询 - FateMaster{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="text-center mb-4">
+                <h2 class="display-5"><i class="fas fa-calendar-alt text-warning"></i> 黄历查询</h2>
+                <p class="lead">查询每日宜忌，选择吉祥时辰</p>
+            </div>
+
+            <!-- 快速导航 -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <label for="calendar-date" class="form-label fw-bold">选择日期</label>
+                            <input type="date" class="form-control form-control-lg" id="calendar-date" value="{{ today|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">快速选择</label>
+                            <div class="btn-group d-block" role="group">
+                                <button class="btn btn-outline-primary btn-sm" onclick="setToday()">今天</button>
+                                <button class="btn btn-outline-primary btn-sm" onclick="setTomorrow()">明天</button>
+                                <button class="btn btn-outline-primary btn-sm" onclick="setNextWeek()">下周</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">&nbsp;</label>
+                            <button class="btn btn-primary btn-lg d-block w-100" onclick="queryCalendar()">
+                                <i class="fas fa-search me-2"></i> 查询黄历
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 加载提示 -->
+            <div id="loading" class="text-center py-4" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">正在查询黄历信息...</p>
+            </div>
+
+            <!-- 黄历结果 -->
+            <div id="calendar-result" class="row">
+                <!-- 基本信息 -->
+                <div class="col-lg-8">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-primary h-100">
+                                <div class="card-header bg-primary text-white">
+                                    <h5><i class="fas fa-info-circle"></i> 今日概况</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <strong>公历：</strong>{{ today|date:'Y年m月d日' }} {{ today|date:'l' }}
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>农历：</strong><span id="lunar-date" class="text-primary fw-bold">加载中...</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>干支：</strong><span id="ganzhi" class="text-info fw-bold">加载中...</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>星座：</strong><span id="constellation" class="badge bg-info">加载中...</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>节气：</strong><span id="solar-term" class="text-success">加载中...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card border-warning h-100">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5><i class="fas fa-yin-yang"></i> 五行分析</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <strong>今日五行：</strong><span id="wuxing" class="badge bg-primary">加载中...</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>旺衰：</strong><span id="prosperity" class="fw-bold">加载中...</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>幸运色：</strong>
+                                        <span class="badge bg-secondary" id="lucky-color">加载中...</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>幸运数字：</strong><span id="lucky-number" class="fw-bold text-primary">加载中...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 宜忌事项 -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-success h-100">
+                                <div class="card-header bg-success text-white">
+                                    <h5><i class="fas fa-thumbs-up"></i> 宜做事项</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="suitable-activities">
+                                        <div class="text-center text-muted">
+                                            <div class="spinner-border spinner-border-sm" role="status"></div>
+                                            <p class="mt-2">加载中...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card border-danger h-100">
+                                <div class="card-header bg-danger text-white">
+                                    <h5><i class="fas fa-thumbs-down"></i> 忌做事项</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="avoid-activities">
+                                        <div class="text-center text-muted">
+                                            <div class="spinner-border spinner-border-sm" role="status"></div>
+                                            <p class="mt-2">加载中...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 侧边栏 -->
+                <div class="col-lg-4">
+                    <!-- 今日运势评分 -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-gradient text-white">
+                            <h5><i class="fas fa-star"></i> 运势评分</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="fortune-score mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>综合运势</span>
+                                    <div class="progress flex-grow-1 mx-2" style="height: 10px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: 85%"></div>
+                                    </div>
+                                    <span class="fw-bold text-success">85%</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>事业运</span>
+                                    <div class="progress flex-grow-1 mx-2" style="height: 10px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 78%"></div>
+                                    </div>
+                                    <span class="fw-bold text-primary">78%</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>财运</span>
+                                    <div class="progress flex-grow-1 mx-2" style="height: 10px;">
+                                        <div class="progress-bar bg-warning" role="progressbar" style="width: 70%"></div>
+                                    </div>
+                                    <span class="fw-bold text-warning">70%</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>感情运</span>
+                                    <div class="progress flex-grow-1 mx-2" style="height: 10px;">
+                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 90%"></div>
+                                    </div>
+                                    <span class="fw-bold text-danger">90%</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>健康运</span>
+                                    <div class="progress flex-grow-1 mx-2" style="height: 10px;">
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: 82%"></div>
+                                    </div>
+                                    <span class="fw-bold text-info">82%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 快速操作 -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-tools"></i> 快速操作</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'chinese_calendar:today' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-calendar-day me-2"></i>今日运势详情
+                                </a>
+                                <button class="btn btn-outline-success" onclick="saveToFavorites()">
+                                    <i class="fas fa-heart me-2"></i>收藏此日期
+                                </button>
+                                <button class="btn btn-outline-info" onclick="shareCalendar()">
+                                    <i class="fas fa-share me-2"></i>分享黄历
+                                </button>
+                                <button class="btn btn-outline-warning" onclick="printCalendar()">
+                                    <i class="fas fa-print me-2"></i>打印黄历
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 相关建议 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-lightbulb"></i> 今日建议</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="small">
+                                <p><strong>穿衣建议：</strong>宜穿绿色或蓝色服装，有助于提升运势。</p>
+                                <p><strong>方位建议：</strong>今日宜朝东南方向，不宜朝西北方向。</p>
+                                <p><strong>饮食建议：</strong>宜食用清淡食物，忌辛辣刺激。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 时辰吉凶 -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-clock"></i> 十二时辰吉凶</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2" id="hourly-fortune">
+                        <!-- 时辰数据将通过JavaScript动态加载 -->
+                        <div class="col-12 text-center text-muted">
+                            <div class="spinner-border" role="status"></div>
+                            <p class="mt-2">正在加载时辰信息...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.fortune-score .progress {
+    height: 8px;
+}
+
+.time-card {
+    transition: transform 0.2s ease;
+    cursor: pointer;
+}
+
+.time-card:hover {
+    transform: translateY(-2px);
+}
+
+.time-card.lucky {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.time-card.normal {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+}
+
+.time-card.unlucky {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+</style>
+
+<script>
+// 页面加载时自动查询今天的黄历
+document.addEventListener('DOMContentLoaded', function() {
+    queryCalendar();
+});
+
+function setToday() {
+    const today = new Date();
+    document.getElementById('calendar-date').value = today.toISOString().split('T')[0];
+}
+
+function setTomorrow() {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('calendar-date').value = tomorrow.toISOString().split('T')[0];
+}
+
+function setNextWeek() {
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    document.getElementById('calendar-date').value = nextWeek.toISOString().split('T')[0];
+}
+
+function queryCalendar() {
+    const date = document.getElementById('calendar-date').value;
+    if (!date) {
+        alert('请选择日期');
+        return;
+    }
+    
+    showLoading();
+    
+    fetch(`/chinese_calendar/api/calendar/${date}/`)
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            updateCalendarDisplay(data);
+            updateHourlyFortune();
+        })
+        .catch(error => {
+            hideLoading();
+            console.error('查询失败:', error);
+            showError('查询失败，请检查网络连接后重试');
+        });
+}
+
+function updateCalendarDisplay(data) {
+    // 更新基本信息
+    document.getElementById('lunar-date').textContent = data.lunar_date || '未知';
+    document.getElementById('ganzhi').textContent = data.ganzhi || '未知';
+    document.getElementById('constellation').textContent = data.constellation || '未知';
+    document.getElementById('solar-term').textContent = data.solar_term || '无';
+    document.getElementById('wuxing').textContent = data.wuxing || '未知';
+    document.getElementById('prosperity').textContent = data.prosperity || '未知';
+    document.getElementById('lucky-number').textContent = data.lucky_number || '未知';
+    
+    // 更新宜忌事项
+    const suitableDiv = document.getElementById('suitable-activities');
+    const avoidDiv = document.getElementById('avoid-activities');
+    
+    suitableDiv.innerHTML = '<div class="d-flex flex-wrap gap-2">' + 
+        (data.suitable || []).map(item => `<span class="badge bg-success-subtle text-success px-3 py-2">${item}</span>`).join('') + 
+        '</div>';
+    
+    avoidDiv.innerHTML = '<div class="d-flex flex-wrap gap-2">' + 
+        (data.avoid || []).map(item => `<span class="badge bg-danger-subtle text-danger px-3 py-2">${item}</span>`).join('') + 
+        '</div>';
+}
+
+function updateHourlyFortune() {
+    const hours = [
+        {name: '子时', time: '23:00-01:00', status: 'lucky'},
+        {name: '丑时', time: '01:00-03:00', status: 'normal'},
+        {name: '寅时', time: '03:00-05:00', status: 'lucky'},
+        {name: '卯时', time: '05:00-07:00', status: 'unlucky'},
+        {name: '辰时', time: '07:00-09:00', status: 'lucky'},
+        {name: '巳时', time: '09:00-11:00', status: 'normal'},
+        {name: '午时', time: '11:00-13:00', status: 'lucky'},
+        {name: '未时', time: '13:00-15:00', status: 'unlucky'},
+        {name: '申时', time: '15:00-17:00', status: 'normal'},
+        {name: '酉时', time: '17:00-19:00', status: 'lucky'},
+        {name: '戌时', time: '19:00-21:00', status: 'unlucky'},
+        {name: '亥时', time: '21:00-23:00', status: 'normal'}
+    ];
+    
+    const hourlyDiv = document.getElementById('hourly-fortune');
+    hourlyDiv.innerHTML = hours.map(hour => {
+        const badgeClass = hour.status === 'lucky' ? 'bg-success' : 
+                          hour.status === 'normal' ? 'bg-warning' : 'bg-danger';
+        const statusText = hour.status === 'lucky' ? '吉' : 
+                          hour.status === 'normal' ? '平' : '凶';
+        
+        return `
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="time-card card border ${hour.status} text-center p-3 h-100">
+                    <div class="fw-bold">${hour.name}</div>
+                    <div class="small text-muted">${hour.time}</div>
+                    <div class="badge ${badgeClass} mt-2">${statusText}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function showLoading() {
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('calendar-result').style.opacity = '0.5';
+}
+
+function hideLoading() {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('calendar-result').style.opacity = '1';
+}
+
+function showError(message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+    alertDiv.innerHTML = `
+        <i class="fas fa-exclamation-triangle me-2"></i>${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
+}
+
+function saveToFavorites() {
+    const date = document.getElementById('calendar-date').value;
+    
+    fetch('/core/api/save-favorite-date/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value || ''
+        },
+        body: JSON.stringify({date: date})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('日期已收藏到您的个人档案');
+        } else {
+            alert('收藏失败，请稍后重试');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('收藏功能暂时不可用');
+    });
+}
+
+function shareCalendar() {
+    const date = document.getElementById('calendar-date').value;
+    const url = `${window.location.origin}${window.location.pathname}?date=${date}`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: `${date} 黄历查询`,
+            text: '查看这一天的黄历宜忌信息',
+            url: url
+        });
+    } else {
+        navigator.clipboard.writeText(url).then(() => {
+            alert('链接已复制到剪贴板');
+        });
+    }
+}
+
+function printCalendar() {
+    window.print();
+}
+</script>
+{% endblock %}

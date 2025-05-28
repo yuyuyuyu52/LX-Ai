@@ -7,89 +7,114 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="text-center mb-5">
-                <h1 class="zen-section-title">八字分析</h1>
-                <p class="zen-section-subtitle">通过生辰时刻，探寻生命的本质与潜能</p>
+            <div class="text-center mb-5 fade-in">
+                <h1 class="display-5 fw-bold text-zen-primary">八字分析</h1>
+                <p class="lead text-zen-secondary">天人合一，解读生命密码</p>
+                <div class="zen-divider mx-auto"></div>
             </div>
 
-            <div class="zen-feature-card">
-                <div class="zen-feature-icon mb-4">
-                    <i class="fas fa-yin-yang"></i>
-                </div>
-                <form id="baziForm">                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label for="birthDate" class="zen-form-label">出生日期</label>
-                            <input type="date" class="zen-form-control" id="birthDate" required>
+            <div class="zen-card slide-in-left">
+                <div class="p-5">
+                    <div class="text-center mb-4">
+                        <div class="zen-icon-circle mx-auto mb-3">
+                            <i class="fas fa-yin-yang"></i>
                         </div>
-                        <div class="col-md-6">
-                            <label for="birthTime" class="zen-form-label">出生时辰</label>
-                            <select class="zen-form-control" id="birthTime" required>
-                                <option value="">请选择时辰</option>
-                                <option value="子时">子时 (23:00-01:00)</option>
-                                <option value="丑时">丑时 (01:00-03:00)</option>
-                                <option value="寅时">寅时 (03:00-05:00)</option>
-                                <option value="卯时">卯时 (05:00-07:00)</option>
-                                <option value="辰时">辰时 (07:00-09:00)</option>
-                                <option value="巳时">巳时 (09:00-11:00)</option>
-                                <option value="午时">午时 (11:00-13:00)</option>
-                                <option value="未时">未时 (13:00-15:00)</option>
-                                <option value="申时">申时 (15:00-17:00)</option>
-                                <option value="酉时">酉时 (17:00-19:00)</option>
-                                <option value="戌时">戌时 (19:00-21:00)</option>
-                                <option value="亥时">亥时 (21:00-23:00)</option>
-                            </select>
-                        </div>
+                        <h4 class="text-zen-primary">请输入您的出生信息</h4>
+                        <p class="text-zen-secondary">精确的时间信息有助于更准确的分析</p>
                     </div>
 
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label for="gender" class="zen-form-label">性别</label>
-                            <select class="zen-form-control" id="gender" required>
-                                <option value="">请选择性别</option>
-                                <option value="male">男</option>
-                                <option value="female">女</option>
-                            </select>
+                    <form id="baziForm">
+                        <div class="row g-3 mb-4">                            <div class="col-md-6">
+                                <label for="birthDate" class="zen-form-label">出生日期</label>
+                                <input type="date" class="zen-form-control" id="birthDate" required
+                                       min="1900-01-01" max="">
+                                <small class="text-zen-secondary">请选择公历日期</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="birthTime" class="zen-form-label">出生时辰</label>
+                                <select class="zen-form-control" id="birthTime" required>
+                                    <option value="">请选择时辰</option>
+                                    <option value="子时">子时 (23:00-01:00)</option>
+                                    <option value="丑时">丑时 (01:00-03:00)</option>
+                                    <option value="寅时">寅时 (03:00-05:00)</option>
+                                    <option value="卯时">卯时 (05:00-07:00)</option>
+                                    <option value="辰时">辰时 (07:00-09:00)</option>
+                                    <option value="巳时">巳时 (09:00-11:00)</option>
+                                    <option value="午时">午时 (11:00-13:00)</option>
+                                    <option value="未时">未时 (13:00-15:00)</option>
+                                    <option value="申时">申时 (15:00-17:00)</option>
+                                    <option value="酉时">酉时 (17:00-19:00)</option>
+                                    <option value="戌时">戌时 (19:00-21:00)</option>
+                                    <option value="亥时">亥时 (21:00-23:00)</option>
+                                </select>
+                                <small class="text-zen-secondary">十二时辰对应表</small>
+                            </div>
                         </div>
-                            </select>
-                        </div>                        <div class="col-md-6">
-                            <label for="birthPlace" class="zen-form-label">出生地点</label>
-                            <input type="text" class="zen-form-control" id="birthPlace" placeholder="如：北京市">
-                        </div>
-                    </div>
 
-                    <div class="d-grid">
-                        <button type="submit" class="zen-btn zen-btn-primary btn-lg py-3">
-                            <i class="fas fa-yin-yang me-2"></i>开始八字分析
-                        </button>
-                    </div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="gender" class="zen-form-label">性别</label>
+                                <select class="zen-form-control" id="gender" required>
+                                    <option value="">请选择性别</option>
+                                    <option value="male">男</option>
+                                    <option value="female">女</option>
+                                </select>
+                                <small class="text-zen-secondary">性别影响命理分析</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="birthPlace" class="zen-form-label">出生地点</label>
+                                <input type="text" class="zen-form-control" id="birthPlace" placeholder="如：北京市" required>
+                                <small class="text-zen-secondary">地理位置影响时间计算</small>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="zen-btn zen-btn-primary zen-btn-lg">
+                                <i class="fas fa-yin-yang me-2"></i>开始八字分析
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>            <!-- 分析结果 -->
             <div id="resultSection" class="mt-5" style="display: none;">
-                <div class="zen-card">
-                    <div class="zen-card-header text-center py-3">
-                        <h3 class="zen-subtitle mb-0"><i class="fas fa-scroll me-2 zen-icon"></i>八字分析结果</h3>
+                <div class="zen-card slide-in-right">
+                    <div class="text-center p-4 border-bottom">
+                        <h3 class="mb-0 text-zen-primary"><i class="fas fa-scroll me-2"></i>八字分析结果</h3>
                     </div>
-                    <div class="zen-card-body p-5">
-                        <!-- 八字显示 -->
+                    <div class="p-5">
+                        <!-- 个人信息回显 -->
                         <div class="text-center mb-4">
-                            <h4 class="zen-feature-title zen-text-primary">您的八字</h4>
-                            <div class="bazi-display d-flex justify-content-center gap-3 my-4">
-                                <div class="zen-bazi-pillar text-center p-3">
-                                    <div class="zen-text-secondary small">年柱</div>
-                                    <div class="fw-bold fs-4 zen-text-accent" id="yearPillar">-</div>
+                            <h5 class="text-zen-secondary">您的信息</h5>
+                            <div class="zen-info-display">
+                                <p class="mb-1"><strong>出生时间：</strong><span id="displayBirthInfo">-</span></p>
+                                <p class="mb-1"><strong>性别：</strong><span id="displayGender">-</span></p>
+                                <p class="mb-0"><strong>出生地：</strong><span id="displayBirthPlace">-</span></p>
+                            </div>
+                        </div>
+
+                        <!-- 八字显示 -->
+                        <div class="text-center mb-5">
+                            <h4 class="text-zen-primary mb-4">您的八字</h4>
+                            <div class="bazi-display">
+                                <div class="zen-bazi-pillar">
+                                    <div class="pillar-label">年柱</div>
+                                    <div class="pillar-value" id="yearPillar">甲子</div>
+                                    <div class="pillar-desc">祖业根基</div>
                                 </div>
-                                <div class="zen-bazi-pillar text-center p-3">
-                                    <div class="zen-text-secondary small">月柱</div>
-                                    <div class="fw-bold fs-4 zen-text-accent" id="monthPillar">-</div>
+                                <div class="zen-bazi-pillar">
+                                    <div class="pillar-label">月柱</div>
+                                    <div class="pillar-value" id="monthPillar">乙丑</div>
+                                    <div class="pillar-desc">父母宫位</div>
                                 </div>
-                                <div class="zen-bazi-pillar text-center p-3">
-                                    <div class="zen-text-secondary small">日柱</div>
-                                    <div class="fw-bold fs-4 zen-text-accent" id="dayPillar">-</div>
+                                <div class="zen-bazi-pillar">
+                                    <div class="pillar-label">日柱</div>
+                                    <div class="pillar-value" id="dayPillar">丙寅</div>
+                                    <div class="pillar-desc">自身命格</div>
                                 </div>
-                                <div class="zen-bazi-pillar text-center p-3">
-                                    <div class="zen-text-secondary small">时柱</div>
-                                    <div class="fw-bold fs-4 zen-text-accent" id="hourPillar">-</div>
+                                <div class="zen-bazi-pillar">
+                                    <div class="pillar-label">时柱</div>
+                                    <div class="pillar-value" id="hourPillar">丁卯</div>
+                                    <div class="pillar-desc">子女后代</div>
                                 </div>
                             </div>
                         </div>
@@ -99,9 +124,9 @@
                             <!-- 分析结果将通过JavaScript填充 -->
                         </div>
 
-                        <div class="text-center mt-4">
+                        <div class="text-center mt-5">
                             <button class="zen-btn zen-btn-primary me-3" onclick="saveResult()">
-                                <i class="fas fa-save me-2"></i>保存结果
+                                <i class="fas fa-save me-2"></i>珍藏分析
                             </button>
                             <button class="zen-btn zen-btn-outline" onclick="resetForm()">
                                 <i class="fas fa-redo me-2"></i>重新分析
@@ -117,39 +142,150 @@
 
 {% block extra_css %}
 <style>
-.bazi-pillar {
-    min-width: 80px;
-    transition: all 0.3s ease;
+.zen-icon-circle {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(145deg, var(--zen-decoration), var(--zen-accent));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--zen-primary);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
-.bazi-pillar:hover {
-    transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+.zen-info-display {
+    background: var(--zen-bg-light);
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border-left: 4px solid var(--zen-accent);
+    margin: 1rem 0;
 }
 
-.analysis-content {
-    line-height: 1.8;
+.bazi-display {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
-.analysis-content h5 {
-    color: #495057;
-    border-bottom: 2px solid #007bff;
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.form-control-lg {
-    border-radius: 0.5rem;
-}
-
-.card {
+.zen-bazi-pillar {
+    background: linear-gradient(145deg, var(--zen-bg-light), var(--zen-decoration));
     border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 2px solid var(--zen-decoration);
+    position: relative;
+    overflow: hidden;
+}
+
+.zen-bazi-pillar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--zen-accent), var(--zen-decoration));
+}
+
+.zen-bazi-pillar:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    border-color: var(--zen-accent);
+}
+
+.pillar-label {
+    font-size: 0.875rem;
+    color: var(--zen-secondary);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.pillar-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--zen-primary);
+    margin: 0.5rem 0;
+    font-family: 'Noto Serif SC', serif;
+}
+
+.pillar-desc {
+    font-size: 0.75rem;
+    color: var(--zen-secondary);
+    margin-top: 0.5rem;
+    opacity: 0.8;
+}
+
+.zen-analysis-content {
+    background: var(--zen-bg-light);
+    padding: 2rem;
+    border-radius: 1rem;
+    border-left: 4px solid var(--zen-accent);
+    line-height: 1.8;
+    color: var(--zen-primary);
+}
+
+.zen-analysis-content h5 {
+    color: var(--zen-primary);
+    border-bottom: 2px solid var(--zen-accent);
+    padding-bottom: 0.5rem;
+    margin: 1.5rem 0 1rem 0;
+    font-family: 'Noto Serif SC', serif;
+}
+
+.zen-analysis-content p {
+    margin-bottom: 1rem;
+    text-align: justify;
+}
+
+.zen-analysis-content strong {
+    color: var(--zen-accent);
+    font-weight: 600;
+}
+
+.zen-divider {
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--zen-accent), var(--zen-decoration));
+    margin: 1rem auto;
+    border-radius: 2px;
+}
+
+.zen-btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .bazi-display {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .zen-bazi-pillar {
+        padding: 1rem;
+    }
+    
+    .pillar-value {
+        font-size: 1.25rem;
+    }
 }
 </style>
-{% endblock %}
+{% endblock extra_css %}
 
 {% block extra_js %}
 <script>
+// 设置出生日期的最大值为今天
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('birthDate').setAttribute('max', today);
+});
+
 document.getElementById('baziForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -158,8 +294,24 @@ document.getElementById('baziForm').addEventListener('submit', function(e) {
     const gender = document.getElementById('gender').value;
     const birthPlace = document.getElementById('birthPlace').value;
     
+    // 验证表单
     if (!birthDate || !birthTime || !gender) {
         alert('请填写完整的出生信息');
+        return;
+    }
+    
+    // 验证出生日期不能超过当前日期
+    const selectedDate = new Date(birthDate);
+    const today = new Date();
+    if (selectedDate > today) {
+        alert('出生日期不能晚于今天');
+        return;
+    }
+    
+    // 验证出生日期不能太古老
+    const minDate = new Date('1900-01-01');
+    if (selectedDate < minDate) {
+        alert('请输入1900年以后的出生日期');
         return;
     }
     
@@ -200,6 +352,16 @@ document.getElementById('baziForm').addEventListener('submit', function(e) {
 });
 
 function displayResult(data) {
+    // 显示个人信息
+    const birthDate = document.getElementById('birthDate').value;
+    const birthTime = document.getElementById('birthTime').value;
+    const gender = document.getElementById('gender').value;
+    const birthPlace = document.getElementById('birthPlace').value;
+    
+    document.getElementById('displayBirthInfo').textContent = birthDate + ' ' + birthTime;
+    document.getElementById('displayGender').textContent = gender === 'male' ? '男' : '女';
+    document.getElementById('displayBirthPlace').textContent = birthPlace;
+    
     // 显示八字
     document.getElementById('yearPillar').textContent = data.bazi.year;
     document.getElementById('monthPillar').textContent = data.bazi.month;
@@ -222,7 +384,62 @@ function displayResult(data) {
 }
 
 function saveResult() {
-    alert('结果已保存到您的个人档案');
+    // 检查用户是否登录
+    if (!document.body.dataset.userAuthenticated || document.body.dataset.userAuthenticated === 'false') {
+        if (confirm('登录后可保存分析结果到个人档案，是否前往登录？')) {
+            window.location.href = '/auth/login/?next=' + encodeURIComponent(window.location.pathname);
+        }
+        return;
+    }
+    
+    // 创建打印版本
+    const printWindow = window.open('', '_blank');
+    const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>八字分析结果</title>
+            <style>
+                body { font-family: "Noto Serif SC", serif; padding: 20px; line-height: 1.6; }
+                .header { text-align: center; margin-bottom: 30px; }
+                .info { background: #f9f5ef; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+                .bazi { display: flex; justify-content: space-around; margin: 20px 0; }
+                .pillar { text-align: center; padding: 10px; border: 1px solid #c8b89e; border-radius: 8px; }
+                .analysis { margin-top: 20px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>八字分析结果</h1>
+                <p>灵汐命理平台 - 生成时间：${new Date().toLocaleString()}</p>
+            </div>
+            <div class="info">
+                <p><strong>姓名：</strong>_______</p>
+                <p><strong>出生时间：</strong>${document.getElementById('displayBirthInfo').textContent}</p>
+                <p><strong>性别：</strong>${document.getElementById('displayGender').textContent}</p>
+                <p><strong>出生地：</strong>${document.getElementById('displayBirthPlace').textContent}</p>
+            </div>
+            <div class="bazi">
+                <div class="pillar"><strong>年柱</strong><br>${document.getElementById('yearPillar').textContent}</div>
+                <div class="pillar"><strong>月柱</strong><br>${document.getElementById('monthPillar').textContent}</div>
+                <div class="pillar"><strong>日柱</strong><br>${document.getElementById('dayPillar').textContent}</div>
+                <div class="pillar"><strong>时柱</strong><br>${document.getElementById('hourPillar').textContent}</div>
+            </div>
+            <div class="analysis">
+                ${document.getElementById('analysisContent').innerHTML}
+            </div>
+            <div style="text-align: center; margin-top: 30px; font-size: 12px; color: #666;">
+                <p>* 此分析仅供参考娱乐，请理性对待命理预测结果</p>
+            </div>
+        </body>
+        </html>
+    `;
+    
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    
+    alert('分析结果已保存！您可以打印或另存为PDF文件保存。');
 }
 
 function resetForm() {

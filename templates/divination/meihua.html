@@ -146,50 +146,35 @@ document.getElementById('meihuaForm').addEventListener('submit', function(e) {
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>占卜中...';
     submitBtn.disabled = true;
-    
-    // 模拟梅花易数计算
-    setTimeout(() => {
-        const hexagrams = ['乾', '兑', '离', '震', '巽', '坎', '艮', '坤'];
-        const mainHex = hexagrams[parseInt(number1) - 1];
-        const changeHex = hexagrams[parseInt(number2) - 1];
-        
-        const interpretation = generateMeihuaInterpretation(mainHex, changeHex, question);
-        
-        displayMeihuaResult(question, mainHex, changeHex, interpretation);
-        
+      // 调用后端API进行梅花易数分析
+    fetch('/divination/api/meihua/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            question: question,
+            number1: parseInt(number1),
+            number2: parseInt(number2)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayMeihuaResult(question, data.main_hexagram, data.change_hexagram, data.interpretation);
+        } else {
+            alert('占卜失败，请重试');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('网络错误，请重试');
+    })
+    .finally(() => {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
-    }, 2000);
+    });
 });
-
-function generateMeihuaInterpretation(mainHex, changeHex, question) {
-    const interpretations = {
-        '乾': '代表天，象征刚健、进取、领导力',
-        '兑': '代表泽，象征喜悦、交流、收获',
-        '离': '代表火，象征光明、智慧、美丽',
-        '震': '代表雷，象征震动、行动、新开始',
-        '巽': '代表风，象征温和、渗透、顺应',
-        '坎': '代表水，象征困险、流动、智慧',
-        '艮': '代表山，象征止静、稳重、阻碍',
-        '坤': '代表地，象征柔顺、包容、厚德'
-    };
-    
-    return `
-        <h5>卦象解析</h5>
-        <p><strong>本卦${mainHex}：</strong>${interpretations[mainHex]}</p>
-        <p><strong>变卦${changeHex}：</strong>${interpretations[changeHex]}</p>
-        
-        <h5>占卜解读</h5>
-        <p>根据您的问题和所得卦象，当前情况显示${mainHex}的特质比较明显。这表明您目前所处的环境或状态具有${interpretations[mainHex].split('，')[1]}的特点。</p>
-        
-        <p>而变卦${changeHex}则预示着未来的发展趋势，${interpretations[changeHex].split('，')[1]}将是关键因素。</p>
-        
-        <h5>建议与指导</h5>
-        <p>建议您在处理相关事务时，既要发挥${mainHex}的优势，也要注意向${changeHex}的方向调整策略。保持积极的心态，顺应时势的变化，必能取得良好的结果。</p>
-        
-        <p class="text-muted"><small>* 此解读仅供参考娱乐，具体决策请结合实际情况理性判断。</small></p>
-    `;
-}
 
 function displayMeihuaResult(question, mainHex, changeHex, interpretation) {
     document.getElementById('questionDisplay').textContent = question;

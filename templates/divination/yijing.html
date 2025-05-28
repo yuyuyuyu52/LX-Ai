@@ -16,7 +16,7 @@
                     <form id="yijingForm">
                         <div class="mb-4">
                             <label for="questionYijing" class="zen-form-label">请诚心默念您的问题</label>
-                            <textarea class="form-control" id="questionYijing" rows="4" 
+                            <textarea class="zen-form-control" id="questionYijing" rows="4" 
                                 placeholder="请静心凝神，将心中疑问付诸文字..." required></textarea>
                             <small class="text-zen-secondary">心诚则灵，意专则通</small>
                         </div>
@@ -46,7 +46,9 @@
                         </div>
                     </form>
                 </div>
-            </div>            <!-- 卜卦结果 -->
+            </div>
+
+            <!-- 卜卦结果 -->
             <div id="yijingResult" class="mt-5" style="display: none;">
                 <div class="zen-card slide-in-right">
                     <div class="text-center p-4 border-bottom">
@@ -120,12 +122,12 @@
 
 .coin-face.front {
     background: linear-gradient(145deg, var(--zen-decoration), var(--zen-accent));
-    color: var(--zen-text-primary);
+    color: var(--zen-primary);
 }
 
 .coin-face.back {
-    background: linear-gradient(145deg, var(--zen-text-primary), var(--zen-text-secondary));
-    color: var(--zen-bg-primary);
+    background: linear-gradient(145deg, var(--zen-primary), var(--zen-secondary));
+    color: var(--zen-bg);
     transform: rotateY(180deg);
 }
 
@@ -157,6 +159,7 @@
     background: var(--zen-accent);
     border-radius: 4px;
     transition: all 0.3s ease;
+    position: relative;
 }
 
 .yao-line.broken {
@@ -169,7 +172,14 @@
     padding: 2rem;
     border-radius: 1rem;
     border-left: 4px solid var(--zen-accent);
-    color: var(--zen-text-primary);
+    color: var(--zen-primary);
+}
+
+.interpretation-content h5 {
+    color: var(--zen-primary);
+    border-bottom: 2px solid var(--zen-accent);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 .zen-divider {
@@ -180,38 +190,7 @@
     border-radius: 2px;
 }
 </style>
-{% endblock %}
-    background: #17a2b8;
-    border-radius: 4px;
-    position: relative;
-}
-
-.yao-line.broken::before {
-    content: '';
-    position: absolute;
-    left: 45%;
-    top: 0;
-    width: 10%;
-    height: 100%;
-    background: white;
-}
-
-.interpretation-content {
-    line-height: 1.8;
-    background: #f0f9ff;
-    padding: 2rem;
-    border-radius: 1rem;
-    border-left: 4px solid #17a2b8;
-}
-
-.interpretation-content h5 {
-    color: #0c5460;
-    border-bottom: 2px solid #17a2b8;
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
-}
-</style>
-{% endblock %}
+{% endblock extra_css %}
 
 {% block extra_js %}
 <script>
@@ -220,7 +199,11 @@ const hexagramData = [
     {name: "坤", number: 2, lines: [0,0,0,0,0,0], meaning: "柔顺厚德", judgment: "利牝马之贞"},
     {name: "屯", number: 3, lines: [1,0,0,0,1,0], meaning: "始生之难", judgment: "元亨利贞"},
     {name: "蒙", number: 4, lines: [0,1,0,0,0,1], meaning: "启蒙教育", judgment: "亨"},
-    // 这里可以添加完整的64卦数据
+    {name: "需", number: 5, lines: [1,1,1,0,1,0], meaning: "需要等待", judgment: "有孚，光亨"},
+    {name: "讼", number: 6, lines: [0,1,0,1,1,1], meaning: "争讼纠纷", judgment: "有孚，窒"},
+    {name: "师", number: 7, lines: [0,1,0,0,0,0], meaning: "军队出征", judgment: "贞，丈人吉"},
+    {name: "比", number: 8, lines: [0,0,0,0,1,0], meaning: "亲密团结", judgment: "吉"},
+    // 可以继续添加更多卦象...
 ];
 
 document.getElementById('yijingForm').addEventListener('submit', function(e) {
@@ -238,21 +221,46 @@ document.getElementById('yijingForm').addEventListener('submit', function(e) {
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>卜卦中...';
     submitBtn.disabled = true;
-    
-    // 模拟抛硬币动画
+      // 模拟抛硬币动画
     startCoinFlipping(() => {
-        const hexagram = generateHexagram();
-        const interpretation = generateYijingInterpretation(hexagram, question);
-        
-        displayYijingResult(question, hexagram, interpretation);
-        
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
+        // 调用后端API进行易经卜卦
+        fetch('/divination/api/yijing/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                question: question
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const hexagram = {
+                    name: data.hexagram_name,
+                    number: data.hexagram_number,
+                    lines: data.hexagram_lines || [1,1,1,1,1,1], // 默认乾卦
+                    meaning: data.hexagram_name + '卦',
+                    judgment: data.hexagram_lines ? '卦象已生成' : '吉凶未卜'
+                };
+                displayYijingResult(question, hexagram, data.interpretation);
+            } else {
+                alert('卜卦失败，请重试');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('网络错误，请重试');
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
     });
 });
 
 function startCoinFlipping(callback) {
-    const coins = document.querySelectorAll('.coin');
+    const coins = document.querySelectorAll('.zen-coin');
     
     coins.forEach((coin, index) => {
         setTimeout(() => {
@@ -268,46 +276,6 @@ function startCoinFlipping(callback) {
     });
     
     setTimeout(callback, 2000);
-}
-
-function generateHexagram() {
-    // 随机生成6个爻（从下到上）
-    const lines = [];
-    for (let i = 0; i < 6; i++) {
-        lines.push(Math.random() > 0.5 ? 1 : 0);
-    }
-    
-    // 简化处理，随机选择一个卦象
-    const randomIndex = Math.floor(Math.random() * hexagramData.length);
-    return hexagramData[randomIndex] || {
-        name: "随机卦",
-        number: Math.floor(Math.random() * 64) + 1,
-        lines: lines,
-        meaning: "随机生成",
-        judgment: "吉凶未卜"
-    };
-}
-
-function generateYijingInterpretation(hexagram, question) {
-    return `
-        <h5>卦象：${hexagram.name}卦 (第${hexagram.number}卦)</h5>
-        <p><strong>卦义：</strong>${hexagram.meaning}</p>
-        <p><strong>彖辞：</strong>${hexagram.judgment}</p>
-        
-        <h5>针对您的问题的解读</h5>
-        <p>根据所得${hexagram.name}卦，您当前的处境和未来的发展趋势如下：</p>
-        
-        <p><strong>现状分析：</strong>您目前所面临的情况具有${hexagram.meaning}的特质。这提示您需要以相应的态度和方法来处理当前的问题。</p>
-        
-        <p><strong>发展趋势：</strong>根据卦象显示，未来的发展方向总体是${hexagram.judgment.includes('吉') ? '积极向上' : '需要谨慎应对'}的。</p>
-        
-        <p><strong>行动建议：</strong>建议您在处理相关事务时，要把握好分寸，顺应自然规律，以诚待人，以正行事。</p>
-        
-        <h5>总结</h5>
-        <p>易经提醒我们，万事万物都在变化之中，把握变化的规律，顺应天道，是获得成功的关键。希望这次卜卦能为您提供有益的启示。</p>
-        
-        <p class="text-muted"><small>* 易经卜卦仅供参考娱乐，人生路上还需理性思考，积极行动。</small></p>
-    `;
 }
 
 function displayYijingResult(question, hexagram, interpretation) {
@@ -341,7 +309,7 @@ function resetYijingForm() {
     document.getElementById('yijingResult').style.display = 'none';
     
     // 重置硬币状态
-    document.querySelectorAll('.coin').forEach(coin => {
+    document.querySelectorAll('.zen-coin').forEach(coin => {
         coin.style.transform = 'rotateY(0deg)';
     });
     
