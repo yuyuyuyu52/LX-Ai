@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}灵汐命理平台 - 静心观命，感悟人生智慧{% endblock %}
+{% block title %}灵汐AI - 静心观命，感悟人生智慧{% endblock %}
 
 {% block content %}
 <!-- 禅意Hero Section -->
@@ -75,7 +75,7 @@
                     <div class="zen-stat-icon">
                         <i class="fas fa-yin-yang"></i>
                     </div>
-                    <div class="zen-stat-number">4</div>
+                    <div class="zen-stat-number">3</div>
                     <div class="zen-stat-label">智慧方式</div>
                 </div>
             </div>
@@ -88,7 +88,7 @@
     <div class="container">
         <div class="text-center mb-5">
             <h2 class="zen-section-title">心灵之径</h2>
-            <p class="zen-section-subtitle">四种方式，引导内心探索，感受生命智慧</p>
+            <p class="zen-section-subtitle">三种方式，引导内心探索，感受生命智慧</p>
         </div>
         <div class="row g-4">
             <div class="col-md-6 col-lg-4">
@@ -133,21 +133,6 @@
                     </p>
                     <a href="{% url 'divination:meihua' %}" class="zen-feature-link">
                         开始观察 <i class="fas fa-arrow-right ms-2"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4">
-                <div class="zen-feature-card">
-                    <div class="zen-feature-icon">
-                        <i class="fas fa-seedling"></i>
-                    </div>
-                    <h5 class="zen-feature-title">塔罗指引</h5>
-                    <p class="zen-feature-description">
-                        倾听内心声音，解读心灵密码，
-                        在静谧中找到前进的方向
-                    </p>
-                    <a href="{% url 'divination:tarot' %}" class="zen-feature-link">
-                        开始倾听 <i class="fas fa-arrow-right ms-2"></i>
                     </a>
                 </div>
             </div>
@@ -214,13 +199,13 @@
                         {% elif record.divination_type == 'meihua' %}
                             <span class="zen-badge zen-badge-green">
                                 <i class="fas fa-leaf me-1"></i>{{ record.get_divination_type_display }}
-                            </span>                        {% elif record.divination_type == 'tarot' %}
-                            <span class="zen-badge zen-badge-purple">
-                                <i class="fas fa-seedling me-1"></i>{{ record.get_divination_type_display }}
-                            </span>
-                        {% elif record.divination_type == 'yijing' %}
+                            </span>                        {% elif record.divination_type == 'daily_fortune' %}
                             <span class="zen-badge zen-badge-blue">
-                                <i class="fas fa-yin-yang me-1"></i>{{ record.get_divination_type_display }}
+                                <i class="fas fa-star me-1"></i>{{ record.get_divination_type_display }}
+                            </span>
+                        {% elif record.divination_type == 'bazi_marriage' %}
+                            <span class="zen-badge zen-badge-red">
+                                <i class="fas fa-heart me-1"></i>{{ record.get_divination_type_display }}
                             </span>
                         {% endif %}
                     </div>

@@ -1,18 +1,5 @@
 from django.contrib import admin
-from .models import TarotCard, IChingHexagram, BaziElement
-
-@admin.register(TarotCard)
-class TarotCardAdmin(admin.ModelAdmin):
-    list_display = ('name', 'suit', 'card_number')
-    list_filter = ('suit',)
-    search_fields = ('name', 'name_en')
-    ordering = ('suit', 'card_number', 'name')
-
-@admin.register(IChingHexagram)
-class IChingHexagramAdmin(admin.ModelAdmin):
-    list_display = ('number', 'name', 'chinese_name')
-    search_fields = ('name', 'chinese_name', 'meaning')
-    ordering = ('number',)
+from .models import BaziElement
 
 @admin.register(BaziElement)
 class BaziElementAdmin(admin.ModelAdmin):

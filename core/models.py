@@ -86,8 +86,6 @@ class DivinationRecord(models.Model):
         ('bazi', '八字分析'),
         ('bazi_marriage', '八字合婚'),
         ('meihua', '梅花易数'),
-        ('tarot', '塔罗占卜'),
-        ('yijing', '易经卜卦'),
         ('daily_fortune', '每日运势'),
     ]
     

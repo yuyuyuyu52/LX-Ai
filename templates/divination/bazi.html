@@ -68,6 +68,31 @@
                             </div>
                         </div>
 
+                        <!-- AI模式选择 -->
+                        {% if user.is_authenticated and user.userprofile.is_vip %}
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="aiMode">
+                                <label class="form-check-label" for="aiMode">
+                                    <i class="fas fa-robot me-2 text-primary"></i>
+                                    <strong>AI增强分析</strong> 
+                                    <span class="badge bg-primary ms-2">会员专享</span>
+                                </label>
+                                <div class="form-text">使用AI技术提供更详细和个性化的八字分析</div>
+                            </div>
+                        </div>
+                        {% elif user.is_authenticated %}
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <p class="mb-2"><i class="fas fa-robot me-2 text-muted"></i>AI增强分析 <span class="badge bg-secondary">会员专享</span></p>
+                            <p class="text-muted small mb-0">升级会员即可享受AI增强的个性化八字分析</p>
+                        </div>
+                        {% else %}
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <p class="mb-2"><i class="fas fa-robot me-2 text-muted"></i>AI增强分析 <span class="badge bg-secondary">需要登录</span></p>
+                            <p class="text-muted small mb-0">登录并升级会员即可享受AI增强分析</p>
+                        </div>
+                        {% endif %}
+
                         <div class="d-grid">
                             <button type="submit" class="zen-btn zen-btn-primary zen-btn-lg">
                                 <i class="fas fa-yin-yang me-2"></i>开始八字分析
@@ -122,6 +147,11 @@
                         <!-- 分析内容 -->
                         <div id="analysisContent" class="zen-analysis-content">
                             <!-- 分析结果将通过JavaScript填充 -->
+                        </div>
+
+                        <!-- AI增强标识 -->
+                        <div id="aiEnhancedBadge" class="text-center mt-4" style="display: none;">
+                            <span class="badge bg-primary"><i class="fas fa-robot me-1"></i>AI增强分析</span>
                         </div>
 
                         <div class="text-center mt-5">
@@ -293,6 +323,7 @@ document.getElementById('baziForm').addEventListener('submit', function(e) {
     const birthTime = document.getElementById('birthTime').value;
     const gender = document.getElementById('gender').value;
     const birthPlace = document.getElementById('birthPlace').value;
+    const aiMode = document.getElementById('aiMode') ? document.getElementById('aiMode').checked : false;
     
     // 验证表单
     if (!birthDate || !birthTime || !gender) {
@@ -326,11 +357,13 @@ document.getElementById('baziForm').addEventListener('submit', function(e) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
         },
         body: JSON.stringify({
             birth_time: birthDate + ' ' + birthTime,
             gender: gender,
-            birth_place: birthPlace
+            birth_place: birthPlace,
+            ai_mode: aiMode
         })
     })
     .then(response => response.json())
@@ -373,6 +406,11 @@ function displayResult(data) {
         '<div class="analysis-text">' + 
         data.analysis.replace(/\n/g, '<br>') + 
         '</div>';
+    
+    // 显示AI增强标识
+    if (data.ai_enhanced) {
+        document.getElementById('aiEnhancedBadge').style.display = 'block';
+    }
     
     // 显示结果区域
     document.getElementById('resultSection').style.display = 'block';

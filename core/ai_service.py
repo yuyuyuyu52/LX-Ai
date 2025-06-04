@@ -254,7 +254,7 @@ class AIService:
             logger.error(f"AI增强梅花易数分析失败: {str(e)}")
             return f"AI分析暂时不可用，请稍后再试。\n\n{basic_analysis}"
     
-    def enhance_daily_fortune(self, zodiac, date, basic_fortune):
+    def enhance_daily_fortune(self, zodiac, date, basic_fortune, user_birth_date=None, additional_info=None):
         """
         AI增强每日运势分析
         
@@ -262,30 +262,104 @@ class AIService:
             zodiac: 生肖
             date: 日期
             basic_fortune: 基础运势
+            user_birth_date: 用户出生日期（可选，用于个性化分析）
+            additional_info: 额外信息（可选）
         
         Returns:
             str: AI增强的运势分析
         """
         try:
+            # 构建个性化信息
+            personal_info = ""
+            if user_birth_date:
+                from datetime import datetime, date as date_type
+                if isinstance(user_birth_date, str):
+                    birth_dt = datetime.strptime(user_birth_date, '%Y-%m-%d').date()
+                elif isinstance(user_birth_date, date_type):
+                    birth_dt = user_birth_date
+                else:
+                    birth_dt = user_birth_date
+                
+                # 计算年龄和人生阶段
+                today = datetime.now().date()
+                age = today.year - birth_dt.year - ((today.month, today.day) < (birth_dt.month, birth_dt.day))
+                
+                if age < 25:
+                    life_stage = "青春成长期"
+                elif age < 35:
+                    life_stage = "事业起步期"
+                elif age < 45:
+                    life_stage = "事业发展期"
+                elif age < 55:
+                    life_stage = "成熟稳定期"
+                else:
+                    life_stage = "智慧沉淀期"
+                
+                personal_info = f"\n【个人特征】\n生肖：{zodiac}\n年龄阶段：{life_stage}（{age}岁）"
+            
+            # 添加时间节点特殊分析
+            time_context = self._get_time_context(date)
+            
             prompt = f"""
-请作为专业的运势分析师，为{zodiac}生肖的人分析{date}的详细运势：
+请作为专业的运势分析师和人生导师，为{zodiac}生肖的人分析{date}的详细运势。
 
 【基础运势】
 {basic_fortune}
+{personal_info}
 
-请从以下角度进行AI增强分析：
-1. 综合运势的详细解读
-2. 爱情运势的具体建议
-3. 事业运势的发展方向
-4. 财运状况的投资建议
-5. 健康运势的养生指导
-6. 人际关系的处理技巧
-7. 学习运势的提升方法
-8. 情绪管理的心理指导
-9. 开运方法的实用建议
-10. 需要注意的事项提醒
+【时间背景】
+{time_context}
 
-请用温暖、积极、实用的语言，为用户提供有价值的每日运势指导。
+请从以下角度进行深度AI增强分析：
+
+1. **综合运势解读**：结合生肖特性和时间因素，分析今日整体运势走向
+
+2. **情感关系指导**：
+   - 单身者的桃花运分析和遇缘建议
+   - 有伴者的感情维护和增进技巧
+   - 家庭关系的和谐相处之道
+
+3. **事业发展策略**：
+   - 工作中的机遇识别和把握
+   - 职场人际关系的处理技巧
+   - 适合今日推进的重要事项
+
+4. **财富管理建议**：
+   - 收入机会和投资方向分析
+   - 消费理财的明智选择
+   - 避免财务风险的注意事项
+
+5. **健康养生指导**：
+   - 身体健康的关注重点
+   - 适合的运动和养生方式
+   - 情绪管理和压力释放方法
+
+6. **人际交往智慧**：
+   - 社交场合的应对技巧
+   - 贵人相助的机会把握
+   - 化解人际矛盾的方法
+
+7. **学习成长建议**：
+   - 技能提升的最佳方向
+   - 知识积累的有效途径
+   - 自我完善的实践方法
+
+8. **开运转运方法**：
+   - 具体的开运行动建议
+   - 能量提升的实用技巧
+   - 改善运势的生活习惯
+
+9. **风险规避提醒**：
+   - 需要特别注意的事项
+   - 可能的挑战和应对策略
+   - 避免不利影响的预防措施
+
+10. **每日行动指南**：
+    - 今日最佳行动时间
+    - 推荐的重要决策方向
+    - 简单易行的幸运提升法
+
+请用温暖、智慧、实用的语言，结合现代生活实际，为用户提供有价值的人生指导和实用建议。分析要具体深入，避免泛泛而谈，让用户能够真正受益并付诸行动。
 """
             
             completion = self.client.chat.completions.create(
@@ -300,6 +374,63 @@ class AIService:
         except Exception as e:
             logger.error(f"AI增强运势分析失败: {str(e)}")
             return f"AI分析暂时不可用，请稍后再试。\n\n{basic_fortune}"
+    
+    def _get_time_context(self, date):
+        """获取时间背景信息"""
+        try:
+            from datetime import datetime
+            if isinstance(date, str):
+                date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+            else:
+                date_obj = date
+            
+            # 获取月份和季节信息
+            month = date_obj.month
+            day = date_obj.day
+            
+            season_map = {
+                (12, 1, 2): "冬季",
+                (3, 4, 5): "春季", 
+                (6, 7, 8): "夏季",
+                (9, 10, 11): "秋季"
+            }
+            
+            season = "春季"  # 默认值
+            for months, season_name in season_map.items():
+                if month in months:
+                    season = season_name
+                    break
+            
+            # 特殊日期分析
+            special_dates = {
+                (1, 1): "新年伊始，万象更新",
+                (2, 14): "情人节，爱意浓浓",
+                (3, 8): "妇女节，关爱女性",
+                (5, 1): "劳动节，勤劳致富",
+                (6, 1): "儿童节，童心未泯",
+                (9, 10): "教师节，尊师重道",
+                (10, 1): "国庆节，举国欢庆",
+                (12, 25): "圣诞节，温馨祥和"
+            }
+            
+            special_note = special_dates.get((month, day), "")
+            
+            # 月初、月中、月末的不同能量
+            if day <= 10:
+                month_phase = "月初新气象，适合新的开始"
+            elif day <= 20:
+                month_phase = "月中稳定期，适合稳步推进"
+            else:
+                month_phase = "月末收尾期，适合总结反思"
+            
+            context = f"当前时节：{season}，{month_phase}"
+            if special_note:
+                context += f"，{special_note}"
+            
+            return context
+            
+        except Exception as e:
+            return "时间背景：普通日子，保持平常心"
     
     def enhance_yijing_analysis(self, question, hexagram_info, basic_analysis):
         """

@@ -22,26 +22,50 @@
 
                         <!-- AI模式选择 -->
                         {% if user.is_authenticated and user.userprofile.is_vip %}
-                        <div class="mb-4 p-3 bg-light rounded">
+                        <div class="mb-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-l-4 border-blue-400">
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="aiMode">
+                                <input class="form-check-input" type="checkbox" id="aiMode" checked>
                                 <label class="form-check-label" for="aiMode">
-                                    <i class="fas fa-robot me-2 text-primary"></i>
-                                    <strong>AI增强分析</strong> 
-                                    <span class="badge bg-primary ms-2">会员专享</span>
+                                    <i class="fas fa-brain me-2 text-primary"></i>
+                                    <strong>AI智能分析</strong> 
+                                    <span class="badge bg-gradient-to-r from-blue-500 to-purple-500 text-white ms-2">VIP专享</span>
                                 </label>
-                                <div class="form-text">使用AI技术提供更详细和个性化的运势分析</div>
+                                <div class="form-text mt-2">
+                                    <i class="fas fa-sparkles me-1 text-warning"></i>
+                                    结合您的生肖特质、年龄阶段和时间节点，提供个性化的深度运势解读、实用建议和开运指南
+                                </div>
                             </div>
                         </div>
                         {% elif user.is_authenticated %}
-                        <div class="mb-4 p-3 bg-light rounded">
-                            <p class="mb-2"><i class="fas fa-robot me-2 text-muted"></i>AI增强分析 <span class="badge bg-secondary">会员专享</span></p>
-                            <p class="text-muted small mb-0">升级会员即可享受AI增强的个性化运势分析</p>
+                        <div class="mb-4 p-4 bg-light rounded border">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-brain me-2 text-muted"></i>
+                                <strong>AI智能分析</strong> 
+                                <span class="badge bg-secondary ms-2">VIP专享</span>
+                            </div>
+                            <p class="text-muted small mb-3">
+                                <i class="fas fa-magic me-1"></i>
+                                获得10倍深度的个性化运势分析，包含事业、情感、财运、健康全方位指导
+                            </p>
+                            <a href="{% url 'core:membership_plans' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-crown me-1"></i>升级VIP解锁
+                            </a>
                         </div>
                         {% else %}
-                        <div class="mb-4 p-3 bg-light rounded">
-                            <p class="mb-2"><i class="fas fa-robot me-2 text-muted"></i>AI增强分析 <span class="badge bg-secondary">需要登录</span></p>
-                            <p class="text-muted small mb-0">登录并升级会员即可享受AI增强分析</p>
+                        <div class="mb-4 p-4 bg-light rounded border">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-brain me-2 text-muted"></i>
+                                <strong>AI智能分析</strong> 
+                                <span class="badge bg-secondary ms-2">需要登录</span>
+                            </div>
+                            <p class="text-muted small mb-3">
+                                <i class="fas fa-user-plus me-1"></i>
+                                登录后升级VIP，即可享受AI个性化运势分析和专业人生指导
+                            </p>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'core:login' %}" class="btn btn-outline-secondary btn-sm">登录</a>
+                                <a href="{% url 'core:membership_plans' %}" class="btn btn-outline-primary btn-sm">了解VIP</a>
+                            </div>
                         </div>
                         {% endif %}
                         
@@ -137,13 +161,31 @@
 
                         <!-- 详细分析 -->
                         <div class="analysis-content">
-                            <h5 class="text-zen-primary mb-3"><i class="fas fa-chart-line me-2"></i>运势分析</h5>
-                            <div id="fortuneAnalysis" class="formatted-text"></div>
-                        </div>
-
-                        <!-- AI增强标识 -->
-                        <div id="aiEnhancedBadge" class="text-center mt-4" style="display: none;">
-                            <span class="badge bg-primary"><i class="fas fa-robot me-1"></i>AI增强分析</span>
+                            <div class="d-flex align-items-center mb-3">
+                                <h5 class="text-zen-primary mb-0">
+                                    <i class="fas fa-chart-line me-2"></i>运势分析
+                                </h5>
+                                <div id="aiEnhancedBadge" class="ms-auto" style="display: none;">
+                                    <span class="badge bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                                        <i class="fas fa-brain me-1"></i>AI智能分析
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- 基础分析容器 -->
+                            <div id="basicAnalysis" class="analysis-section mb-4">
+                                <div id="fortuneAnalysis" class="formatted-text"></div>
+                            </div>
+                            
+                            <!-- AI增强分析容器 -->
+                            <div id="aiAnalysisSection" class="ai-enhanced-section" style="display: none;">
+                                <div class="ai-analysis-header">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="fas fa-sparkles me-2"></i>AI个性化深度解读
+                                    </h6>
+                                </div>
+                                <div id="aiAnalysisContent" class="ai-analysis-content"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -240,6 +282,86 @@
     white-space: pre-line;
     line-height: 1.8;
 }
+
+/* AI增强分析样式 */
+.ai-enhanced-section {
+    background: linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 100%);
+    border: 1px solid #e3e8ff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.ai-analysis-header {
+    border-bottom: 2px solid #e3e8ff;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+}
+
+.ai-analysis-content {
+    line-height: 1.8;
+}
+
+.ai-analysis-content h6 {
+    color: #4f46e5;
+    border-left: 4px solid #4f46e5;
+    padding-left: 12px;
+    margin-top: 20px;
+    margin-bottom: 12px;
+}
+
+.ai-analysis-content .badge {
+    font-size: 0.8em;
+    margin-right: 8px;
+    margin-bottom: 4px;
+}
+
+.ai-analysis-content ul {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 10px 0;
+}
+
+.ai-analysis-content li {
+    color: #374151;
+    margin-bottom: 6px;
+    position: relative;
+    padding-left: 20px;
+}
+
+.ai-analysis-content li::before {
+    content: "✨";
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+/* 运势评分颜色 */
+.fortune-score.text-success {
+    color: #10b981 !important;
+}
+
+.fortune-score.text-warning {
+    color: #f59e0b !important;
+}
+
+.fortune-score.text-danger {
+    color: #ef4444 !important;
+}
+
+/* 响应式改进 */
+@media (max-width: 768px) {
+    .ai-enhanced-section {
+        padding: 15px;
+        margin: 15px -15px 0 -15px;
+        border-radius: 0;
+    }
+    
+    .ai-analysis-content h6 {
+        font-size: 1rem;
+    }
+}
 </style>
 
 <script>
@@ -298,28 +420,93 @@ function displayFortuneResult(data) {
     // 更新生肖
     document.getElementById('zodiacName').textContent = data.zodiac;
     
-    // 更新运势评分
-    document.getElementById('loveScore').textContent = data.fortune_scores.love;
-    document.getElementById('careerScore').textContent = data.fortune_scores.career;
-    document.getElementById('wealthScore').textContent = data.fortune_scores.wealth;
-    document.getElementById('healthScore').textContent = data.fortune_scores.health;
+    // 更新运势评分并添加星级显示
+    updateFortuneScore('loveScore', data.fortune_scores.love);
+    updateFortuneScore('careerScore', data.fortune_scores.career);
+    updateFortuneScore('wealthScore', data.fortune_scores.wealth);
+    updateFortuneScore('healthScore', data.fortune_scores.health);
     
     // 更新幸运元素
     document.getElementById('luckyColor').textContent = data.lucky_elements.color;
     document.getElementById('luckyNumber').textContent = data.lucky_elements.number;
     document.getElementById('luckyDirection').textContent = data.lucky_elements.direction;
     
-    // 更新分析内容
-    document.getElementById('fortuneAnalysis').textContent = data.analysis;
-    
-    // 显示AI增强标识
+    // 根据是否是AI增强分析来显示不同内容
     if (data.ai_enhanced) {
-        document.getElementById('aiEnhancedBadge').style.display = 'block';
+        // 显示AI增强标识
+        document.getElementById('aiEnhancedBadge').style.display = 'inline-block';
+        
+        // 分离基础分析和AI分析
+        const analysisText = data.analysis;
+        const sections = analysisText.split(/(?=\d+\.\s*\*\*)|(?=【)/);
+        
+        if (sections.length > 1) {
+            // 第一部分是基础分析，其余是AI增强内容
+            document.getElementById('fortuneAnalysis').innerHTML = formatAnalysisText(sections[0]);
+            
+            // AI增强部分
+            const aiContent = sections.slice(1).join('\n\n');
+            document.getElementById('aiAnalysisContent').innerHTML = formatAIAnalysis(aiContent);
+            document.getElementById('aiAnalysisSection').style.display = 'block';
+        } else {
+            // 如果没有明确分段，全部作为AI分析显示
+            document.getElementById('fortuneAnalysis').innerHTML = formatAnalysisText(analysisText);
+            document.getElementById('aiAnalysisSection').style.display = 'none';
+        }
+    } else {
+        // 基础分析模式
+        document.getElementById('fortuneAnalysis').innerHTML = formatAnalysisText(data.analysis);
+        document.getElementById('aiAnalysisSection').style.display = 'none';
+        document.getElementById('aiEnhancedBadge').style.display = 'none';
     }
     
-    // 显示结果
+    // 显示结果并平滑滚动
     document.getElementById('fortuneResult').style.display = 'block';
-    document.getElementById('fortuneResult').scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+        document.getElementById('fortuneResult').scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+}
+
+function updateFortuneScore(elementId, score) {
+    const element = document.getElementById(elementId);
+    element.textContent = score;
+    
+    // 添加星级显示
+    const stars = '★'.repeat(score) + '☆'.repeat(5 - score);
+    element.title = `${score}星：${stars}`;
+    
+    // 根据分数添加颜色类
+    element.className = 'fortune-score';
+    if (score >= 4) {
+        element.classList.add('text-success');
+    } else if (score >= 3) {
+        element.classList.add('text-warning');
+    } else {
+        element.classList.add('text-danger');
+    }
+}
+
+function formatAnalysisText(text) {
+    if (!text) return '';
+    
+    return text
+        .replace(/\n/g, '<br>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>');
+}
+
+function formatAIAnalysis(text) {
+    if (!text) return '';
+    
+    // 处理AI分析的特殊格式
+    return text
+        .replace(/(\d+\.\s*\*\*.*?\*\*)/g, '<h6 class="text-primary mt-4 mb-2">$1</h6>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-dark">$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/【(.*?)】/g, '<span class="badge bg-light text-dark me-2">$1</span>')
+        .replace(/\n/g, '<br>')
+        .replace(/(\- .*?)(<br>|$)/g, '<li class="mb-1">$1</li>')
+        .replace(/(<li.*?<\/li>)/g, '<ul class="list-unstyled ms-3">$1</ul>');
 }
 
 function getCookie(name) {
