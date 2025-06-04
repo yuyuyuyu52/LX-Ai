@@ -1,0 +1,491 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}我的订单 - 静心{% endblock %}
+
+{% block extra_css %}
+<style>
+    .orders-container {
+        max-width: 1000px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+    
+    .orders-header {
+        background: var(--zen-bg-primary);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        text-align: center;
+        border: 1px solid var(--zen-decoration);
+    }
+    
+    .orders-title {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--zen-text-primary);
+        margin-bottom: 10px;
+        font-family: 'Noto Serif SC', serif;
+    }
+    
+    .orders-subtitle {
+        color: var(--zen-text-secondary);
+        font-size: 1.1rem;
+    }
+    
+    .order-filters {
+        background: var(--zen-bg-light);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    
+    .filter-btn {
+        padding: 8px 20px;
+        border-radius: 20px;
+        border: 1px solid var(--zen-decoration);
+        background: var(--zen-bg-primary);
+        color: var(--zen-text-secondary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+    
+    .filter-btn.active {
+        background: var(--zen-accent);
+        color: white;
+        border-color: var(--zen-accent);
+    }
+    
+    .filter-btn:hover {
+        border-color: var(--zen-accent);
+        color: var(--zen-accent);
+    }
+    
+    .filter-btn.active:hover {
+        color: white;
+    }
+    
+    .order-card {
+        background: var(--zen-bg-primary);
+        border-radius: 15px;
+        border: 1px solid var(--zen-decoration);
+        margin-bottom: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .order-card:hover {
+        box-shadow: 0 10px 30px rgba(200, 184, 158, 0.2);
+        transform: translateY(-2px);
+    }
+    
+    .order-header {
+        background: var(--zen-bg-light);
+        padding: 20px 25px;
+        border-bottom: 1px solid var(--zen-decoration);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .order-id {
+        font-weight: bold;
+        color: var(--zen-text-primary);
+        font-size: 1.1rem;
+    }
+    
+    .order-date {
+        color: var(--zen-text-secondary);
+        font-size: 0.9rem;
+    }
+    
+    .order-body {
+        padding: 25px;
+    }
+    
+    .order-content {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        gap: 20px;
+        align-items: center;
+    }
+    
+    .order-info {
+        flex: 1;
+    }
+    
+    .plan-name {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: var(--zen-text-primary);
+        margin-bottom: 8px;
+    }
+    
+    .plan-details {
+        color: var(--zen-text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+    
+    .payment-method {
+        display: inline-flex;
+        align-items: center;
+        background: var(--zen-bg-light);
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        color: var(--zen-text-secondary);
+        margin-top: 10px;
+    }
+    
+    .payment-icon {
+        margin-right: 5px;
+        font-size: 1rem;
+    }
+    
+    .wechat-icon { color: #09BB07; }
+    .alipay-icon { color: #1677FF; }
+    .mock-icon { color: #FF6B6B; }
+    
+    .order-amount {
+        text-align: center;
+        padding: 0 20px;
+    }
+    
+    .amount-label {
+        color: var(--zen-text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+    
+    .amount-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: var(--zen-accent);
+    }
+    
+    .order-status {
+        text-align: center;
+    }
+    
+    .status-badge {
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+        display: inline-block;
+    }
+    
+    .status-paid {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+    
+    .status-pending {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+    
+    .status-expired {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+    
+    .status-cancelled {
+        background: rgba(108, 117, 125, 0.1);
+        color: #6c757d;
+        border: 1px solid rgba(108, 117, 125, 0.3);
+    }
+    
+    .order-actions {
+        margin-top: 10px;
+    }
+    
+    .action-btn {
+        padding: 6px 15px;
+        border-radius: 15px;
+        border: 1px solid var(--zen-decoration);
+        background: var(--zen-bg-light);
+        color: var(--zen-text-secondary);
+        text-decoration: none;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+        margin: 2px;
+        display: inline-block;
+    }
+    
+    .action-btn:hover {
+        border-color: var(--zen-accent);
+        color: var(--zen-accent);
+    }
+    
+    .action-btn.primary {
+        background: var(--zen-accent);
+        color: white;
+        border-color: var(--zen-accent);
+    }
+    
+    .action-btn.primary:hover {
+        background: var(--zen-text-primary);
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--zen-text-secondary);
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .empty-title {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+    }
+    
+    .empty-desc {
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+    
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    
+    @media (max-width: 768px) {
+        .order-content {
+            grid-template-columns: 1fr;
+            gap: 15px;
+            text-align: center;
+        }
+        
+        .order-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+        }
+        
+        .order-filters {
+            justify-content: center;
+        }
+        
+        .amount-value {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="orders-container">
+    <div class="orders-header">
+        <h1 class="orders-title">我的订单</h1>
+        <p class="orders-subtitle">查看您的会员购买记录和订单状态</p>
+    </div>
+    
+    <div class="order-filters">
+        <span style="color: var(--zen-text-primary); font-weight: 500;">筛选：</span>
+        <button class="filter-btn active" data-status="all">全部订单</button>
+        <button class="filter-btn" data-status="paid">已支付</button>
+        <button class="filter-btn" data-status="pending">待支付</button>
+        <button class="filter-btn" data-status="expired">已过期</button>
+        <button class="filter-btn" data-status="cancelled">已取消</button>
+    </div>
+    
+    <div class="orders-list" id="ordersList">
+        {% if orders %}
+            {% for order in orders %}
+            <div class="order-card" data-status="{{ order.status }}">
+                <div class="order-header">
+                    <div>
+                        <div class="order-id">订单号：{{ order.order_id }}</div>
+                        <div class="order-date">{{ order.created_at|date:"Y年m月d日 H:i" }}</div>
+                    </div>
+                </div>
+                
+                <div class="order-body">
+                    <div class="order-content">
+                        <div class="order-info">
+                            <div class="plan-name">{{ order.plan.name }}</div>
+                            <div class="plan-details">套餐类型：{{ order.plan.get_plan_type_display }}</div>
+                            <div class="plan-details">有效期：{{ order.plan.duration_days }}天</div>
+                            {% if order.payment_time %}
+                            <div class="plan-details">支付时间：{{ order.payment_time|date:"Y-m-d H:i" }}</div>
+                            {% endif %}
+                            
+                            <div class="payment-method">
+                                {% if order.payment_method == 'wechat' %}
+                                    <i class="fab fa-weixin payment-icon wechat-icon"></i>
+                                    微信支付
+                                {% elif order.payment_method == 'alipay' %}
+                                    <i class="fab fa-alipay payment-icon alipay-icon"></i>
+                                    支付宝
+                                {% elif order.payment_method == 'mock' %}
+                                    <i class="fas fa-code payment-icon mock-icon"></i>
+                                    模拟支付
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="order-amount">
+                            <div class="amount-label">订单金额</div>
+                            <div class="amount-value">¥{{ order.amount|floatformat:0 }}</div>
+                        </div>
+                        
+                        <div class="order-status">
+                            <div class="status-badge status-{{ order.status }}">
+                                {% if order.status == 'paid' %}
+                                    <i class="fas fa-check-circle me-1"></i>已支付
+                                {% elif order.status == 'pending' %}
+                                    <i class="fas fa-clock me-1"></i>待支付
+                                {% elif order.status == 'expired' %}
+                                    <i class="fas fa-times-circle me-1"></i>已过期
+                                {% elif order.status == 'cancelled' %}
+                                    <i class="fas fa-ban me-1"></i>已取消
+                                {% elif order.status == 'refunded' %}
+                                    <i class="fas fa-undo me-1"></i>已退款
+                                {% endif %}
+                            </div>
+                            
+                            <div class="order-actions">
+                                {% if order.status == 'pending' and not order.is_expired %}
+                                    <a href="{% url 'core:membership_payment' order.order_id %}" class="action-btn primary">
+                                        <i class="fas fa-credit-card me-1"></i>立即支付
+                                    </a>
+                                {% endif %}
+                                
+                                {% if order.status == 'paid' %}
+                                    <a href="{% url 'core:membership_status' %}" class="action-btn">
+                                        <i class="fas fa-crown me-1"></i>查看会员
+                                    </a>
+                                {% endif %}
+                                
+                                <a href="#" class="action-btn" onclick="showOrderDetails('{{ order.order_id }}')">
+                                    <i class="fas fa-info-circle me-1"></i>订单详情
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <div class="empty-title">暂无订单记录</div>
+                <div class="empty-desc">
+                    您还没有购买过会员套餐<br>
+                    立即选购适合您的会员服务
+                </div>
+                <a href="{% url 'core:membership_plans' %}" class="zen-btn zen-btn-primary">
+                    <i class="fas fa-crown me-2"></i>
+                    查看会员套餐
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const orderCards = document.querySelectorAll('.order-card');
+    
+    // 筛选功能
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const status = this.getAttribute('data-status');
+            
+            // 更新按钮状态
+            filterBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 筛选订单
+            orderCards.forEach(card => {
+                const cardStatus = card.getAttribute('data-status');
+                if (status === 'all' || cardStatus === status) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // 检查是否有显示的订单
+            const visibleCards = Array.from(orderCards).filter(card => 
+                card.style.display !== 'none'
+            );
+            
+            if (visibleCards.length === 0 && status !== 'all') {
+                showEmptyResult(status);
+            } else {
+                hideEmptyResult();
+            }
+        });
+    });
+    
+    function showEmptyResult(status) {
+        const statusText = {
+            'paid': '已支付',
+            'pending': '待支付', 
+            'expired': '已过期',
+            'cancelled': '已取消'
+        };
+        
+        let emptyState = document.getElementById('emptyResult');
+        if (!emptyState) {
+            emptyState = document.createElement('div');
+            emptyState.id = 'emptyResult';
+            emptyState.className = 'empty-state';
+            emptyState.innerHTML = `
+                <div class="empty-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="empty-title">没有找到${statusText[status]}的订单</div>
+                <div class="empty-desc">
+                    尝试选择其他筛选条件或
+                    <button class="btn btn-link p-0" onclick="resetFilter()">查看全部订单</button>
+                </div>
+            `;
+            document.getElementById('ordersList').appendChild(emptyState);
+        }
+    }
+    
+    function hideEmptyResult() {
+        const emptyState = document.getElementById('emptyResult');
+        if (emptyState) {
+            emptyState.remove();
+        }
+    }
+    
+    window.resetFilter = function() {
+        document.querySelector('.filter-btn[data-status="all"]').click();
+    };
+    
+    window.showOrderDetails = function(orderId) {
+        // 这里可以实现订单详情弹窗或跳转
+        alert(`订单详情功能开发中\n订单号：${orderId}`);
+    };
+});
+</script>
+{% endblock %}

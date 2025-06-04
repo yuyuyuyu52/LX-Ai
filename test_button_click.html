@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>按钮点击测试</title>
+    <style>
+        .test-btn {
+            background: transparent;
+            color: #C8B89E;
+            border: 1px solid #C8B89E;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .test-btn:hover:not(:disabled) {
+            background: #C8B89E;
+            color: #F9F5EF;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(200, 184, 158, 0.3);
+        }
+        
+        .test-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #E7DAC6;
+            border-color: #E7DAC6;
+            color: #A89E92;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-control {
+            width: 70%;
+            padding: 10px;
+            border: 1px solid #E7DAC6;
+            border-radius: 8px;
+            margin-right: 10px;
+        }
+        
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .status.success {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+        
+        .status.error {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>验证码按钮点击测试</h2>
+        
+        <div class="form-group">
+            <label>手机号码：</label>
+            <input type="tel" id="phoneInput" class="form-control" placeholder="请输入11位手机号码">
+            <button type="button" id="testBtn" class="test-btn">获取验证码</button>
+        </div>
+        
+        <div id="statusDiv" class="status">状态信息</div>
+        
+        <div style="margin-top: 30px;">
+            <h3>点击测试日志：</h3>
+            <div id="logDiv" style="background: #f5f5f5; padding: 15px; border-radius: 5px; min-height: 100px; font-family: monospace; white-space: pre-wrap;"></div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button type="button" onclick="clearLog()">清空日志</button>
+            <button type="button" onclick="testButtonAccess()">测试按钮访问</button>
+        </div>
+    </div>
+
+    <script>
+        const phoneInput = document.getElementById('phoneInput');
+        const testBtn = document.getElementById('testBtn');
+        const statusDiv = document.getElementById('statusDiv');
+        const logDiv = document.getElementById('logDiv');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.textContent += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            logDiv.textContent = '';
+        }
+        
+        function showStatus(type, message) {
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+        }
+        
+        function testButtonAccess() {
+            log('=== 测试按钮访问性 ===');
+            log('按钮元素: ' + (testBtn ? '找到' : '未找到'));
+            if (testBtn) {
+                log('按钮ID: ' + testBtn.id);
+                log('按钮类名: ' + testBtn.className);
+                log('按钮禁用状态: ' + testBtn.disabled);
+                log('按钮样式: ' + window.getComputedStyle(testBtn).pointerEvents);
+                log('按钮位置: ' + testBtn.getBoundingClientRect().top + ', ' + testBtn.getBoundingClientRect().left);
+            }
+        }
+        
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', function() {
+            log('页面DOM加载完成');
+            
+            // 检查按钮是否存在
+            if (testBtn) {
+                log('找到测试按钮: ' + testBtn.id);
+                
+                // 添加点击事件监听器
+                testBtn.addEventListener('click', function(event) {
+                    log('按钮点击事件被触发！');
+                    event.preventDefault();
+                    
+                    const phone = phoneInput.value.trim();
+                    log('获取到手机号: ' + phone);
+                    
+                    if (!phone) {
+                        showStatus('error', '请输入手机号码');
+                        log('手机号为空');
+                        return;
+                    }
+                    
+                    if (!/^1[3-9]\d{9}$/.test(phone)) {
+                        showStatus('error', '请输入有效的11位手机号码');
+                        log('手机号格式无效: ' + phone);
+                        return;
+                    }
+                    
+                    log('手机号验证通过，模拟发送验证码');
+                    showStatus('success', '验证码发送成功（模拟）');
+                    
+                    // 模拟倒计时
+                    testBtn.disabled = true;
+                    let countdown = 5;
+                    const timer = setInterval(() => {
+                        countdown--;
+                        testBtn.textContent = `重新发送(${countdown}s)`;
+                        log('倒计时: ' + countdown);
+                        
+                        if (countdown <= 0) {
+                            clearInterval(timer);
+                            testBtn.disabled = false;
+                            testBtn.textContent = '获取验证码';
+                            log('倒计时结束，按钮重新启用');
+                        }
+                    }, 1000);
+                });
+                
+                log('按钮点击事件监听器已添加');
+                
+                // 添加鼠标悬停事件
+                testBtn.addEventListener('mouseenter', function() {
+                    log('鼠标悬停在按钮上');
+                });
+                
+                testBtn.addEventListener('mouseleave', function() {
+                    log('鼠标离开按钮');
+                });
+                
+            } else {
+                log('错误：未找到测试按钮！');
+            }
+            
+            // 初始测试
+            testButtonAccess();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,364 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}会员套餐 - 静心{% endblock %}
+
+{% block extra_css %}
+<style>
+    .membership-hero {
+        background: linear-gradient(135deg, var(--zen-accent) 0%, var(--zen-decoration) 100%);
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    
+    .membership-hero h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        font-family: 'Noto Serif SC', serif;
+    }
+    
+    .membership-hero p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+    
+    .plan-card {
+        background: var(--zen-bg-primary);
+        border: 2px solid var(--zen-decoration);
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        transition: all 0.3s ease;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .plan-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 60px rgba(200, 184, 158, 0.3);
+        border-color: var(--zen-accent);
+    }
+    
+    .plan-card.recommended {
+        border-color: var(--zen-accent);
+        position: relative;
+    }
+    
+    .plan-card.recommended::before {
+        content: '推荐';
+        position: absolute;
+        top: 20px;
+        right: -30px;
+        background: var(--zen-accent);
+        color: white;
+        padding: 5px 40px;
+        transform: rotate(45deg);
+        font-size: 0.9rem;
+        font-weight: bold;
+    }
+    
+    .plan-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--zen-text-primary);
+        margin-bottom: 15px;
+        font-family: 'Noto Serif SC', serif;
+    }
+    
+    .plan-price {
+        font-size: 3rem;
+        font-weight: bold;
+        color: var(--zen-accent);
+        margin-bottom: 10px;
+    }
+    
+    .plan-price .currency {
+        font-size: 1.5rem;
+        vertical-align: top;
+    }
+    
+    .plan-duration {
+        color: var(--zen-text-secondary);
+        margin-bottom: 30px;
+        font-size: 1.1rem;
+    }
+    
+    .plan-features {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 30px;
+    }
+    
+    .plan-features li {
+        padding: 10px 0;
+        border-bottom: 1px solid var(--zen-decoration);
+        color: var(--zen-text-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .plan-features li:last-child {
+        border-bottom: none;
+    }
+    
+    .plan-features li i {
+        color: var(--zen-accent);
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+    }
+    
+    .zen-btn-purchase {
+        background: var(--zen-accent);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 30px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .zen-btn-purchase:hover {
+        background: var(--zen-text-primary);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .current-membership {
+        background: var(--zen-bg-light);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .vip-badge {
+        display: inline-block;
+        background: linear-gradient(45deg, #FFD700, #FFA500);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        margin-left: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .membership-benefits {
+        background: var(--zen-bg-light);
+        border-radius: 20px;
+        padding: 40px;
+        margin-top: 50px;
+        text-align: center;
+    }
+    
+    .benefits-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        margin-top: 30px;
+    }
+    
+    .benefit-item {
+        text-align: center;
+    }
+    
+    .benefit-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--zen-accent);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 2rem;
+        color: white;
+    }
+    
+    .benefit-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--zen-text-primary);
+        margin-bottom: 10px;
+    }
+    
+    .benefit-desc {
+        color: var(--zen-text-secondary);
+        line-height: 1.6;
+    }
+    
+    @media (max-width: 768px) {
+        .plan-card {
+            margin-bottom: 30px;
+        }
+        
+        .membership-hero h1 {
+            font-size: 2rem;
+        }
+        
+        .plan-price {
+            font-size: 2.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="membership-hero">
+    <div class="container">
+        <h1>选择您的会员套餐</h1>
+        <p>解锁更多精准的命理分析功能，享受专属服务</p>
+    </div>
+</div>
+
+<div class="container">
+    {% if user.is_authenticated and user_profile %}
+    <div class="current-membership">
+        <h4>当前会员状态</h4>
+        {% if user_profile.is_vip %}
+            <p class="mb-0">
+                <i class="fas fa-crown text-warning"></i>
+                尊贵会员
+                <span class="vip-badge">VIP</span>
+            </p>
+            {% if user_profile.membership_expire_date %}
+            <small class="text-muted">有效期至：{{ user_profile.membership_expire_date|date:"Y年m月d日" }}</small>
+            {% endif %}
+        {% else %}
+            <p class="mb-0">
+                <i class="fas fa-user text-secondary"></i>
+                普通用户
+            </p>
+            <small class="text-muted">升级会员即可享受更多特权服务</small>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <div class="row justify-content-center">
+        {% for plan in plans %}
+        <div class="col-lg-5 col-md-6 mb-4">
+            <div class="plan-card {% if plan.plan_type == 'annual' %}recommended{% endif %}">
+                <div class="plan-name">{{ plan.name }}</div>
+                <div class="plan-price">
+                    <span class="currency">¥</span>{{ plan.price|floatformat:0 }}
+                </div>
+                <div class="plan-duration">
+                    {% if plan.plan_type == 'daily' %}
+                        单日体验
+                    {% elif plan.plan_type == 'annual' %}
+                        整年无忧
+                    {% endif %}
+                </div>
+                
+                <ul class="plan-features">
+                    {% if plan.plan_type == 'daily' %}
+                        <li><i class="fas fa-check"></i> AI增强八字分析</li>
+                        <li><i class="fas fa-check"></i> 精准塔罗占卜</li>
+                        <li><i class="fas fa-check"></i> 专业梅花易数</li>
+                        <li><i class="fas fa-check"></i> 24小时无限次使用</li>
+                        <li><i class="fas fa-check"></i> 专属客服支持</li>
+                    {% elif plan.plan_type == 'annual' %}
+                        <li><i class="fas fa-crown"></i> 全年无限使用</li>
+                        <li><i class="fas fa-crown"></i> AI深度分析</li>
+                        <li><i class="fas fa-crown"></i> 独家运势报告</li>
+                        <li><i class="fas fa-crown"></i> 优先客服响应</li>
+                        <li><i class="fas fa-crown"></i> 专属会员标识</li>
+                        <li><i class="fas fa-crown"></i> 历史记录永久保存</li>
+                    {% endif %}
+                </ul>
+                
+                {% if user.is_authenticated %}
+                    <a href="{% url 'core:purchase_membership' plan.id %}" class="zen-btn-purchase">
+                        {% if user_profile and user_profile.is_vip %}
+                            续费会员
+                        {% else %}
+                            立即开通
+                        {% endif %}
+                    </a>
+                {% else %}
+                    <a href="{% url 'core:login' %}?next={% url 'core:purchase_membership' plan.id %}" class="zen-btn-purchase">
+                        登录后购买
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="membership-benefits">
+        <h3>会员专享特权</h3>
+        <div class="benefits-grid">
+            <div class="benefit-item">
+                <div class="benefit-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="benefit-title">AI智能分析</div>
+                <div class="benefit-desc">独家AI算法深度解析命理玄机，提供更精准的人生指导</div>
+            </div>
+            
+            <div class="benefit-item">
+                <div class="benefit-icon">
+                    <i class="fas fa-infinity"></i>
+                </div>
+                <div class="benefit-title">无限次使用</div>
+                <div class="benefit-desc">会员期间可无限次使用所有占卜功能，随时获得命理指引</div>
+            </div>
+            
+            <div class="benefit-item">
+                <div class="benefit-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="benefit-title">记录永久保存</div>
+                <div class="benefit-desc">所有占卜记录永久保存，方便回顾和对比人生轨迹</div>
+            </div>
+            
+            <div class="benefit-item">
+                <div class="benefit-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <div class="benefit-title">专属客服</div>
+                <div class="benefit-desc">享受专属客服支持，解答疑问，提供个性化建议</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 添加一些交互效果
+    const planCards = document.querySelectorAll('.plan-card');
+    
+    planCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-10px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+    
+    // 检查会员状态
+    {% if user.is_authenticated %}
+    fetch('{% url "core:check_membership_status" %}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('会员状态:', data.data);
+            }
+        })
+        .catch(error => console.error('检查会员状态失败:', error));
+    {% endif %}
+});
+</script>
+{% endblock %}

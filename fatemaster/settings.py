@@ -50,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.MembershipMiddleware',  # 会员中间件
 ]
 
 ROOT_URLCONF = 'fatemaster.urls'
@@ -145,3 +146,27 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 邮件配置
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # 开发环境使用控制台输出
+# 生产环境邮件配置（使用SMTP）
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.163.com'  # 或其他邮件服务商
+# EMAIL_PORT = 25
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'your_email@163.com'
+# EMAIL_HOST_PASSWORD = 'your_password'
+# DEFAULT_FROM_EMAIL = 'FateMaster <your_email@163.com>'
+
+# 会员系统配置
+MEMBERSHIP_CONFIG = {
+    'ORDER_EXPIRE_HOURS': 24,  # 订单过期时间（小时）
+    'EXPIRY_WARNING_DAYS': 3,   # 到期提醒天数
+    'MAX_DAILY_USAGE': 10,      # 非VIP用户每日使用限制
+    'CLEANUP_DAYS': 30,         # 过期订单清理天数
+}
+
+# 登录和注册配置
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'

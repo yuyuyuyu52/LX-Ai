@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5 fade-in">
+                <h1 class="display-5 fw-bold text-zen-primary">每日运势</h1>
+                <p class="lead text-zen-secondary">洞察今日运势，把握人生机遇，趋吉避凶</p>
+                <div class="zen-divider mx-auto"></div>
+            </div>
+
+            <div class="zen-card slide-in-left">
+                <div class="p-5">
+                    <form id="fortuneForm">
+                        <div class="mb-4">
+                            <label for="birthDate" class="zen-form-label">出生日期</label>
+                            <input type="date" class="form-control" id="birthDate" required>
+                            <div class="form-text">请输入您的阳历出生日期，我们将为您分析今日运势</div>
+                        </div>
+
+                        <!-- AI模式选择 -->
+                        {% if user.is_authenticated and user.userprofile.is_vip %}
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="aiMode">
+                                <label class="form-check-label" for="aiMode">
+                                    <i class="fas fa-robot me-2 text-primary"></i>
+                                    <strong>AI增强分析</strong> 
+                                    <span class="badge bg-primary ms-2">会员专享</span>
+                                </label>
+                                <div class="form-text">使用AI技术提供更详细和个性化的运势分析</div>
+                            </div>
+                        </div>
+                        {% elif user.is_authenticated %}
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <p class="mb-2"><i class="fas fa-robot me-2 text-muted"></i>AI增强分析 <span class="badge bg-secondary">会员专享</span></p>
+                            <p class="text-muted small mb-0">升级会员即可享受AI增强的个性化运势分析</p>
+                        </div>
+                        {% else %}
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <p class="mb-2"><i class="fas fa-robot me-2 text-muted"></i>AI增强分析 <span class="badge bg-secondary">需要登录</span></p>
+                            <p class="text-muted small mb-0">登录并升级会员即可享受AI增强分析</p>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="zen-btn zen-btn-primary">
+                                <i class="fas fa-star me-2"></i>查看今日运势
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 运势结果 -->
+            <div id="fortuneResult" class="mt-5" style="display: none;">
+                <div class="zen-card slide-in-right">
+                    <div class="text-center p-4 border-bottom">
+                        <h3 class="mb-0 text-zen-primary"><i class="fas fa-calendar-day me-2"></i>今日运势</h3>
+                        <p class="text-muted mb-0" id="todayDate"></p>
+                    </div>
+                    <div class="p-5">
+                        <!-- 生肖信息 -->
+                        <div class="text-center mb-4">
+                            <h4 class="text-zen-primary mb-2">您的生肖</h4>
+                            <div class="zodiac-display">
+                                <span id="zodiacName" class="zodiac-text"></span>
+                            </div>
+                        </div>
+
+                        <!-- 运势评分 -->
+                        <div class="row mb-5">
+                            <div class="col-md-6 col-lg-3 mb-3">
+                                <div class="fortune-item text-center">
+                                    <div class="fortune-icon love">
+                                        <i class="fas fa-heart"></i>
+                                    </div>
+                                    <h6>爱情运势</h6>
+                                    <div class="fortune-score" id="loveScore">0</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 mb-3">
+                                <div class="fortune-item text-center">
+                                    <div class="fortune-icon career">
+                                        <i class="fas fa-briefcase"></i>
+                                    </div>
+                                    <h6>事业运势</h6>
+                                    <div class="fortune-score" id="careerScore">0</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 mb-3">
+                                <div class="fortune-item text-center">
+                                    <div class="fortune-icon wealth">
+                                        <i class="fas fa-coins"></i>
+                                    </div>
+                                    <h6>财富运势</h6>
+                                    <div class="fortune-score" id="wealthScore">0</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 mb-3">
+                                <div class="fortune-item text-center">
+                                    <div class="fortune-icon health">
+                                        <i class="fas fa-heartbeat"></i>
+                                    </div>
+                                    <h6>健康运势</h6>
+                                    <div class="fortune-score" id="healthScore">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 幸运元素 -->
+                        <div class="row mb-4">
+                            <div class="col-md-4 text-center">
+                                <div class="lucky-item">
+                                    <i class="fas fa-palette text-primary"></i>
+                                    <h6>幸运颜色</h6>
+                                    <span id="luckyColor" class="lucky-value"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="lucky-item">
+                                    <i class="fas fa-hashtag text-success"></i>
+                                    <h6>幸运数字</h6>
+                                    <span id="luckyNumber" class="lucky-value"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="lucky-item">
+                                    <i class="fas fa-compass text-warning"></i>
+                                    <h6>幸运方位</h6>
+                                    <span id="luckyDirection" class="lucky-value"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 详细分析 -->
+                        <div class="analysis-content">
+                            <h5 class="text-zen-primary mb-3"><i class="fas fa-chart-line me-2"></i>运势分析</h5>
+                            <div id="fortuneAnalysis" class="formatted-text"></div>
+                        </div>
+
+                        <!-- AI增强标识 -->
+                        <div id="aiEnhancedBadge" class="text-center mt-4" style="display: none;">
+                            <span class="badge bg-primary"><i class="fas fa-robot me-1"></i>AI增强分析</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.zodiac-display {
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    display: inline-block;
+    min-width: 120px;
+}
+
+.zodiac-text {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.fortune-item {
+    padding: 20px;
+    border-radius: 10px;
+    background: #f8f9fa;
+    transition: transform 0.3s;
+}
+
+.fortune-item:hover {
+    transform: translateY(-5px);
+}
+
+.fortune-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.fortune-icon.love {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+}
+
+.fortune-icon.career {
+    background: linear-gradient(135deg, #4ecdc4, #44a08d);
+}
+
+.fortune-icon.wealth {
+    background: linear-gradient(135deg, #feca57, #ff9ff3);
+}
+
+.fortune-icon.health {
+    background: linear-gradient(135deg, #48dbfb, #0abde3);
+}
+
+.fortune-score {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.lucky-item {
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+}
+
+.lucky-item i {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.lucky-item h6 {
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.lucky-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.formatted-text {
+    white-space: pre-line;
+    line-height: 1.8;
+}
+</style>
+
+<script>
+document.getElementById('fortuneForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const birthDate = document.getElementById('birthDate').value;
+    const aiMode = document.getElementById('aiMode') ? document.getElementById('aiMode').checked : false;
+    
+    if (!birthDate) {
+        alert('请选择出生日期');
+        return;
+    }
+    
+    // 显示加载状态
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>分析中...';
+    submitBtn.disabled = true;
+    
+    // 调用运势API
+    fetch('/divination/api/daily-fortune/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            birth_date: birthDate,
+            ai_mode: aiMode
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayFortuneResult(data);
+        } else {
+            alert('分析失败：' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('网络错误，请稍后重试');
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+function displayFortuneResult(data) {
+    // 更新日期
+    const today = new Date();
+    document.getElementById('todayDate').textContent = today.toLocaleDateString('zh-CN');
+    
+    // 更新生肖
+    document.getElementById('zodiacName').textContent = data.zodiac;
+    
+    // 更新运势评分
+    document.getElementById('loveScore').textContent = data.fortune_scores.love;
+    document.getElementById('careerScore').textContent = data.fortune_scores.career;
+    document.getElementById('wealthScore').textContent = data.fortune_scores.wealth;
+    document.getElementById('healthScore').textContent = data.fortune_scores.health;
+    
+    // 更新幸运元素
+    document.getElementById('luckyColor').textContent = data.lucky_elements.color;
+    document.getElementById('luckyNumber').textContent = data.lucky_elements.number;
+    document.getElementById('luckyDirection').textContent = data.lucky_elements.direction;
+    
+    // 更新分析内容
+    document.getElementById('fortuneAnalysis').textContent = data.analysis;
+    
+    // 显示AI增强标识
+    if (data.ai_enhanced) {
+        document.getElementById('aiEnhancedBadge').style.display = 'block';
+    }
+    
+    // 显示结果
+    document.getElementById('fortuneResult').style.display = 'block';
+    document.getElementById('fortuneResult').scrollIntoView({ behavior: 'smooth' });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

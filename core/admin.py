@@ -1,15 +1,52 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.db.models import Count
-from .models import UserProfile, DivinationRecord, Notification
+from django.utils import timezone
+from .models import UserProfile, DivinationRecord, Notification, SMSVerification, MembershipPlan, MembershipOrder, PaymentRecord
+
+@admin.register(SMSVerification)
+class SMSVerificationAdmin(admin.ModelAdmin):
+    list_display = ('phone_number', 'code', 'created_at', 'expire_at', 'is_used')
+    list_filter = ('is_used', 'created_at')
+    search_fields = ('phone_number',)
+    readonly_fields = ('created_at', 'expire_at')
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'birth_date', 'birth_place', 'gender', 'divination_count', 'created_at')
-    list_filter = ('gender', 'created_at')
-    search_fields = ('user__username', 'user__email', 'birth_place')
+    list_display = ('user', 'phone_number', 'membership_status', 'membership_expire_date', 'birth_date', 'birth_place', 'gender', 'divination_count', 'created_at')
+    list_filter = ('membership', 'gender', 'phone_verified', 'created_at')
+    search_fields = ('user__username', 'user__email', 'phone_number', 'birth_place')
     date_hierarchy = 'created_at'
-    readonly_fields = ('created_at',)
+    readonly_fields = ('created_at', 'ai_usage_count')
+    
+    fieldsets = (
+        ('用户基本信息', {
+            'fields': ('user', 'phone_number', 'phone_verified', 'created_at')
+        }),
+        ('个人信息', {
+            'fields': ('birth_date', 'birth_place', 'gender'),
+            'classes': ('wide',)
+        }),
+        ('会员信息', {
+            'fields': ('membership', 'membership_expire_date'),
+            'classes': ('wide',)
+        }),
+        ('使用统计', {
+            'fields': ('ai_usage_count',),
+        }),
+    )
+    
+    def membership_status(self, obj):
+        if obj.is_vip():
+            days_left = (obj.membership_expire_date - timezone.now()).days if obj.membership_expire_date else 0
+            color = 'green' if days_left > 7 else 'orange' if days_left > 0 else 'red'
+            return format_html(
+                '<span style="color: {}; font-weight: bold;">VIP会员 ({}天)</span>',
+                color,
+                days_left if days_left > 0 else '已过期'
+            )
+        return format_html('<span style="color: gray;">普通用户</span>')
+    membership_status.short_description = '会员状态'
     
     def divination_count(self, obj):
         count = DivinationRecord.objects.filter(user=obj.user).count()
@@ -108,3 +145,109 @@ class NotificationAdmin(admin.ModelAdmin):
         queryset.update(is_read=False)
         self.message_user(request, f'已将 {queryset.count()} 条通知标记为未读。')
     mark_as_unread.short_description = '标记为未读'
+
+
+@admin.register(MembershipPlan)
+class MembershipPlanAdmin(admin.ModelAdmin):
+    list_display = ('name', 'plan_type', 'price', 'duration_days', 'is_active', 'sort_order', 'created_at')
+    list_filter = ('plan_type', 'is_active', 'created_at')
+    search_fields = ('name', 'description')
+    readonly_fields = ('created_at',)
+    list_editable = ('is_active', 'sort_order')
+    ordering = ('sort_order', 'price')
+    
+    fieldsets = (
+        ('基本信息', {
+            'fields': ('name', 'plan_type', 'price', 'duration_days', 'sort_order')
+        }),
+        ('套餐详情', {
+            'fields': ('description', 'features'),
+            'classes': ('wide',)
+        }),
+        ('状态信息', {
+            'fields': ('is_active', 'created_at'),
+        }),
+    )
+    
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        # 为features字段添加帮助文本
+        if 'features' in form.base_fields:
+            form.base_fields['features'].help_text = '以JSON列表格式输入特权，例如：["AI增强分析", "无限次使用", "专属客服"]'
+        return form
+
+
+@admin.register(MembershipOrder)
+class MembershipOrderAdmin(admin.ModelAdmin):
+    list_display = ('order_id', 'user', 'plan', 'amount', 'status', 'payment_method', 'created_at', 'payment_time')
+    list_filter = ('status', 'payment_method', 'created_at', 'plan__plan_type')
+    search_fields = ('order_id', 'user__username', 'trade_no')
+    date_hierarchy = 'created_at'
+    readonly_fields = ('order_id', 'created_at', 'updated_at', 'expire_time')
+    list_per_page = 25
+    ordering = ('-created_at',)
+    
+    fieldsets = (
+        ('订单信息', {
+            'fields': ('order_id', 'user', 'plan', 'amount', 'created_at', 'updated_at')
+        }),
+        ('支付信息', {
+            'fields': ('status', 'payment_method', 'payment_time', 'expire_time', 'trade_no'),
+            'classes': ('wide',)
+        }),
+        ('备注信息', {
+            'fields': ('remark',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    actions = ['activate_membership', 'cancel_orders']
+    
+    def activate_membership(self, request, queryset):
+        """手动激活会员"""
+        activated_count = 0
+        for order in queryset.filter(status='paid'):
+            if order.activate_membership():
+                activated_count += 1
+        
+        if activated_count > 0:
+            self.message_user(request, f'成功激活 {activated_count} 个会员订单。')
+        else:
+            self.message_user(request, '没有可激活的订单。', level='warning')
+    activate_membership.short_description = '激活会员'
+    
+    def cancel_orders(self, request, queryset):
+        """取消订单"""
+        cancelled_count = queryset.filter(status='pending').update(status='cancelled')
+        if cancelled_count > 0:
+            self.message_user(request, f'成功取消 {cancelled_count} 个待支付订单。')
+        else:
+            self.message_user(request, '没有可取消的订单。', level='warning')
+    cancel_orders.short_description = '取消待支付订单'
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('user', 'plan')
+
+
+@admin.register(PaymentRecord)
+class PaymentRecordAdmin(admin.ModelAdmin):
+    list_display = ('trade_no', 'order', 'amount', 'payment_method', 'created_at')
+    list_filter = ('payment_method', 'created_at')
+    search_fields = ('trade_no', 'order__order_id')
+    date_hierarchy = 'created_at'
+    readonly_fields = ('trade_no', 'created_at')
+    list_per_page = 25
+    ordering = ('-created_at',)
+    
+    fieldsets = (
+        ('支付记录', {
+            'fields': ('trade_no', 'order', 'amount', 'payment_method', 'created_at')
+        }),
+        ('支付数据', {
+            'fields': ('payment_data',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('order', 'order__user')

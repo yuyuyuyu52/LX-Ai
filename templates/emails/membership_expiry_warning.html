@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP会员即将过期提醒</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .email-container {
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .warning-badge {
+            background: #ffc107;
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        .expire-info {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>⏰ VIP会员即将过期</h1>
+            <p>命理大师续费提醒</p>
+        </div>
+        
+        <div class="content">
+            <h2>尊敬的 {{ user.username }}，</h2>
+            
+            <div class="warning-badge">📢 续费提醒</div>
+            
+            <p>您的VIP会员即将过期，请及时续费以继续享受专属服务。</p>
+            
+            <div class="expire-info">
+                <h3>⚠️ 重要提醒</h3>
+                <p><strong>剩余时间：{{ days_left }} 天</strong></p>
+                <p><strong>到期时间：{{ expire_date|date:"Y年m月d日" }}</strong></p>
+                <p>会员过期后，您将无法继续使用VIP专属功能。</p>
+            </div>
+            
+            <h3>🌟 VIP专属特权包括：</h3>
+            <ul>
+                <li>AI增强分析 - 更精准的命理解读</li>
+                <li>无限次使用 - 不受次数限制</li>
+                <li>记录永久保存 - 随时回顾查看</li>
+                <li>专属客服 - 优先技术支持</li>
+                <li>更多功能持续更新中...</li>
+            </ul>
+            
+            <p>💡 <strong>立即续费，享受不间断的VIP服务！</strong></p>
+            
+            <p>如有任何疑问，请联系我们的客服团队。</p>
+        </div>
+        
+        <div class="footer">
+            <p>此邮件由命理大师系统自动发送，请勿回复。</p>
+            <p>© 2024 命理大师 - 专业的命理分析平台</p>
+        </div>
+    </div>
+</body>
+</html>

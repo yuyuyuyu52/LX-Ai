@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>验证码按钮最终测试 - 更新版</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-control {
+            width: 70%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .btn-outline-zen {
+            background: transparent;
+            color: #c8b89e;
+            border: 1px solid #c8b89e;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-left: 10px;
+            min-width: 120px;
+        }
+        .btn-outline-zen:hover:not(:disabled) {
+            background: #c8b89e;
+            color: white;
+        }
+        .btn-outline-zen:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #ccc;
+            border-color: #ccc;
+            color: #666;
+        }
+        .verification-status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+        }
+        .verification-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .verification-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .verification-status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔧 验证码按钮最终测试</h2>
+        
+        <div class="form-group">
+            <label for="phone">手机号码:</label><br>
+            <input type="text" id="phone" class="form-control" placeholder="请输入11位手机号" value="13800138002">
+            <button type="button" id="sendVerificationBtn" class="btn-outline-zen">获取验证码</button>
+        </div>
+        
+        <div id="verificationStatus" class="verification-status">
+            <i id="statusIcon"></i>
+            <span id="statusText"></span>
+        </div>
+        
+        <div id="code_debug" style="margin-top: 10px; color: green; font-weight: bold; display: none;"></div>
+        
+        <div class="debug-info" id="debugInfo">
+等待操作...
+        </div>
+    </div>
+
+    <script>
+        // 调试信息显示
+        function addDebugInfo(message) {
+            const debugElement = document.getElementById('debugInfo');
+            const timestamp = new Date().toLocaleTimeString();
+            debugElement.textContent += `[${timestamp}] ${message}\n`;
+            console.log(message);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            addDebugInfo('页面加载完成');
+            
+            const phoneField = document.getElementById('phone');
+            const sendVerificationBtn = document.getElementById('sendVerificationBtn');
+            const verificationStatus = document.getElementById('verificationStatus');
+            const statusIcon = document.getElementById('statusIcon');
+            const statusText = document.getElementById('statusText');
+            let countdown = 60;
+            
+            addDebugInfo(`验证码按钮: ${sendVerificationBtn ? '找到' : '未找到'}`);
+            addDebugInfo(`手机号字段: ${phoneField ? '找到' : '未找到'}`);
+            
+            // 显示验证状态
+            function showVerificationStatus(type, message, icon = '') {
+                addDebugInfo(`显示状态: ${type} - ${message}`);
+                if (verificationStatus && statusText) {
+                    verificationStatus.className = `verification-status ${type}`;
+                    verificationStatus.style.display = 'block';
+                    statusText.textContent = message;
+                    if (statusIcon && icon) {
+                        statusIcon.className = `${icon} me-1`;
+                    }
+                }
+            }
+            
+            // 隐藏验证状态
+            function hideVerificationStatus() {
+                if (verificationStatus) {
+                    verificationStatus.style.display = 'none';
+                }
+            }
+            
+            // 倒计时功能
+            function startCountdown() {
+                addDebugInfo('开始60秒倒计时');
+                countdown = 60;
+                sendVerificationBtn.disabled = true;
+                
+                const timer = setInterval(() => {
+                    countdown--;
+                    sendVerificationBtn.textContent = `重新发送(${countdown}s)`;
+                    
+                    if (countdown <= 0) {
+                        clearInterval(timer);
+                        sendVerificationBtn.disabled = false;
+                        sendVerificationBtn.textContent = '获取验证码';
+                        addDebugInfo('倒计时结束，按钮重新启用');
+                    }
+                }, 1000);
+            }
+            
+            // 手机号格式验证
+            function validatePhoneNumber(phone) {
+                const isValid = /^1[3-9]\d{9}$/.test(phone);
+                addDebugInfo(`手机号验证: ${phone} -> ${isValid ? '有效' : '无效'}`);
+                return isValid;
+            }
+            
+            // 添加点击事件
+            if (sendVerificationBtn) {
+                addDebugInfo('添加验证码按钮点击事件');
+                
+                sendVerificationBtn.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    addDebugInfo('验证码按钮被点击！');
+                    hideVerificationStatus();
+                    
+                    const phoneNumber = phoneField.value.trim();
+                    addDebugInfo(`获取手机号: ${phoneNumber}`);
+                    
+                    if (!validatePhoneNumber(phoneNumber)) {
+                        showVerificationStatus('error', '请输入有效的11位手机号码');
+                        return;
+                    }
+                    
+                    addDebugInfo('手机号验证通过，准备发送请求');
+                    showVerificationStatus('info', '正在发送验证码...');
+                    
+                    // 禁用按钮
+                    sendVerificationBtn.disabled = true;
+                    sendVerificationBtn.textContent = '发送中...';
+                    
+                    // 发送验证码请求
+                    const formData = new FormData();
+                    formData.append('phone', phoneNumber);
+                    
+                    addDebugInfo('发送POST请求到 /get-code/');
+                    
+                    fetch('/get-code/', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        addDebugInfo(`收到响应: 状态码 ${response.status}`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        addDebugInfo(`响应数据: ${JSON.stringify(data)}`);
+                        
+                        if (data.success) {
+                            showVerificationStatus('success', '验证码已发送，请查收短信');
+                            if (data.code) {
+                                const codeDebug = document.getElementById('code_debug');
+                                if (codeDebug) {
+                                    codeDebug.textContent = `测试验证码: ${data.code}`;
+                                    codeDebug.style.display = 'block';
+                                }
+                            }
+                            startCountdown();
+                        } else {
+                            showVerificationStatus('error', data.message || '验证码发送失败，请稍后再试');
+                            sendVerificationBtn.disabled = false;
+                            sendVerificationBtn.textContent = '获取验证码';
+                        }
+                    })
+                    .catch(error => {
+                        addDebugInfo(`请求错误: ${error.toString()}`);
+                        showVerificationStatus('error', '网络错误，请检查网络连接后重试');
+                        sendVerificationBtn.disabled = false;
+                        sendVerificationBtn.textContent = '获取验证码';
+                    });
+                });
+                
+                addDebugInfo('验证码按钮点击事件添加完成');
+            } else {
+                addDebugInfo('错误：无法找到验证码按钮元素！');
+            }
+        });
+    </script>
+</body>
+</html>

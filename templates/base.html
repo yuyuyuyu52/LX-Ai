@@ -33,10 +33,18 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'divination:bazi' %}">八字分析</a></li>
+                            <li><a class="dropdown-item" href="{% url 'divination:bazi_marriage' %}">八字合婚</a></li>
                             <li><a class="dropdown-item" href="{% url 'divination:meihua' %}">梅花易数</a></li>
                             <li><a class="dropdown-item" href="{% url 'divination:tarot' %}">塔罗占卜</a></li>
                             <li><a class="dropdown-item" href="{% url 'divination:yijing' %}">易经卜卦</a></li>
+                            <li><a class="dropdown-item" href="{% url 'divination:daily_fortune' %}">每日运势</a></li>
                         </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:membership_plans' %}">
+                            <i class="fas fa-crown me-1 text-warning"></i>会员套餐
+                        </a>
+                    </li>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'chinese_calendar:calendar' %}">黄历查询</a>
@@ -67,10 +75,19 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-user me-1"></i>{{ user.username }}
+                                {% if user.userprofile.is_vip %}
+                                    <span class="badge bg-warning text-dark ms-1">VIP</span>
+                                {% endif %}
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{% url 'core:profile' %}">
                                     <i class="fas fa-user-circle me-2"></i>个人档案
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:membership_status' %}">
+                                    <i class="fas fa-crown me-2"></i>会员中心
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:membership_orders' %}">
+                                    <i class="fas fa-shopping-bag me-2"></i>我的订单
                                 </a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{% url 'core:logout' %}">

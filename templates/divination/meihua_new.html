@@ -164,8 +164,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     const aiModeSwitch = document.getElementById('aiModeSwitch');
     
+    // 设置初始状态
     {% if user.is_authenticated %}
-        {% if user.userprofile.is_vip %}
+        {% if user.userprofile.can_use_ai %}
             aiModeSwitch.disabled = false;
             aiModeSwitch.parentElement.querySelector('small').textContent = "(会员专享功能)";
         {% else %}
@@ -177,15 +178,15 @@ document.addEventListener('DOMContentLoaded', function() {
         aiModeSwitch.parentElement.querySelector('small').textContent = "(请先登录)";
     {% endif %}
     
+    // 监听开关状态变化
     aiModeSwitch.addEventListener('change', function() {
         if(this.checked) {
-            {% if not user.is_authenticated %}
-                alert('AI增强模式需要登录，请先登录');
+            // 前端二次验证
+            const canUse = {% if user.is_authenticated and user.userprofile.can_use_ai %}true{% else %}false{% endif %};
+            if(!canUse) {
+                alert('AI增强模式仅限会员使用，请登录或升级会员');
                 this.checked = false;
-            {% elif not user.userprofile.can_use_ai %}
-                alert('AI增强模式仅限会员使用，请升级会员');
-                this.checked = false;
-            {% endif %}
+            }
         }
     });
 });
@@ -207,7 +208,8 @@ document.getElementById('meihuaForm').addEventListener('submit', function(e) {
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>占卜中...';
     submitBtn.disabled = true;
-      // 检查是否启用AI模式
+      
+    // 检查是否启用AI模式
     const aiMode = document.getElementById('aiModeSwitch').checked;
     
     // 调用后端API进行梅花易数分析

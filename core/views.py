@@ -3,15 +3,19 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import UserProfile, DivinationRecord
+from .models import UserProfile, DivinationRecord, SMSVerification
 from .forms import CustomUserCreationForm, UserProfileForm
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Q, Count
 from django.core.paginator import Paginator
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 import csv
 import json
 from datetime import datetime, timedelta
+from .sms import generate_verification_code, send_sms_verification
+from .sms_views import send_verification_code, check_phone_exists
 
 def home(request):
     """首页视图"""
@@ -318,3 +322,11 @@ def mark_all_notifications_read(request):
         return JsonResponse({'success': True})
     
     return JsonResponse({'success': False, 'error': '请求方法错误'})
+
+def test_verify_page(request):
+    """验证码功能测试页面"""
+    return render(request, 'core/test_verify.html', {'page_title': '验证码功能测试'})
+
+def verification_test_page(request):
+    """完整的验证码功能测试页面"""
+    return render(request, 'core/verification_test.html', {'page_title': '验证码功能测试'})

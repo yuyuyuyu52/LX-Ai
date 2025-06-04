@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="text-center mb-5 fade-in">
+                <h1 class="display-5 fw-bold text-zen-primary">八字合婚</h1>
+                <p class="lead text-zen-secondary">天作之合，缘定三生，测算两人姻缘和合之道</p>
+                <div class="zen-divider mx-auto"></div>
+            </div>
+
+            <div class="zen-card slide-in-left">
+                <div class="p-5">
+                    <form id="marriageForm">
+                        <div class="row">
+                            <!-- 男方信息 -->
+                            <div class="col-md-6">
+                                <h4 class="text-zen-primary mb-4"><i class="fas fa-mars me-2"></i>男方信息</h4>
+                                <div class="mb-3">
+                                    <label for="maleName" class="zen-form-label">姓名</label>
+                                    <input type="text" class="form-control" id="maleName" placeholder="请输入男方姓名" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="maleBirthTime" class="zen-form-label">出生时间</label>
+                                    <input type="datetime-local" class="form-control" id="maleBirthTime" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="maleBirthPlace" class="zen-form-label">出生地点</label>
+                                    <input type="text" class="form-control" id="maleBirthPlace" placeholder="省市区县（可选）">
+                                </div>
+                            </div>
+                            
+                            <!-- 女方信息 -->
+                            <div class="col-md-6">
+                                <h4 class="text-zen-primary mb-4"><i class="fas fa-venus me-2"></i>女方信息</h4>
+                                <div class="mb-3">
+                                    <label for="femaleName" class="zen-form-label">姓名</label>
+                                    <input type="text" class="form-control" id="femaleName" placeholder="请输入女方姓名" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="femaleBirthTime" class="zen-form-label">出生时间</label>
+                                    <input type="datetime-local" class="form-control" id="femaleBirthTime" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="femaleBirthPlace" class="zen-form-label">出生地点</label>
+                                    <input type="text" class="form-control" id="femaleBirthPlace" placeholder="省市区县（可选）">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI模式选择 -->
+                        {% if user.is_authenticated and user.userprofile.is_vip %}
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="aiMode">
+                                <label class="form-check-label" for="aiMode">
+                                    <i class="fas fa-robot me-2 text-primary"></i>
+                                    <strong>AI增强分析</strong> 
+                                    <span class="badge bg-primary ms-2">会员专享</span>
+                                </label>
+                                <div class="form-text">使用AI技术提供更详细和个性化的合婚分析</div>
+                            </div>
+                        </div>
+                        {% elif user.is_authenticated %}
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <p class="mb-2"><i class="fas fa-robot me-2 text-muted"></i>AI增强分析 <span class="badge bg-secondary">会员专享</span></p>
+                            <p class="text-muted small mb-0">升级会员即可享受AI增强的个性化合婚分析</p>
+                        </div>
+                        {% else %}
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <p class="mb-2"><i class="fas fa-robot me-2 text-muted"></i>AI增强分析 <span class="badge bg-secondary">需要登录</span></p>
+                            <p class="text-muted small mb-0">登录并升级会员即可享受AI增强分析</p>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="zen-btn zen-btn-primary">
+                                <i class="fas fa-heart me-2"></i>开始合婚分析
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 合婚结果 -->
+            <div id="marriageResult" class="mt-5" style="display: none;">
+                <div class="zen-card slide-in-right">
+                    <div class="text-center p-4 border-bottom">
+                        <h3 class="mb-0 text-zen-primary"><i class="fas fa-heart me-2"></i>八字合婚结果</h3>
+                    </div>
+                    <div class="p-5">
+                        <!-- 匹配度展示 -->
+                        <div class="text-center mb-5">
+                            <div class="marriage-score-circle mx-auto mb-3">
+                                <div class="score-text">
+                                    <span id="compatibilityScore" class="score-number">0</span>
+                                    <span class="score-label">分</span>
+                                </div>
+                            </div>
+                            <h4 class="text-zen-primary">缘分匹配度</h4>
+                            <p id="compatibilityLevel" class="text-muted"></p>
+                        </div>
+
+                        <!-- 双方基本信息 -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded">
+                                    <h5 class="text-zen-primary"><i class="fas fa-mars me-2"></i><span id="maleNameDisplay"></span></h5>
+                                    <p class="mb-1"><strong>生肖：</strong><span id="maleZodiac"></span></p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded">
+                                    <h5 class="text-zen-primary"><i class="fas fa-venus me-2"></i><span id="femaleNameDisplay"></span></h5>
+                                    <p class="mb-1"><strong>生肖：</strong><span id="femaleZodiac"></span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 详细分析 -->
+                        <div class="analysis-content">
+                            <h5 class="text-zen-primary mb-3"><i class="fas fa-chart-line me-2"></i>详细分析</h5>
+                            <div id="marriageAnalysis" class="formatted-text"></div>
+                        </div>
+
+                        <!-- AI增强标识 -->
+                        <div id="aiEnhancedBadge" class="text-center mt-4" style="display: none;">
+                            <span class="badge bg-primary"><i class="fas fa-robot me-1"></i>AI增强分析</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.marriage-score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(#28a745 0% 0%, #f8f9fa 0% 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.marriage-score-circle::before {
+    content: '';
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: white;
+    position: absolute;
+}
+
+.score-text {
+    z-index: 1;
+    text-align: center;
+}
+
+.score-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.score-label {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+.formatted-text {
+    white-space: pre-line;
+    line-height: 1.8;
+}
+</style>
+
+<script>
+document.getElementById('marriageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const maleName = document.getElementById('maleName').value;
+    const maleBirthTime = document.getElementById('maleBirthTime').value;
+    const maleBirthPlace = document.getElementById('maleBirthPlace').value;
+    const femaleName = document.getElementById('femaleName').value;
+    const femaleBirthTime = document.getElementById('femaleBirthTime').value;
+    const femaleBirthPlace = document.getElementById('femaleBirthPlace').value;
+    const aiMode = document.getElementById('aiMode') ? document.getElementById('aiMode').checked : false;
+    
+    if (!maleName || !maleBirthTime || !femaleName || !femaleBirthTime) {
+        alert('请填写完整的基本信息');
+        return;
+    }
+    
+    // 显示加载状态
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>分析中...';
+    submitBtn.disabled = true;
+    
+    // 调用合婚API
+    fetch('/divination/api/bazi-marriage/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            male_info: {
+                name: maleName,
+                birth_time: maleBirthTime,
+                birth_place: maleBirthPlace
+            },
+            female_info: {
+                name: femaleName,
+                birth_time: femaleBirthTime,
+                birth_place: femaleBirthPlace
+            },
+            ai_mode: aiMode
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayMarriageResult(data);
+        } else {
+            alert('分析失败：' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('网络错误，请稍后重试');
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+function displayMarriageResult(data) {
+    // 更新匹配度
+    const score = data.compatibility_score;
+    document.getElementById('compatibilityScore').textContent = score;
+    
+    // 更新匹配度等级
+    let level = '';
+    if (score >= 90) level = '天作之合';
+    else if (score >= 80) level = '缘分深厚';
+    else if (score >= 70) level = '较为合适';
+    else if (score >= 60) level = '尚需磨合';
+    else level = '需要谨慎';
+    
+    document.getElementById('compatibilityLevel').textContent = level;
+    
+    // 更新圆形进度条
+    const circle = document.querySelector('.marriage-score-circle');
+    const percentage = score;
+    let color = '#dc3545'; // 红色
+    if (score >= 80) color = '#28a745'; // 绿色
+    else if (score >= 60) color = '#ffc107'; // 黄色
+    
+    circle.style.background = `conic-gradient(${color} 0% ${percentage}%, #f8f9fa ${percentage}% 100%)`;
+    
+    // 更新基本信息
+    document.getElementById('maleNameDisplay').textContent = data.detail_info.male_shengxiao.split('(')[0];
+    document.getElementById('femaleNameDisplay').textContent = data.detail_info.female_shengxiao.split('(')[0];
+    document.getElementById('maleZodiac').textContent = data.detail_info.male_shengxiao;
+    document.getElementById('femaleZodiac').textContent = data.detail_info.female_shengxiao;
+    
+    // 更新分析内容
+    document.getElementById('marriageAnalysis').textContent = data.analysis;
+    
+    // 显示AI增强标识
+    if (data.ai_enhanced) {
+        document.getElementById('aiEnhancedBadge').style.display = 'block';
+    }
+    
+    // 显示结果
+    document.getElementById('marriageResult').style.display = 'block';
+    document.getElementById('marriageResult').scrollIntoView({ behavior: 'smooth' });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

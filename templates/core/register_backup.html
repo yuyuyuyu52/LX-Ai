@@ -1,0 +1,783 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}静心注册{% endblock %}
+
+{% block extra_css %}
+<style>
+    .zen-auth-container {
+        max-width: 450px;
+        margin: 50px auto;
+        padding: 40px;
+        border-radius: 20px;
+        background: var(--zen-bg-primary);
+        border: 1px solid var(--zen-decoration);
+        box-shadow: 0 20px 60px rgba(200, 184, 158, 0.2);
+    }
+    
+    .zen-auth-form {
+        padding: 0;
+    }
+    
+    .zen-auth-title {
+        color: var(--zen-text-primary);
+        text-align: center;
+        margin-bottom: 2rem;
+        font-family: 'Noto Serif SC', serif;
+    }
+    
+    .zen-form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .zen-form-control {
+        background: var(--zen-bg-light);
+        border: 1px solid var(--zen-decoration);
+        color: var(--zen-text-primary);
+        border-radius: 12px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .zen-form-control::placeholder {
+        color: var(--zen-text-secondary);
+    }
+    
+    .zen-form-control:focus {
+        background: var(--zen-bg-primary);
+        border-color: var(--zen-accent);
+        color: var(--zen-text-primary);
+        box-shadow: 0 0 0 0.2rem rgba(200, 184, 158, 0.25);
+        outline: none;
+    }
+    
+    .zen-btn-auth {
+        background: linear-gradient(135deg, var(--zen-accent), var(--zen-decoration));
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-weight: 600;
+        color: var(--zen-text-primary);
+        transition: all 0.3s ease;
+        width: 100%;
+    }    
+    .zen-btn-auth:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(200, 184, 158, 0.4);
+    }
+    
+    .zen-auth-link {
+        color: var(--zen-text-secondary);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    
+    .zen-auth-link:hover {
+        color: var(--zen-accent);
+    }
+    
+    .zen-divider {
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--zen-accent), var(--zen-decoration));
+        margin: 1.5rem auto;
+        border-radius: 2px;
+    }
+    
+    .zen-errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 5px 0;
+    }
+    
+    .zen-errorlist li {
+        background: rgba(220, 53, 69, 0.1);
+        color: var(--zen-text-primary);
+        padding: 8px 12px;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        font-size: 0.875rem;
+        border-left: 3px solid #dc3545;
+    }    
+    .zen-helptext {
+        font-size: 0.75rem;
+        color: var(--zen-text-secondary);
+        margin-top: 5px;
+    }
+    
+    /* 验证码按钮样式 - 增强版 */
+    .btn-outline-zen {
+        background: transparent !important;
+        color: var(--zen-accent) !important;
+        border: 1px solid var(--zen-accent) !important;
+        border-radius: 8px !important;
+        padding: 10px 16px !important;
+        font-weight: 500 !important;
+        transition: all 0.3s ease !important;
+        white-space: nowrap !important;
+        min-height: 44px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        pointer-events: auto !important;
+        position: relative !important;
+        z-index: 10 !important;
+    }
+    
+    .btn-outline-zen:hover:not(:disabled) {
+        background: var(--zen-accent) !important;
+        color: var(--zen-bg-primary) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(200, 184, 158, 0.3) !important;
+    }
+    
+    .btn-outline-zen:focus {
+        outline: 2px solid var(--zen-accent) !important;
+        outline-offset: 2px !important;
+    }
+    
+    .btn-outline-zen:disabled {
+        opacity: 0.6 !important;
+        cursor: not-allowed !important;
+        background: var(--zen-decoration) !important;
+        border-color: var(--zen-decoration) !important;
+        color: var(--zen-text-secondary) !important;
+        pointer-events: none !important;
+    }
+    
+    /* 确保按钮可点击 */
+    .btn-outline-zen:not(:disabled) {
+        pointer-events: auto !important;
+        cursor: pointer !important;
+    }
+    
+    .verification-status {
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 6px;
+        display: none;
+    }
+    
+    .verification-status.success {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.2);
+    }
+    
+    .verification-status.error {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.2);
+    }
+    
+    .verification-status.info {
+        background: rgba(200, 184, 158, 0.1);
+        color: var(--zen-accent);
+        border: 1px solid rgba(200, 184, 158, 0.2);
+    }
+    
+    .btn-outline-zen:hover {
+        background: var(--zen-accent);
+        color: var(--zen-white);
+        transform: translateY(-1px);
+    }
+    
+    .btn-outline-zen:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+    
+    /* 确保按钮可点击 */
+    .btn-outline-zen:not(:disabled) {
+        pointer-events: auto;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="zen-auth-container fade-in">
+        <h2 class="zen-auth-title">
+            <i class="fas fa-seedling me-2"></i>
+            静心注册
+        </h2>
+        <div class="zen-divider"></div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+          <form method="post" class="zen-auth-form">
+            {% csrf_token %}
+            
+            <div class="zen-form-group">
+                <label for="{{ form.username.id_for_label }}" class="zen-form-label text-zen-secondary">用户名</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <ul class="zen-errorlist">
+                        {% for error in form.username.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {% if form.username.help_text %}
+                    <div class="zen-helptext">{{ form.username.help_text }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="zen-form-group">
+                <label for="{{ form.phone_number.id_for_label }}" class="zen-form-label text-zen-secondary">手机号码</label>
+                <div class="d-flex">
+                    {{ form.phone_number }}
+                    <button type="button" id="sendVerificationBtn" class="btn btn-outline-zen ms-2" style="min-width: 120px;" tabindex="0">
+                        获取验证码
+                    </button>
+                </div>
+                
+                <!-- 验证码状态提示 -->
+                <div id="verificationStatus" class="verification-status">
+                    <i id="statusIcon" class="me-1"></i>
+                    <span id="statusText"></span>
+                </div>
+                
+                <!-- 调试按钮 -->
+                <div style="margin-top: 10px;">
+                    <button type="button" id="debugBtn" class="btn btn-sm btn-secondary" onclick="debugButtonClick()">
+                        调试测试
+                    </button>
+                    <span id="debugInfo" style="margin-left: 10px; font-size: 12px; color: #666;"></span>
+                </div>
+                
+                <span id="code_debug" class="text-success ms-2" style="display: none;"></span>
+                {% if form.phone_number.errors %}
+                    <ul class="zen-errorlist">
+                        {% for error in form.phone_number.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <div class="zen-form-group">
+                <label for="{{ form.verification_code.id_for_label }}" class="zen-form-label text-zen-secondary">验证码</label>
+                <div class="position-relative">
+                    {{ form.verification_code }}
+                    <div id="codeInputStatus" class="position-absolute end-0 top-50 translate-middle-y me-3" style="display: none;">
+                        <i class="fas fa-check-circle text-success"></i>
+                    </div>
+                </div>
+                <small class="form-text text-zen-secondary">请输入手机收到的6位验证码</small>
+                {% if form.verification_code.errors %}
+                    <ul class="zen-errorlist">
+                        {% for error in form.verification_code.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <div class="zen-form-group">
+                <label for="{{ form.password1.id_for_label }}" class="zen-form-label text-zen-secondary">密码</label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                    <ul class="zen-errorlist">
+                        {% for error in form.password1.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {% if form.password1.help_text %}
+                    <div class="zen-helptext">{{ form.password1.help_text }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="zen-form-group">
+                <label for="{{ form.password2.id_for_label }}" class="zen-form-label text-zen-secondary">确认密码</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                    <ul class="zen-errorlist">
+                        {% for error in form.password2.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {% if form.password2.help_text %}
+                    <div class="zen-helptext">{{ form.password2.help_text }}</div>
+                {% endif %}
+            </div>
+            
+            <!-- 可选的个人信息 -->
+            <div class="zen-form-group">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="showOptional">
+                    <label class="form-check-label text-zen-secondary" for="showOptional">
+                        填写个人信息（用于更精准的命理分析）
+                    </label>
+                </div>
+            </div>
+            
+            <div id="optionalFields" style="display: none;">
+                <div class="zen-form-group">
+                    <label for="{{ form.birth_date.id_for_label }}" class="zen-form-label text-zen-secondary">出生时间</label>
+                    {{ form.birth_date }}
+                    {% if form.birth_date.errors %}                        <ul class="zen-errorlist">
+                            {% for error in form.birth_date.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="zen-form-group">
+                    <label for="{{ form.birth_place.id_for_label }}" class="zen-form-label text-zen-secondary">出生地点</label>
+                    {{ form.birth_place }}
+                    {% if form.birth_place.errors %}
+                        <ul class="zen-errorlist">
+                            {% for error in form.birth_place.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="zen-form-group">
+                    <label for="{{ form.gender.id_for_label }}" class="zen-form-label text-zen-secondary">性别</label>
+                    {{ form.gender }}
+                    {% if form.gender.errors %}
+                        <ul class="zen-errorlist">
+                            {% for error in form.gender.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="d-grid mb-3">
+                <button type="submit" class="zen-btn-auth">
+                    <i class="fas fa-seedling me-2"></i>
+                    静心注册
+                </button>
+            </div>
+            
+            <div class="text-center">
+                <p class="mb-0 text-zen-secondary">已有账户？
+                    <a href="{% url 'core:login' %}" class="zen-auth-link">
+                        <i class="fas fa-leaf me-1"></i>
+                        静心登录
+                    </a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('注册页面JavaScript已加载');
+    
+    // 可选字段显示/隐藏
+    const showOptional = document.getElementById('showOptional');
+    const optionalFields = document.getElementById('optionalFields');
+    
+    // 验证码发送相关
+    const phoneField = document.getElementById('id_phone_number');
+    const sendVerificationBtn = document.getElementById('sendVerificationBtn');
+    const verificationStatus = document.getElementById('verificationStatus');
+    const statusIcon = document.getElementById('statusIcon');
+    const statusText = document.getElementById('statusText');
+    const verificationCodeField = document.getElementById('id_verification_code');
+    const codeInputStatus = document.getElementById('codeInputStatus');
+    let countdown = 60;
+    
+    // 检查关键元素是否存在
+    console.log('验证码按钮元素:', sendVerificationBtn);
+    console.log('手机号字段元素:', phoneField);
+    console.log('验证状态元素:', verificationStatus);
+    
+    if (!sendVerificationBtn) {
+        console.error('错误：找不到验证码按钮！');
+        return;
+    }
+    
+    if (!phoneField) {
+        console.error('错误：找不到手机号字段！');
+        return;
+    }
+    
+    // 显示验证状态
+    function showVerificationStatus(type, message, icon = '') {
+        if (verificationStatus && statusText) {
+            verificationStatus.className = `verification-status ${type}`;
+            verificationStatus.style.display = 'block';
+            statusText.textContent = message;
+            if (statusIcon && icon) {
+                statusIcon.className = `${icon} me-1`;
+            }
+        }
+    }
+    
+    // 隐藏验证状态
+    function hideVerificationStatus() {
+        if (verificationStatus) {
+            verificationStatus.style.display = 'none';
+        }
+    }
+    
+    // 显示可选字段功能
+    showOptional.addEventListener('change', function() {
+        if (this.checked) {
+            optionalFields.style.display = 'block';
+            optionalFields.style.opacity = '0';
+            setTimeout(() => {
+                optionalFields.style.transition = 'opacity 0.3s ease';
+                optionalFields.style.opacity = '1';
+            }, 10);
+        } else {
+            optionalFields.style.transition = 'opacity 0.3s ease';
+            optionalFields.style.opacity = '0';
+            setTimeout(() => {
+                optionalFields.style.display = 'none';
+            }, 300);
+        }
+    });
+    
+    // 设置表单字段属性
+    const formFields = {
+        'id_username': {
+            placeholder: '请输入用户名（4-20个字符）',
+            class: 'form-control zen-form-control'
+        },
+        'id_phone_number': {
+            placeholder: '请输入11位手机号码',
+            class: 'form-control zen-form-control'
+        },
+        'id_verification_code': {
+            placeholder: '请输入6位验证码',
+            class: 'form-control zen-form-control'
+        },
+        'id_password1': {
+            placeholder: '请输入密码（至少8个字符）',
+            class: 'form-control zen-form-control'
+        },
+        'id_password2': {
+            placeholder: '请再次输入密码',
+            class: 'form-control zen-form-control'
+        },
+        'id_birth_place': {
+            placeholder: '如：北京市朝阳区',
+            class: 'form-control zen-form-control'
+        }
+    };
+    
+    Object.keys(formFields).forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            Object.keys(formFields[fieldId]).forEach(attr => {
+                field.setAttribute(attr, formFields[fieldId][attr]);
+            });
+        }
+    });
+    
+    // 添加输入动画效果
+    const inputs = document.querySelectorAll('.form-control');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentNode.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            if (!this.value) {
+                this.parentNode.classList.remove('focused');
+            }
+        });
+    });
+    
+    // 表单动画
+    const form = document.querySelector('.auth-form');
+    form.style.opacity = '0';
+    form.style.transform = 'translateY(20px)';
+    
+    setTimeout(() => {
+        form.style.transition = 'all 0.6s ease';
+        form.style.opacity = '1';
+        form.style.transform = 'translateY(0)';
+    }, 200);
+    
+    // 验证码发送功能
+    function startCountdown() {
+        countdown = 60;
+        sendVerificationBtn.disabled = true;
+        
+        const timer = setInterval(() => {
+            countdown--;
+            sendVerificationBtn.textContent = `重新发送(${countdown}s)`;
+            
+            if (countdown <= 0) {
+                clearInterval(timer);
+                sendVerificationBtn.disabled = false;
+                sendVerificationBtn.textContent = '获取验证码';
+            }
+        }, 1000);
+    }
+    
+    // 手机号格式验证
+    function validatePhoneNumber(phone) {
+        return /^1[3-9]\d{9}$/.test(phone);
+    }
+    
+    // 发送验证码点击事件
+    if (sendVerificationBtn) {
+        console.log('找到验证码按钮，准备添加点击事件');
+        console.log('按钮样式 pointer-events:', window.getComputedStyle(sendVerificationBtn).pointerEvents);
+        console.log('按钮是否禁用:', sendVerificationBtn.disabled);
+        console.log('按钮位置:', sendVerificationBtn.getBoundingClientRect());
+        
+        // 添加多种事件监听器确保能够捕获点击
+        ['click', 'mousedown', 'touchstart'].forEach(eventType => {
+            sendVerificationBtn.addEventListener(eventType, function(event) {
+                if (eventType === 'click') {
+                    event.preventDefault(); // 防止表单提交
+                    console.log('验证码按钮被点击 (click事件)');
+                    handleVerificationCodeSend(event);
+                } else {
+                    console.log(`验证码按钮 ${eventType} 事件被触发`);
+                }
+            });
+        });
+        
+        // 函数处理验证码发送逻辑
+        function handleVerificationCodeSend(event) {
+            console.log('开始处理验证码发送');
+            hideVerificationStatus();
+            
+            const phoneNumber = phoneField.value.trim();
+            console.log('获取到的手机号:', phoneNumber);
+            
+            if (!validatePhoneNumber(phoneNumber)) {
+                showVerificationStatus('error', '请输入有效的11位手机号码', 'fas fa-exclamation-circle');
+                return;
+            }
+            
+            console.log('手机号验证通过，准备发送验证码请求');
+            showVerificationStatus('info', '正在发送验证码...', 'fas fa-spinner fa-spin');
+            
+            // 禁用按钮并开始倒计时
+            sendVerificationBtn.disabled = true;
+            sendVerificationBtn.textContent = '发送中...';
+            
+            // 获取CSRF令牌
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            console.log('CSRF令牌:', csrfToken ? '已获取' : '未找到');
+            
+            // 使用fetch发送请求
+            fetch('/get-code/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: 'phone=' + encodeURIComponent(phoneNumber)
+            })
+            .then(response => {
+                console.log('收到响应，状态码:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('验证码响应数据:', data);
+                
+                if (data.success) {
+                    showVerificationStatus('success', '验证码已发送，请查收短信', 'fas fa-check-circle');
+                    // 在调试模式下显示验证码
+                    if (data.code) {
+                        const codeDebug = document.getElementById('code_debug');
+                        if (codeDebug) {
+                            codeDebug.textContent = `测试验证码: ${data.code}`;
+                            codeDebug.style.display = 'inline-block';
+                        }
+                    }
+                    startCountdown();
+                } else {
+                    showVerificationStatus('error', data.message || '验证码发送失败，请稍后再试', 'fas fa-exclamation-circle');
+                    sendVerificationBtn.disabled = false;
+                    sendVerificationBtn.textContent = '获取验证码';
+                }
+            })
+            .catch(error => {
+                console.error('验证码发送错误:', error);
+                showVerificationStatus('error', '网络错误，请检查网络连接后重试', 'fas fa-exclamation-triangle');
+                sendVerificationBtn.disabled = false;
+                sendVerificationBtn.textContent = '获取验证码';
+            });
+        }
+        
+        console.log('验证码按钮点击事件已添加');
+    } else {
+        console.error('错误：验证码按钮未找到，无法添加点击事件！');
+    }
+    
+    // 调试函数
+    window.debugButtonClick = function() {
+        const debugInfo = document.getElementById('debugInfo');
+        const timestamp = new Date().toLocaleTimeString();
+        debugInfo.textContent = `调试按钮点击成功 - ${timestamp}`;
+        console.log('调试按钮点击成功');
+        
+        // 检查验证码按钮状态
+        if (sendVerificationBtn) {
+            console.log('验证码按钮状态检查:');
+            console.log('- 是否存在:', !!sendVerificationBtn);
+            console.log('- 是否禁用:', sendVerificationBtn.disabled);
+            console.log('- pointer-events样式:', window.getComputedStyle(sendVerificationBtn).pointerEvents);
+            console.log('- 按钮位置:', sendVerificationBtn.getBoundingClientRect());
+            console.log('- 父元素:', sendVerificationBtn.parentElement);
+            
+            // 尝试手动触发验证码按钮点击
+            try {
+                sendVerificationBtn.click();
+                console.log('手动触发验证码按钮点击成功');
+            } catch (error) {
+                console.error('手动触发验证码按钮点击失败:', error);
+            }
+        }
+    };
+    
+    // 验证码输入验证
+    if (verificationCodeField) {
+        verificationCodeField.addEventListener('input', function() {
+            const code = this.value.trim();
+            if (code.length === 6 && /^\d{6}$/.test(code)) {
+                if (codeInputStatus) {
+                    codeInputStatus.style.display = 'block';
+                }
+            } else {
+                if (codeInputStatus) {
+                    codeInputStatus.style.display = 'none';
+                }
+            }
+        });
+    }
+    
+    // 手机号输入时检查是否已注册
+    if (phoneField) {
+        phoneField.addEventListener('blur', function() {
+            const phoneNumber = this.value.trim();
+            console.log('手机号失焦检查:', phoneNumber);
+            
+            if (validatePhoneNumber(phoneNumber)) {
+                // 清除之前的状态
+                hideVerificationStatus();
+                
+                fetch(`/api/check-phone/?phone_number=${phoneNumber}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            showVerificationStatus('error', '该手机号已被注册，请直接登录或使用其他手机号', 'fas fa-user-check');
+                            if (sendVerificationBtn) {
+                                sendVerificationBtn.disabled = true;
+                            }
+                        } else {
+                            if (sendVerificationBtn) {
+                                sendVerificationBtn.disabled = false;
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.warn('检查手机号失败:', error);
+                        // 检查失败时不阻止用户操作
+                        if (sendVerificationBtn) {
+                            sendVerificationBtn.disabled = false;
+                        }
+                    });
+            } else if (phoneNumber.length > 0) {
+                showVerificationStatus('error', '请输入有效的11位手机号码', 'fas fa-exclamation-circle');
+                if (sendVerificationBtn) {
+                    sendVerificationBtn.disabled = true;
+                }
+            } else {
+            hideVerificationStatus();
+            sendVerificationBtn.disabled = false;
+        }
+    });
+    
+    // 手机号输入时实时验证
+    phoneField.addEventListener('input', function() {
+        const phoneNumber = this.value.trim();
+        if (phoneNumber.length === 0) {
+            hideVerificationStatus();
+            sendVerificationBtn.disabled = false;
+        }
+    });
+    
+    // 表单提交验证
+    const registerForm = document.querySelector('.zen-auth-form');
+    if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+            const phoneNumber = phoneField.value.trim();
+            const verificationCode = verificationCodeField.value.trim();
+            const username = document.getElementById('id_username').value.trim();
+            const password1 = document.getElementById('id_password1').value;
+            const password2 = document.getElementById('id_password2').value;
+            
+            // 验证手机号
+            if (!validatePhoneNumber(phoneNumber)) {
+                e.preventDefault();
+                showVerificationStatus('error', '请输入有效的11位手机号码', 'fas fa-exclamation-circle');
+                phoneField.focus();
+                return false;
+            }
+            
+            // 验证验证码
+            if (!verificationCode || !/^\d{6}$/.test(verificationCode)) {
+                e.preventDefault();
+                showVerificationStatus('error', '请输入6位数字验证码', 'fas fa-exclamation-circle');
+                verificationCodeField.focus();
+                return false;
+            }
+            
+            // 验证用户名
+            if (!username || username.length < 4) {
+                e.preventDefault();
+                alert('用户名至少需要4个字符');
+                document.getElementById('id_username').focus();
+                return false;
+            }
+            
+            // 验证密码
+            if (!password1 || password1.length < 8) {
+                e.preventDefault();
+                alert('密码至少需要8个字符');
+                document.getElementById('id_password1').focus();
+                return false;
+            }
+            
+            if (password1 !== password2) {
+                e.preventDefault();
+                alert('两次输入的密码不一致');
+                document.getElementById('id_password2').focus();
+                return false;
+            }
+            
+            // 显示提交状态
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>注册中...';
+            }
+            
+            console.log('表单验证通过，开始提交注册');
+        });
+    }
+});
+</script>
+{% endblock %}
