@@ -59,8 +59,11 @@ def check_usage_limit(usage_type='general', limit_per_day=10):
     """检查使用次数限制的装饰器"""
     def decorator(view_func):
         @wraps(view_func)
-        @login_required
         def _wrapped_view(request, *args, **kwargs):
+            # 如果用户未登录，直接允许访问（游客模式）
+            if not request.user.is_authenticated:
+                return view_func(request, *args, **kwargs)
+            
             try:
                 profile = request.user.userprofile
             except UserProfile.DoesNotExist:
@@ -81,11 +84,19 @@ def check_usage_limit(usage_type='general', limit_per_day=10):
             ).count()
             
             if today_usage >= limit_per_day:
-                messages.warning(
-                    request, 
-                    f'您今日已使用{today_usage}次，达到每日限制。升级VIP享受无限次使用。'
-                )
-                return redirect('core:membership_plans')
+                from django.http import JsonResponse
+                # 对于AJAX请求返回JSON错误
+                if request.content_type == 'application/json':
+                    return JsonResponse({
+                        'success': False, 
+                        'error': f'您今日已使用{today_usage}次，达到每日限制。升级VIP享受无限次使用。'
+                    })
+                else:
+                    messages.warning(
+                        request, 
+                        f'您今日已使用{today_usage}次，达到每日限制。升级VIP享受无限次使用。'
+                    )
+                    return redirect('core:membership_plans')
             
             return view_func(request, *args, **kwargs)
         

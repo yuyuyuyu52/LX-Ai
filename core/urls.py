@@ -4,9 +4,9 @@ from . import test_sms_views
 from . import verify_views
 from . import debug_tools
 from . import membership_views
+from . import sms_views
 
 app_name = 'core'
-
 urlpatterns = [
     path('', views.home, name='home'),
     path('about/', views.about, name='about'),
@@ -14,8 +14,8 @@ urlpatterns = [
     path('login/', views.user_login, name='login'),
     path('register/', views.user_register, name='register'),
     path('logout/', views.user_logout, name='logout'),
-    path('api/send-verification-code/', views.send_verification_code, name='send_verification_code'),
-    path('api/check-phone/', views.check_phone_exists, name='check_phone_exists'),
+    path('api/send-verification-code/', sms_views.send_verification_code, name='send_verification_code'),
+    path('api/check-phone/', sms_views.check_phone_exists, name='check_phone_exists'),
     # 测试路由
     path('test-sms/', test_sms_views.sms_test_page, name='sms_test_page'),
     path('test-sms-send/', test_sms_views.test_send_sms, name='test_send_sms'),

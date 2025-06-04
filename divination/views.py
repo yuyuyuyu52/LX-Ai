@@ -15,6 +15,59 @@ from core.fortune_calculator import meihua_calculator, fortune_calculator
 from core.ai_service import ai_service
 from core.decorators import check_usage_limit, membership_info
 
+
+def parse_chinese_time(time_str):
+    """
+    解析中文时间格式 "YYYY-MM-DD 时辰名称" 为 datetime 对象
+    
+    Args:
+        time_str: 时间字符串，格式如 "2024-01-01 子时"
+    
+    Returns:
+        datetime: 解析后的datetime对象
+    """
+    # 中文时辰到小时的映射
+    time_mapping = {
+        '子时': 0,   # 23:00-01:00, 取0点
+        '丑时': 2,   # 01:00-03:00, 取2点  
+        '寅时': 4,   # 03:00-05:00, 取4点
+        '卯时': 6,   # 05:00-07:00, 取6点
+        '辰时': 8,   # 07:00-09:00, 取8点
+        '巳时': 10,  # 09:00-11:00, 取10点
+        '午时': 12,  # 11:00-13:00, 取12点
+        '未时': 14,  # 13:00-15:00, 取14点
+        '申时': 16,  # 15:00-17:00, 取16点
+        '酉时': 18,  # 17:00-19:00, 取18点
+        '戌时': 20,  # 19:00-21:00, 取20点
+        '亥时': 22,  # 21:00-23:00, 取22点
+    }
+    
+    try:
+        # 分割日期和时辰
+        parts = time_str.strip().split(' ')
+        if len(parts) != 2:
+            raise ValueError("时间格式错误")
+        
+        date_part = parts[0]
+        time_part = parts[1]
+        
+        # 解析日期部分
+        year, month, day = date_part.split('-')
+        year, month, day = int(year), int(month), int(day)
+        
+        # 获取对应的小时
+        if time_part not in time_mapping:
+            raise ValueError(f"未知的时辰: {time_part}")
+        
+        hour = time_mapping[time_part]
+        
+        # 创建datetime对象
+        return datetime(year, month, day, hour, 0, 0)
+        
+    except Exception as e:
+        raise ValueError(f"时间解析失败: {str(e)}")
+
+
 def bazi_analysis(request):
     """八字分析页面"""
     return render(request, 'divination/bazi.html', {'page_title': '八字分析'})
@@ -40,7 +93,7 @@ def daily_fortune(request):
     return render(request, 'divination/daily_fortune.html', {'page_title': '每日运势'})
 
 @csrf_exempt
-@check_usage_limit
+@check_usage_limit()
 @membership_info
 def bazi_api(request):
     """八字分析API - 支持普通模式和AI增强模式"""
@@ -61,10 +114,17 @@ def bazi_api(request):
             # 解析出生时间
             try:
                 if isinstance(birth_time, str):
-                    birth_dt = datetime.fromisoformat(birth_time.replace('Z', '+00:00'))
+                    # 处理中文时辰格式 "YYYY-MM-DD 时辰名称"
+                    if ' ' in birth_time and any(time in birth_time for time in ['子时', '丑时', '寅时', '卯时', '辰时', '巳时', '午时', '未时', '申时', '酉时', '戌时', '亥时']):
+                        birth_dt = parse_chinese_time(birth_time)
+                    else:
+                        # 处理ISO格式时间
+                        birth_dt = datetime.fromisoformat(birth_time.replace('Z', '+00:00'))
                 else:
                     birth_dt = datetime.now()
-            except:
+            except ValueError as e:
+                return JsonResponse({'success': False, 'error': f'出生时间格式错误: {str(e)}'})
+            except Exception as e:
                 return JsonResponse({'success': False, 'error': '出生时间格式错误'})
 
             # 八字计算
@@ -124,17 +184,22 @@ def bazi_api(request):
     return JsonResponse({'success': False, 'error': '请求方法错误'})
 
 @csrf_exempt
-@check_usage_limit
+@check_usage_limit()
 @membership_info
 def bazi_marriage_api(request):
     """八字合婚API - 支持普通模式和AI增强模式"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            male_birth_time = data.get('male_birth_time')
-            female_birth_time = data.get('female_birth_time')
-            male_name = data.get('male_name', '男方')
-            female_name = data.get('female_name', '女方')
+            
+            # 解析嵌套的数据结构
+            male_info = data.get('male_info', {})
+            female_info = data.get('female_info', {})
+            
+            male_birth_time = male_info.get('birth_time')
+            female_birth_time = female_info.get('birth_time')
+            male_name = male_info.get('name', '男方')
+            female_name = female_info.get('name', '女方')
             ai_mode = data.get('ai_mode', False)
 
             # 检查AI模式权限
@@ -146,41 +211,62 @@ def bazi_marriage_api(request):
             # 解析出生时间
             try:
                 if isinstance(male_birth_time, str):
-                    male_dt = datetime.fromisoformat(male_birth_time.replace('Z', '+00:00'))
+                    # 处理中文时辰格式 "YYYY-MM-DD 时辰名称"
+                    if ' ' in male_birth_time and any(time in male_birth_time for time in ['子时', '丑时', '寅时', '卯时', '辰时', '巳时', '午时', '未时', '申时', '酉时', '戌时', '亥时']):
+                        male_dt = parse_chinese_time(male_birth_time)
+                    else:
+                        # 处理ISO格式时间
+                        male_dt = datetime.fromisoformat(male_birth_time.replace('Z', '+00:00'))
                 else:
                     male_dt = datetime.now()
                     
                 if isinstance(female_birth_time, str):
-                    female_dt = datetime.fromisoformat(female_birth_time.replace('Z', '+00:00'))
+                    # 处理中文时辰格式 "YYYY-MM-DD 时辰名称"
+                    if ' ' in female_birth_time and any(time in female_birth_time for time in ['子时', '丑时', '寅时', '卯时', '辰时', '巳时', '午时', '未时', '申时', '酉时', '戌时', '亥时']):
+                        female_dt = parse_chinese_time(female_birth_time)
+                    else:
+                        # 处理ISO格式时间
+                        female_dt = datetime.fromisoformat(female_birth_time.replace('Z', '+00:00'))
                 else:
                     female_dt = datetime.now()
-            except:
+            except ValueError as e:
+                return JsonResponse({'success': False, 'error': f'出生时间格式错误: {str(e)}'})
+            except Exception as e:
                 return JsonResponse({'success': False, 'error': '出生时间格式错误'})
 
+            # 分别计算男女双方八字
+            from core.bazi_calculator import BaziCalculator
+            bazi_calculator = BaziCalculator()
+            male_bazi_data = bazi_calculator.calculate_bazi(male_dt, '男')
+            female_bazi_data = bazi_calculator.calculate_bazi(female_dt, '女')
+            
             # 八字合婚计算
-            marriage_result = bazi_calculator.calculate_marriage_compatibility(male_dt, female_dt)
+            marriage_result = bazi_calculator.calculate_marriage_compatibility(male_bazi_data, female_bazi_data)
             
             # 基础分析结果
             basic_analysis = f"""
 【八字合婚分析报告】
 
 【基本信息】
-{male_name}：{marriage_result['male_info']['bazi_string']['year']} {marriage_result['male_info']['bazi_string']['month']} {marriage_result['male_info']['bazi_string']['day']} {marriage_result['male_info']['bazi_string']['hour']}
-生肖：{marriage_result['male_info']['shengxiao']}  五行：{bazi_calculator.WUXING_TIANGAN[marriage_result['male_info']['ri_zhu']]}
+{male_name}：{male_bazi_data['bazi_string']['year']} {male_bazi_data['bazi_string']['month']} {male_bazi_data['bazi_string']['day']} {male_bazi_data['bazi_string']['hour']}
+生肖：{male_bazi_data['shengxiao']}  日主：{male_bazi_data['ri_zhu']}
 
-{female_name}：{marriage_result['female_info']['bazi_string']['year']} {marriage_result['female_info']['bazi_string']['month']} {marriage_result['female_info']['bazi_string']['day']} {marriage_result['female_info']['bazi_string']['hour']}
-生肖：{marriage_result['female_info']['shengxiao']}  五行：{bazi_calculator.WUXING_TIANGAN[marriage_result['female_info']['ri_zhu']]}
+{female_name}：{female_bazi_data['bazi_string']['year']} {female_bazi_data['bazi_string']['month']} {female_bazi_data['bazi_string']['day']} {female_bazi_data['bazi_string']['hour']}
+生肖：{female_bazi_data['shengxiao']}  日主：{female_bazi_data['ri_zhu']}
 
 【匹配度评分】
-综合匹配度：{marriage_result['compatibility_score']:.1f}分
+综合匹配度：{marriage_result['total_score']}分 - {marriage_result['level']}
+{marriage_result['description']}
 
 【详细分析】
-生肖配对：{marriage_result['zodiac_compatibility']['score']}分 - {marriage_result['zodiac_compatibility']['description']}
-五行互补：{marriage_result['wuxing_compatibility']['score']}分 - {marriage_result['wuxing_compatibility']['description']}
-性格匹配：{marriage_result['personality_match']['score']}分 - {marriage_result['personality_match']['description']}
+生肖配对：{marriage_result['details']['shengxiao_score']}分
+五行互补：{marriage_result['details']['wuxing_score']}分
+日柱匹配：{marriage_result['details']['rizhu_score']}分
+格局配合：{marriage_result['details']['geju_score']}分
 
 【合婚建议】
-{marriage_result['marriage_advice']}
+根据八字分析，你们的匹配度为{marriage_result['total_score']}分，属于{marriage_result['level']}婚配。
+{marriage_result['description']}
 
 【注意事项】
 - 夫妻相处要互相理解包容
@@ -195,16 +281,12 @@ def bazi_marriage_api(request):
             final_analysis = basic_analysis
             if ai_mode and request.user.is_authenticated:
                 try:
-                    marriage_info = {
-                        'male_birth_time': male_birth_time,
-                        'female_birth_time': female_birth_time,
-                        'male_name': male_name,
-                        'female_name': female_name
-                    }
+                    from core.ai_service import AIService
+                    ai_service = AIService()
                     ai_analysis = ai_service.enhance_marriage_analysis(
-                        marriage_result,
-                        basic_analysis,
-                        marriage_info
+                        male_bazi_data['bazi_string'],
+                        female_bazi_data['bazi_string'],
+                        basic_analysis
                     )
                     final_analysis = ai_analysis
                     profile.ai_usage_count += 1
@@ -230,14 +312,14 @@ def bazi_marriage_api(request):
 
             return JsonResponse({
                 'success': True,
-                'compatibility_score': marriage_result['compatibility_score'],
+                'compatibility_score': marriage_result['total_score'],
                 'analysis': final_analysis,
                 'ai_enhanced': ai_mode,
                 'detail_info': {
-                    'male_shengxiao': marriage_result['male_info']['shengxiao'],
-                    'female_shengxiao': marriage_result['female_info']['shengxiao'],
-                    'zodiac_score': marriage_result['zodiac_compatibility']['score'],
-                    'wuxing_score': marriage_result['wuxing_compatibility']['score']
+                    'male_shengxiao': marriage_result['male_shengxiao'],
+                    'female_shengxiao': marriage_result['female_shengxiao'],
+                    'zodiac_score': marriage_result['details']['shengxiao_score'],
+                    'wuxing_score': marriage_result['details']['wuxing_score']
                 }
             })
         except Exception as e:
@@ -245,7 +327,7 @@ def bazi_marriage_api(request):
     return JsonResponse({'success': False, 'error': '请求方法错误'})
 
 @csrf_exempt
-@check_usage_limit
+@check_usage_limit()
 @membership_info
 def tarot_api(request):
     """塔罗占卜API"""
@@ -308,7 +390,7 @@ def tarot_api(request):
     return JsonResponse({'success': False, 'error': '请求方法错误'})
 
 @csrf_exempt
-@check_usage_limit
+@check_usage_limit()
 @membership_info
 def meihua_api(request):
     """梅花易数API"""
@@ -335,7 +417,41 @@ def meihua_api(request):
             # 使用梅花易数计算器
             from core.fortune_calculator import MeihuaCalculator
             calculator = MeihuaCalculator()
-            result = calculator.calculate_hexagram(number1, number2, question)
+            result = calculator.calculate_meihua(question)
+            
+            # 生成基础分析
+            def generate_basic_meihua_analysis(result_data):
+                return f"""
+【梅花易数分析】
+
+【问题】{result_data['question']}
+
+【卦象信息】
+主卦：{result_data['zhu_gua']['name']}
+  上卦：{result_data['zhu_gua']['upper']['name']}（{result_data['zhu_gua']['upper']['nature']}）
+  下卦：{result_data['zhu_gua']['lower']['name']}（{result_data['zhu_gua']['lower']['nature']}）
+
+变卦：{result_data['bian_gua']['name']}
+  上卦：{result_data['bian_gua']['upper']['name']}（{result_data['bian_gua']['upper']['nature']}）
+  下卦：{result_data['bian_gua']['lower']['name']}（{result_data['bian_gua']['lower']['nature']}）
+
+动爻：第{result_data['dong_yao']}爻
+
+【体用分析】
+体卦：{result_data['ti_yong']['ti_gua']['name']}（{result_data['ti_yong']['ti_gua']['wuxing']}）
+用卦：{result_data['ti_yong']['yong_gua']['name']}（{result_data['ti_yong']['yong_gua']['wuxing']}）
+关系：{result_data['ti_yong']['analysis']}
+
+【五行分析】
+{result_data['wuxing']['analysis']}
+
+【时间预测】
+{result_data['time_prediction']}
+
+* 以上分析基于梅花易数传统理论，仅供参考娱乐。
+                """
+            
+            basic_analysis = generate_basic_meihua_analysis(result)
             
             # AI增强分析
             if ai_mode:
@@ -344,10 +460,10 @@ def meihua_api(request):
                     ai_service = AIService()
                     ai_analysis = ai_service.enhance_meihua_analysis(
                         question=question,
-                        main_gua=result['main_gua'],
+                        main_gua=result['zhu_gua'],
                         bian_gua=result['bian_gua'],
                         dong_yao=result['dong_yao'],
-                        basic_analysis=result['analysis']
+                        basic_analysis=basic_analysis
                     )
                     
                     # 更新用户AI使用次数
@@ -357,10 +473,10 @@ def meihua_api(request):
                     final_analysis = ai_analysis
                 except Exception as e:
                     # AI服务失败时使用基础分析
-                    final_analysis = result['analysis']
+                    final_analysis = basic_analysis
                     ai_mode = False
             else:
-                final_analysis = result['analysis']
+                final_analysis = basic_analysis
             
             # 保存占卜记录
             if request.user.is_authenticated:
@@ -383,15 +499,15 @@ def meihua_api(request):
             
             return JsonResponse({
                 'success': True,
-                'main_gua': result['main_gua'],
+                'main_gua': result['zhu_gua'],
                 'bian_gua': result['bian_gua'],
                 'dong_yao': result['dong_yao'],
                 'analysis': final_analysis,
                 'ai_enhanced': ai_mode,
                 'detail_info': {
-                    'main_gua_name': result['main_gua']['name'],
+                    'main_gua_name': result['zhu_gua']['name'],
                     'bian_gua_name': result['bian_gua']['name'],
-                    'time_info': result['time_info']
+                    'time_info': result['time_prediction']
                 }
             })
         except Exception as e:
@@ -399,7 +515,7 @@ def meihua_api(request):
     return JsonResponse({'success': False, 'error': '请求方法错误'})
 
 @csrf_exempt
-@check_usage_limit
+@check_usage_limit()
 @membership_info
 def yijing_api(request):
     """易经卜卦API - 支持普通模式和AI增强模式"""
@@ -531,7 +647,7 @@ def yijing_api(request):
     return JsonResponse({'success': False, 'error': '请求方法错误'})
 
 @csrf_exempt
-@check_usage_limit
+@check_usage_limit()
 @membership_info
 def daily_fortune_api(request):
     """每日运势API"""
@@ -553,10 +669,22 @@ def daily_fortune_api(request):
                 if not user_profile.can_use_ai():
                     return JsonResponse({'success': False, 'error': 'AI模式仅限会员使用'})
             
+            # 解析出生日期获取生肖
+            from datetime import datetime
+            
+            try:
+                birth_dt = datetime.strptime(birth_date, '%Y-%m-%d')
+            except ValueError:
+                return JsonResponse({'success': False, 'error': '出生日期格式错误'})
+            
+            # 计算生肖
+            zodiac_list = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪']
+            zodiac = zodiac_list[(birth_dt.year - 4) % 12]
+            
             # 使用运势计算器
             from core.fortune_calculator import FortuneCalculator
             calculator = FortuneCalculator()
-            result = calculator.calculate_daily_fortune(birth_date)
+            result = calculator.calculate_daily_fortune(zodiac, user_birth_date=birth_dt.date())
             
             # AI增强分析
             if ai_mode:
@@ -566,8 +694,14 @@ def daily_fortune_api(request):
                     ai_analysis = ai_service.enhance_daily_fortune_analysis(
                         birth_date=birth_date,
                         zodiac=result['zodiac'],
-                        fortune_scores=result['fortune_scores'],
-                        basic_analysis=result['analysis']
+                        fortune_scores={
+                            'overall': result['overall_fortune'],
+                            'love': result['love_fortune'],
+                            'career': result['career_fortune'],
+                            'wealth': result['wealth_fortune'],
+                            'health': result['health_fortune']
+                        },
+                        basic_analysis=result['description']
                     )
                     
                     # 更新用户AI使用次数
@@ -577,10 +711,10 @@ def daily_fortune_api(request):
                     final_analysis = ai_analysis
                 except Exception as e:
                     # AI服务失败时使用基础分析
-                    final_analysis = result['analysis']
+                    final_analysis = result['description']
                     ai_mode = False
             else:
-                final_analysis = result['analysis']
+                final_analysis = result['description']
             
             # 保存占卜记录
             if request.user.is_authenticated:
@@ -602,21 +736,19 @@ def daily_fortune_api(request):
             
             # 保存或更新每日运势记录
             from core.models import DailyFortune
-            from datetime import datetime
             today = datetime.now().date()
             
             fortune_record, created = DailyFortune.objects.get_or_create(
                 date=today,
                 zodiac=result['zodiac'],
                 defaults={
-                    'overall_score': result['fortune_scores']['overall'],
-                    'love_score': result['fortune_scores']['love'],
-                    'career_score': result['fortune_scores']['career'],
-                    'wealth_score': result['fortune_scores']['wealth'],
-                    'health_score': result['fortune_scores']['health'],
-                    'lucky_color': result['lucky_elements']['color'],
-                    'lucky_number': result['lucky_elements']['number'],
-                    'lucky_direction': result['lucky_elements']['direction'],
+                    'overall_fortune': result['overall_fortune'],
+                    'love_fortune': result['love_fortune'],
+                    'career_fortune': result['career_fortune'],
+                    'wealth_fortune': result['wealth_fortune'],
+                    'health_fortune': result['health_fortune'],
+                    'lucky_color': result['lucky_color'],
+                    'lucky_number': result['lucky_number'],
                     'description': final_analysis
                 }
             )
@@ -624,14 +756,24 @@ def daily_fortune_api(request):
             return JsonResponse({
                 'success': True,
                 'zodiac': result['zodiac'],
-                'fortune_scores': result['fortune_scores'],
-                'lucky_elements': result['lucky_elements'],
+                'fortune_scores': {
+                    'overall': result['overall_fortune'],
+                    'love': result['love_fortune'],
+                    'career': result['career_fortune'],
+                    'wealth': result['wealth_fortune'],
+                    'health': result['health_fortune']
+                },
+                'lucky_elements': {
+                    'color': result['lucky_color'],
+                    'number': result['lucky_number'],
+                    'direction': '东方'  # 可以后续完善方位计算
+                },
                 'analysis': final_analysis,
                 'ai_enhanced': ai_mode,
                 'detail_info': {
-                    'date': today.strftime('%Y-%m-%d'),
-                    'wuxing_analysis': result.get('wuxing_analysis', ''),
-                    'advice': result.get('advice', '')
+                    'date': result['date'].strftime('%Y-%m-%d'),
+                    'wuxing_analysis': '',
+                    'advice': ''
                 }
             })
         except Exception as e:

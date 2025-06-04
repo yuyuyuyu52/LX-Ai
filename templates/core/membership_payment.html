@@ -205,6 +205,9 @@
     <div class="payment-container">
         <h2 class="mb-4">确认支付</h2>
         
+        <!-- CSRF Token -->
+        {% csrf_token %}
+        
         <div class="order-info">
             <div class="order-title">{{ order.plan.name }}</div>
             <div class="order-amount">¥{{ order.amount|floatformat:0 }}</div>

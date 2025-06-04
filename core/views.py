@@ -269,8 +269,12 @@ def get_notifications(request):
     
     from core.models import Notification
     
-    notifications = Notification.objects.filter(user=request.user).order_by('-created_at')[:10]
-    unread_count = notifications.filter(is_read=False).count()
+    # 获取基础查询集
+    base_notifications = Notification.objects.filter(user=request.user)
+    # 计算未读数量（在切片之前）
+    unread_count = base_notifications.filter(is_read=False).count()
+    # 获取最新的10条通知
+    notifications = base_notifications.order_by('-created_at')[:10]
     
     notifications_data = []
     for notification in notifications:

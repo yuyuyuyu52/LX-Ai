@@ -46,7 +46,7 @@ def purchase_membership(request, plan_id):
             order = form.create_order()
             if order:
                 # 跳转到支付页面
-                return redirect('membership_payment', order_id=order.order_id)
+                return redirect('core:membership_payment', order_id=order.order_id)
             else:
                 messages.error(request, '创建订单失败，请重试')
         else:
@@ -68,14 +68,14 @@ def membership_payment(request, order_id):
     # 检查订单状态
     if order.status != 'pending':
         messages.error(request, '订单状态异常')
-        return redirect('membership_plans')
+        return redirect('core:membership_plans')
     
     # 检查订单是否过期
     if order.is_expired():
         order.status = 'expired'
         order.save()
         messages.error(request, '订单已过期，请重新下单')
-        return redirect('membership_plans')
+        return redirect('core:membership_plans')
     
     context = {
         'order': order,
