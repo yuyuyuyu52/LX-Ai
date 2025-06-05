@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_js %}
+<script src="{% static 'js/markdown-formatter.js' %}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
@@ -315,7 +319,7 @@ function displayMarriageResult(data) {
     }
     
     // 更新分析内容
-    document.getElementById('marriageAnalysis').textContent = data.analysis;
+    document.getElementById('marriageAnalysis').innerHTML = formatMarkdown(data.analysis);
     
     // 显示AI增强标识
     if (data.ai_enhanced) {

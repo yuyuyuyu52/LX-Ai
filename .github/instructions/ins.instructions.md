@@ -12,3 +12,5 @@ Coding standards, domain knowledge, and preferences that AI should follow.
 2. 八字合婚
 3. 每日运势
 4. 梅花易数
+
+别的功能统统不用管

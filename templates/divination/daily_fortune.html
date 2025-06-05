@@ -517,27 +517,17 @@ function updateFortuneScore(elementId, score) {
     }
 }
 
+// 这些函数现在使用全局的formatMarkdown和formatAIMarkdown函数，保持兼容性
 function formatAnalysisText(text) {
     if (!text) return '';
     
-    return text
-        .replace(/\n/g, '<br>')
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>');
+    return formatMarkdown(text);
 }
 
 function formatAIAnalysis(text) {
     if (!text) return '';
     
-    // 处理AI分析的特殊格式
-    return text
-        .replace(/(\d+\.\s*\*\*.*?\*\*)/g, '<h6 class="text-primary mt-4 mb-2">$1</h6>')
-        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-dark">$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/【(.*?)】/g, '<span class="badge bg-light text-dark me-2">$1</span>')
-        .replace(/\n/g, '<br>')
-        .replace(/(\- .*?)(<br>|$)/g, '<li class="mb-1">$1</li>')
-        .replace(/(<li.*?<\/li>)/g, '<ul class="list-unstyled ms-3">$1</ul>');
+    return formatAIMarkdown(text);
 }
 
 function getCookie(name) {

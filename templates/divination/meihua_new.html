@@ -260,7 +260,7 @@ function displayMeihuaResult(question, data) {
     }
     
     // 添加分析内容
-    interpretationHTML += `<div class="mb-4">${data.analysis}</div>`;
+    interpretationHTML += `<div class="mb-4">${formatMarkdown(data.analysis)}</div>`;
     
     // 添加时间信息
     if (data.detail_info.time_info) {

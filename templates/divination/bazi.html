@@ -309,6 +309,7 @@
 {% endblock extra_css %}
 
 {% block extra_js %}
+<script src="{% static 'js/markdown-formatter.js' %}"></script>
 <script>
 // 设置出生日期的最大值为今天
 document.addEventListener('DOMContentLoaded', function() {
@@ -468,7 +469,7 @@ function displayResult(data) {
     // 显示分析内容
     document.getElementById('analysisContent').innerHTML = 
         '<div class="analysis-text">' + 
-        data.analysis.replace(/\n/g, '<br>') + 
+        formatMarkdown(data.analysis) + 
         '</div>';
     
     // 显示AI增强标识
