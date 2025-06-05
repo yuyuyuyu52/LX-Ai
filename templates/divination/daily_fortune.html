@@ -378,9 +378,33 @@ document.getElementById('fortuneForm').addEventListener('submit', function(e) {
     
     // 显示加载状态
     const submitBtn = document.querySelector('button[type="submit"]');
+    // 显示加载状态和进度提示
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>分析中...';
     submitBtn.disabled = true;
+    
+    // 进度提示
+    let progressMessages = [
+        '计算生肖运势...',
+        '分析五行能量...',
+        '解读今日宜忌...',
+        'AI增强分析中...',
+        '生成个性化建议...'
+    ];
+    let currentProgress = 0;
+    
+    const progressInterval = setInterval(() => {
+        if (currentProgress < progressMessages.length - 1) {
+            currentProgress++;
+            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>${progressMessages[currentProgress]}`;
+        }
+    }, 3000);
+    
+    // 创建超时控制的fetch请求
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+        controller.abort();
+    }, 100000); // 100秒超时 - 配合后端90秒超时
     
     // 调用运势API
     fetch('/divination/api/daily-fortune/', {
@@ -392,7 +416,8 @@ document.getElementById('fortuneForm').addEventListener('submit', function(e) {
         body: JSON.stringify({
             birth_date: birthDate,
             ai_mode: aiMode
-        })
+        }),
+        signal: controller.signal
     })
     .then(response => response.json())
     .then(data => {
@@ -404,9 +429,15 @@ document.getElementById('fortuneForm').addEventListener('submit', function(e) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('网络错误，请稍后重试');
+        if (error.name === 'AbortError') {
+            alert('运势分析超时，请检查网络连接或稍后重试');
+        } else {
+            alert('网络错误，请稍后重试');
+        }
     })
     .finally(() => {
+        clearTimeout(timeoutId);
+        clearInterval(progressInterval);
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     });

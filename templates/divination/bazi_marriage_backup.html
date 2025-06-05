@@ -6,7 +6,32 @@
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="text-center mb-5 fade-in">
-                <h1 class="display-5 fw-bold text-zen-primary">八字合婚</h1>
+                <h1 clas            ai_mode: aiMode
+        }),
+        signal: controller.signal
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayMarriageResult(data);
+        } else {
+            alert('合婚分析失败：' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        if (error.name === 'AbortError') {
+            alert('合婚分析超时，请检查网络连接或稍后重试');
+        } else {
+            alert('网络错误，请稍后重试');
+        }
+    })
+    .finally(() => {
+        clearTimeout(timeoutId);
+        clearInterval(progressInterval);
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });d text-zen-primary">八字合婚</h1>
                 <p class="lead text-zen-secondary">天作之合，缘定三生，测算两人姻缘和合之道</p>
                 <div class="zen-divider mx-auto"></div>
             </div>
@@ -177,14 +202,6 @@
     white-space: pre-line;
     line-height: 1.8;
 }
-
-.zen-divider {
-    width: 60px;
-    height: 3px;
-    background: linear-gradient(90deg, var(--zen-accent), var(--zen-decoration));
-    margin: 1rem auto;
-    border-radius: 2px;
-}
 </style>
 
 <script>
@@ -207,32 +224,31 @@ document.getElementById('marriageForm').addEventListener('submit', function(e) {
     // 获取按钮并显示加载状态
     const submitBtn = document.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>分析中...';
+    submitBtn.disabled = true;
     
-    // 进度提示消息
+    // 进度提示
     let progressMessages = [
-        '正在获取男方八字...',
-        '正在获取女方八字...',
-        '分析五行匹配度...',
-        '计算生肖合化...',
-        'AI增强分析中...'
+        '计算双方八字...',
+        '分析生肖配对...',
+        '解读五行互补...',
+        'AI增强合婚分析...',
+        '生成合婚建议...'
     ];
     let currentProgress = 0;
-    
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>' + progressMessages[0];
-    submitBtn.disabled = true;
     
     const progressInterval = setInterval(() => {
         if (currentProgress < progressMessages.length - 1) {
             currentProgress++;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>' + progressMessages[currentProgress];
+            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>${progressMessages[currentProgress]}`;
         }
     }, 3000);
     
-    // 创建超时控制器
+    // 创建超时控制的fetch请求
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
         controller.abort();
-    }, 100000); // 100秒超时 - 配合后端90秒超时 - 匹配后端75秒配置
+    }, 60000); // 60秒超时
     
     // 调用合婚API
     fetch('/divination/api/bazi-marriage/', {
@@ -261,7 +277,7 @@ document.getElementById('marriageForm').addEventListener('submit', function(e) {
         if (data.success) {
             displayMarriageResult(data);
         } else {
-            alert('合婚分析失败：' + data.error);
+            alert('分析失败：' + data.error);
         }
     })
     .catch(error => {
@@ -305,14 +321,10 @@ function displayMarriageResult(data) {
     circle.style.background = `conic-gradient(${color} 0% ${percentage}%, #f8f9fa ${percentage}% 100%)`;
     
     // 更新基本信息
-    if (data.detail_info && data.detail_info.male_shengxiao) {
-        document.getElementById('maleNameDisplay').textContent = data.detail_info.male_shengxiao.split('(')[0] || maleName;
-        document.getElementById('maleZodiac').textContent = data.detail_info.male_shengxiao;
-    }
-    if (data.detail_info && data.detail_info.female_shengxiao) {
-        document.getElementById('femaleNameDisplay').textContent = data.detail_info.female_shengxiao.split('(')[0] || femaleName;
-        document.getElementById('femaleZodiac').textContent = data.detail_info.female_shengxiao;
-    }
+    document.getElementById('maleNameDisplay').textContent = data.detail_info.male_shengxiao.split('(')[0];
+    document.getElementById('femaleNameDisplay').textContent = data.detail_info.female_shengxiao.split('(')[0];
+    document.getElementById('maleZodiac').textContent = data.detail_info.male_shengxiao;
+    document.getElementById('femaleZodiac').textContent = data.detail_info.female_shengxiao;
     
     // 更新分析内容
     document.getElementById('marriageAnalysis').textContent = data.analysis;

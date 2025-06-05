@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前端超时机制测试</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .test-section {
+            margin: 2rem 0;
+            padding: 2rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .progress-log {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.2rem 0;
+        }
+        .log-success { color: #28a745; }
+        .log-error { color: #dc3545; }
+        .log-warning { color: #ffc107; }
+        .log-info { color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <h1 class="text-center mb-5">FateMaster 前端超时机制测试</h1>
+        
+        <!-- 八字分析测试 -->
+        <div class="test-section">
+            <h3><i class="fas fa-yin-yang me-2"></i>八字分析超时测试</h3>
+            <p class="text-muted">测试八字分析的超时控制和进度反馈机制</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <form id="baziTestForm">
+                        <div class="mb-3">
+                            <label class="form-label">姓名</label>
+                            <input type="text" class="form-control" id="baziName" value="测试用户" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">出生时间</label>
+                            <input type="datetime-local" class="form-control" id="baziBirthTime" value="1990-05-15T10:30" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">出生地点</label>
+                            <input type="text" class="form-control" id="baziBirthPlace" value="北京">
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="baziAiMode" checked>
+                            <label class="form-check-label" for="baziAiMode">AI增强模式</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="baziSubmitBtn">
+                            <i class="fas fa-play me-2"></i>开始八字分析
+                        </button>
+                        <button type="button" class="btn btn-secondary ms-2" onclick="clearLog('baziLog')">清空日志</button>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <h6>测试日志：</h6>
+                    <div id="baziLog" class="progress-log"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 八字合婚测试 -->
+        <div class="test-section">
+            <h3><i class="fas fa-heart me-2"></i>八字合婚超时测试</h3>
+            <p class="text-muted">测试八字合婚的超时控制和进度反馈机制</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <form id="marriageTestForm">
+                        <div class="row">
+                            <div class="col-6">
+                                <h6>男方信息</h6>
+                                <div class="mb-2">
+                                    <input type="text" class="form-control form-control-sm" id="maleName" value="张三" placeholder="男方姓名">
+                                </div>
+                                <div class="mb-2">
+                                    <input type="datetime-local" class="form-control form-control-sm" id="maleBirthTime" value="1990-05-15T10:30">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h6>女方信息</h6>
+                                <div class="mb-2">
+                                    <input type="text" class="form-control form-control-sm" id="femaleName" value="李四" placeholder="女方姓名">
+                                </div>
+                                <div class="mb-2">
+                                    <input type="datetime-local" class="form-control form-control-sm" id="femaleBirthTime" value="1992-08-20T14:15">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="marriageAiMode" checked>
+                            <label class="form-check-label" for="marriageAiMode">AI增强模式</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="marriageSubmitBtn">
+                            <i class="fas fa-heart me-2"></i>开始合婚分析
+                        </button>
+                        <button type="button" class="btn btn-secondary ms-2" onclick="clearLog('marriageLog')">清空日志</button>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <h6>测试日志：</h6>
+                    <div id="marriageLog" class="progress-log"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 超时测试 -->
+        <div class="test-section">
+            <h3><i class="fas fa-clock me-2"></i>人工超时测试</h3>
+            <p class="text-muted">模拟超时情况来测试超时处理机制</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">超时时间（秒）</label>
+                        <select class="form-control" id="timeoutDuration">
+                            <option value="5">5秒（快速测试）</option>
+                            <option value="10">10秒</option>
+                            <option value="30">30秒</option>
+                            <option value="60" selected>60秒（默认）</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-warning" id="timeoutTestBtn">
+                        <i class="fas fa-stopwatch me-2"></i>开始超时测试
+                    </button>
+                    <button type="button" class="btn btn-secondary ms-2" onclick="clearLog('timeoutLog')">清空日志</button>
+                </div>
+                <div class="col-md-6">
+                    <h6>超时测试日志：</h6>
+                    <div id="timeoutLog" class="progress-log"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function logMessage(logId, message, type = 'info') {
+            const logDiv = document.getElementById(logId);
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog(logId) {
+            document.getElementById(logId).innerHTML = '';
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // 八字分析测试
+        document.getElementById('baziTestForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const logId = 'baziLog';
+            const submitBtn = document.getElementById('baziSubmitBtn');
+            const originalText = submitBtn.innerHTML;
+            
+            logMessage(logId, '开始八字分析测试', 'info');
+            
+            // 获取表单数据
+            const data = {
+                name: document.getElementById('baziName').value,
+                birth_time: document.getElementById('baziBirthTime').value,
+                birth_place: document.getElementById('baziBirthPlace').value,
+                ai_mode: document.getElementById('baziAiMode').checked
+            };
+            
+            logMessage(logId, `请求数据: ${JSON.stringify(data)}`, 'info');
+            
+            // 进度提示
+            let progressMessages = [
+                '正在排列八字...',
+                '分析五行生克...',
+                '解读十神关系...',
+                'AI增强分析中...',
+                '生成分析结果...'
+            ];
+            let currentProgress = 0;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>' + progressMessages[0];
+            submitBtn.disabled = true;
+            logMessage(logId, `进度: ${progressMessages[0]}`, 'info');
+            
+            const progressInterval = setInterval(() => {
+                currentProgress = (currentProgress + 1) % progressMessages.length;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>' + progressMessages[currentProgress];
+                logMessage(logId, `进度: ${progressMessages[currentProgress]}`, 'info');
+            }, 3000);
+            
+            // 创建超时控制器
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                controller.abort();
+                logMessage(logId, '触发60秒超时控制', 'warning');
+            }, 60000);
+            
+            const startTime = Date.now();
+            
+            // 发送请求
+            fetch('/divination/api/bazi/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data),
+                signal: controller.signal
+            })
+            .then(response => {
+                const endTime = Date.now();
+                const duration = (endTime - startTime) / 1000;
+                logMessage(logId, `收到响应，耗时: ${duration.toFixed(2)}秒`, 'info');
+                return response.json();
+            })
+            .then(data => {
+                logMessage(logId, '解析JSON响应成功', 'success');
+                if (data.success) {
+                    logMessage(logId, `分析成功！AI增强: ${data.ai_enhanced}`, 'success');
+                    logMessage(logId, `分析结果预览: ${data.analysis.substring(0, 100)}...`, 'info');
+                } else {
+                    logMessage(logId, `分析失败: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                logMessage(logId, `请求异常: ${error.message}`, 'error');
+                if (error.name === 'AbortError') {
+                    logMessage(logId, '请求被超时控制器中止', 'warning');
+                } else {
+                    logMessage(logId, '网络或其他错误', 'error');
+                }
+            })
+            .finally(() => {
+                clearTimeout(timeoutId);
+                clearInterval(progressInterval);
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                logMessage(logId, '请求完成，按钮状态已恢复', 'info');
+            });
+        });
+
+        // 八字合婚测试
+        document.getElementById('marriageTestForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const logId = 'marriageLog';
+            const submitBtn = document.getElementById('marriageSubmitBtn');
+            const originalText = submitBtn.innerHTML;
+            
+            logMessage(logId, '开始八字合婚测试', 'info');
+            
+            const data = {
+                male_info: {
+                    name: document.getElementById('maleName').value,
+                    birth_time: document.getElementById('maleBirthTime').value,
+                    birth_place: '北京'
+                },
+                female_info: {
+                    name: document.getElementById('femaleName').value,
+                    birth_time: document.getElementById('femaleBirthTime').value,
+                    birth_place: '上海'
+                },
+                ai_mode: document.getElementById('marriageAiMode').checked
+            };
+            
+            logMessage(logId, `请求数据: ${JSON.stringify(data)}`, 'info');
+            
+            // 进度提示
+            let progressMessages = [
+                '正在获取男方八字...',
+                '正在获取女方八字...',
+                '分析五行匹配度...',
+                '计算生肖合化...',
+                'AI增强分析中...'
+            ];
+            let currentProgress = 0;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>' + progressMessages[0];
+            submitBtn.disabled = true;
+            logMessage(logId, `进度: ${progressMessages[0]}`, 'info');
+            
+            const progressInterval = setInterval(() => {
+                if (currentProgress < progressMessages.length - 1) {
+                    currentProgress++;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>' + progressMessages[currentProgress];
+                    logMessage(logId, `进度: ${progressMessages[currentProgress]}`, 'info');
+                }
+            }, 3000);
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                controller.abort();
+                logMessage(logId, '触发60秒超时控制', 'warning');
+            }, 60000);
+            
+            const startTime = Date.now();
+            
+            fetch('/divination/api/bazi-marriage/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data),
+                signal: controller.signal
+            })
+            .then(response => {
+                const endTime = Date.now();
+                const duration = (endTime - startTime) / 1000;
+                logMessage(logId, `收到响应，耗时: ${duration.toFixed(2)}秒`, 'info');
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    logMessage(logId, `合婚分析成功！匹配度: ${data.compatibility_score}`, 'success');
+                    logMessage(logId, `AI增强: ${data.ai_enhanced}`, 'info');
+                } else {
+                    logMessage(logId, `合婚分析失败: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                logMessage(logId, `请求异常: ${error.message}`, 'error');
+                if (error.name === 'AbortError') {
+                    logMessage(logId, '请求被超时控制器中止', 'warning');
+                }
+            })
+            .finally(() => {
+                clearTimeout(timeoutId);
+                clearInterval(progressInterval);
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                logMessage(logId, '请求完成，按钮状态已恢复', 'info');
+            });
+        });
+
+        // 超时测试
+        document.getElementById('timeoutTestBtn').addEventListener('click', function() {
+            const logId = 'timeoutLog';
+            const submitBtn = this;
+            const originalText = submitBtn.innerHTML;
+            const timeoutDuration = parseInt(document.getElementById('timeoutDuration').value) * 1000;
+            
+            logMessage(logId, `开始超时测试，设置超时时间: ${timeoutDuration/1000}秒`, 'info');
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>测试中...';
+            submitBtn.disabled = true;
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                controller.abort();
+                logMessage(logId, `${timeoutDuration/1000}秒超时触发`, 'warning');
+            }, timeoutDuration);
+            
+            const startTime = Date.now();
+            
+            // 模拟一个永远不会响应的请求
+            fetch('/divination/api/bazi/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    name: '超时测试',
+                    birth_time: '1990-01-01T00:00',
+                    birth_place: '测试',
+                    ai_mode: true,
+                    timeout_test: true  // 特殊标记，可能会让后端延迟响应
+                }),
+                signal: controller.signal
+            })
+            .then(response => {
+                const endTime = Date.now();
+                const duration = (endTime - startTime) / 1000;
+                logMessage(logId, `意外收到响应，耗时: ${duration.toFixed(2)}秒`, 'success');
+                return response.json();
+            })
+            .then(data => {
+                logMessage(logId, '响应处理成功', 'success');
+            })
+            .catch(error => {
+                const endTime = Date.now();
+                const duration = (endTime - startTime) / 1000;
+                logMessage(logId, `请求在${duration.toFixed(2)}秒后中止`, 'warning');
+                
+                if (error.name === 'AbortError') {
+                    logMessage(logId, '✅ 超时控制机制正常工作', 'success');
+                } else {
+                    logMessage(logId, `其他错误: ${error.message}`, 'error');
+                }
+            })
+            .finally(() => {
+                clearTimeout(timeoutId);
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                logMessage(logId, '超时测试完成', 'info');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -47,16 +47,6 @@ class AIService:
         Returns:
             str: AI响应结果
         """
-        # 🔍 DEBUG: 打印实际发送给AI的提示词
-        print("=" * 80)
-        print("🤖 AI模式激活 - 正在发送提示词给DeepSeek-R1")
-        print("=" * 80)
-        print(f"📝 提示词内容（长度: {len(prompt)}字符）:")
-        print("-" * 40)
-        print(prompt)
-        print("-" * 40)
-        print("⏰ 开始AI调用...")
-        
         def ai_call():
             return chat(role="user", content=prompt)
         
@@ -68,14 +58,6 @@ class AIService:
                     
                     try:
                         result = future.result(timeout=timeout_seconds)
-                        
-                        # 🔍 DEBUG: 打印AI响应结果
-                        print(f"✅ AI调用成功! 响应长度: {len(result)}字符")
-                        print(f"📄 AI响应内容预览:")
-                        print("-" * 40)
-                        print(result[:200] + "..." if len(result) > 200 else result)
-                        print("=" * 80)
-                        
                         return result
                     except FutureTimeoutError:
                         retry_count += 1
@@ -186,34 +168,18 @@ class AIService:
             logger.error(f"AI增强合婚分析失败: {str(e)}")
             return f"AI增强分析失败，使用基础分析结果。\n\n{basic_analysis}"
     
-    def enhance_meihua_analysis(self, question, main_gua, bian_gua, dong_yao, basic_analysis):
+    def enhance_meihua_analysis(self, gua_info, basic_analysis):
         """
         AI增强梅花易数分析
         
         Args:
-            question: 用户提出的问题
-            main_gua: 主卦信息
-            bian_gua: 变卦信息
-            dong_yao: 动爻位置
+            gua_info: 卦象信息
             basic_analysis: 基础分析结果
         
         Returns:
             str: AI增强的梅花易数分析结果
         """
         try:
-            # 构建卦象信息字符串
-            gua_info = f"""问题：{question}
-            
-主卦：{main_gua['name']} 
-  上卦：{main_gua['upper']['name']}（{main_gua['upper']['nature']}）
-  下卦：{main_gua['lower']['name']}（{main_gua['lower']['nature']}）
-
-变卦：{bian_gua['name']}
-  上卦：{bian_gua['upper']['name']}（{bian_gua['upper']['nature']}）
-  下卦：{bian_gua['lower']['name']}（{bian_gua['lower']['nature']}）
-
-动爻：第{dong_yao}爻"""
-
             prompt = f"""请作为专业易学大师，深度解析以下梅花易数卦象：
 
 【卦象信息】
@@ -284,144 +250,6 @@ class AIService:
         except Exception as e:
             logger.error(f"AI增强每日运势分析失败: {str(e)}")
             return f"AI增强分析失败: {str(e)}"
-    
-    # 兼容的方法名，用于测试和外部调用
-    def get_bazi_analysis(self, bazi_data, gender, focus="综合"):
-        """
-        获取八字分析（兼容方法）
-        
-        Args:
-            bazi_data: 八字数据字符串
-            gender: 性别
-            focus: 关注重点
-        
-        Returns:
-            str: AI分析结果
-        """
-        # 构建模拟的数据结构
-        if isinstance(bazi_data, str):
-            parts = bazi_data.split()
-            bazi_dict = {
-                'year': parts[0] if len(parts) > 0 else '',
-                'month': parts[1] if len(parts) > 1 else '',
-                'day': parts[2] if len(parts) > 2 else '',
-                'hour': parts[3] if len(parts) > 3 else ''
-            }
-        else:
-            bazi_dict = bazi_data
-        
-        birth_info = {
-            'gender': gender,
-            'birth_time': bazi_data,
-            'birth_place': '未指定'
-        }
-        
-        return self.enhance_bazi_analysis(bazi_dict, f"基础分析：关注{focus}", birth_info)
-    
-    def get_meihua_analysis(self, shang_gua, xia_gua, dong_yao, question=""):
-        """
-        获取梅花易数分析（兼容方法）
-        
-        Args:
-            shang_gua: 上卦
-            xia_gua: 下卦
-            dong_yao: 动爻
-            question: 问题
-        
-        Returns:
-            str: AI分析结果
-        """
-        # 创建模拟的卦象数据结构
-        main_gua = {
-            'name': f"{shang_gua}{xia_gua}卦",
-            'upper': {'name': shang_gua, 'nature': ''},
-            'lower': {'name': xia_gua, 'nature': ''}
-        }
-        
-        bian_gua = {
-            'name': f"{shang_gua}{xia_gua}变卦",
-            'upper': {'name': shang_gua, 'nature': ''},
-            'lower': {'name': xia_gua, 'nature': ''}
-        }
-        
-        basic_analysis = f"基础分析：{shang_gua}变{xia_gua}，动爻在第{dong_yao}爻"
-        
-        return self.enhance_meihua_analysis(question, main_gua, bian_gua, dong_yao, basic_analysis)
-    
-    def get_marriage_analysis(self, male_bazi, female_bazi):
-        """
-        获取八字合婚分析（兼容方法）
-        
-        Args:
-            male_bazi: 男方八字
-            female_bazi: 女方八字
-        
-        Returns:
-            str: AI分析结果
-        """
-        if isinstance(male_bazi, str):
-            male_parts = male_bazi.split()
-            male_dict = {
-                'year': male_parts[0] if len(male_parts) > 0 else '',
-                'month': male_parts[1] if len(male_parts) > 1 else '',
-                'day': male_parts[2] if len(male_parts) > 2 else '',
-                'hour': male_parts[3] if len(male_parts) > 3 else ''
-            }
-        else:
-            male_dict = male_bazi
-            
-        if isinstance(female_bazi, str):
-            female_parts = female_bazi.split()
-            female_dict = {
-                'year': female_parts[0] if len(female_parts) > 0 else '',
-                'month': female_parts[1] if len(female_parts) > 1 else '',
-                'day': female_parts[2] if len(female_parts) > 2 else '',
-                'hour': female_parts[3] if len(female_parts) > 3 else ''
-            }
-        else:
-            female_dict = female_bazi
-        
-        male_info = {
-            'name': '男方',
-            'bazi': male_bazi,
-            'gender': '男'
-        }
-        
-        female_info = {
-            'name': '女方', 
-            'bazi': female_bazi,
-            'gender': '女'
-        }
-        
-        basic_analysis = f"基础合婚分析：男方{male_bazi}，女方{female_bazi}"
-        
-        return self.enhance_marriage_analysis(basic_analysis, male_info, female_info)
-    
-    def get_daily_fortune(self, constellation, date):
-        """
-        获取每日运势分析（兼容方法）
-        
-        Args:
-            constellation: 星座
-            date: 日期
-        
-        Returns:
-            str: AI分析结果
-        """
-        user_info = {
-            'constellation': constellation,
-            'shengxiao': '',
-            'gender': '',
-            'birth_year': ''
-        }
-        
-        fortune_data = {
-            'date': date,
-            'lunar_date': '',
-            'weekday': ''
-        }
-        
-        return self.enhance_daily_fortune(user_info, fortune_data)
 
 # 全局AI服务实例
 ai_service = AIService()

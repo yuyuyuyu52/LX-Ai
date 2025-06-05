@@ -316,6 +316,22 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('birthDate').setAttribute('max', today);
 });
 
+// 获取CSRF令牌的函数
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 document.getElementById('baziForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -346,11 +362,42 @@ document.getElementById('baziForm').addEventListener('submit', function(e) {
         return;
     }
     
-    // 显示加载状态
+    // 显示加载状态和进度提示
     const submitBtn = document.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>分析中...';
     submitBtn.disabled = true;
+    
+    // 进度提示
+    let progressMessages = [
+        '正在排列八字...',
+        '分析五行生克...',
+        '解读十神关系...',
+        '计算格局配置...',
+        '分析性格特征...',
+        'AI增强分析中...',
+        '优化分析结果...',
+        '生成最终报告...'
+    ];
+    let currentProgress = 0;
+    
+    const progressInterval = setInterval(() => {
+        currentProgress = (currentProgress + 1) % progressMessages.length;
+        submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>${progressMessages[currentProgress]}`;
+    }, 2500); // 缩短到2.5秒更新一次，增加动态感
+    
+    // 创建超时控制的fetch请求
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+        controller.abort();
+    }, 100000); // 100秒超时 - 配合后端90秒超时 - 匹配后端75秒配置
+    
+    console.log('发送八字分析请求:', {
+        birth_time: birthDate + ' ' + birthTime,
+        gender: gender,
+        birth_place: birthPlace,
+        ai_mode: aiMode
+    });
     
     // 发送分析请求
     fetch('/divination/api/bazi/', {
@@ -364,10 +411,15 @@ document.getElementById('baziForm').addEventListener('submit', function(e) {
             gender: gender,
             birth_place: birthPlace,
             ai_mode: aiMode
-        })
+        }),
+        signal: controller.signal
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('收到响应:', response.status);
+        return response.json();
+    })
     .then(data => {
+        console.log('处理数据:', data);
         if (data.success) {
             displayResult(data);
         } else {
@@ -376,9 +428,21 @@ document.getElementById('baziForm').addEventListener('submit', function(e) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('网络错误，请稍后重试');
+        if (error.name === 'AbortError') {
+            // 超时错误 - 提供更友好的提示
+            const errorMsg = aiMode ? 
+                'AI增强分析需要较长时间，请稍候再试，或选择普通模式获得快速结果。' : 
+                '八字分析超时，请检查网络连接后重试。';
+            alert(errorMsg);
+        } else if (error.message && error.message.includes('fetch')) {
+            alert('网络连接异常，请检查网络后重试');
+        } else {
+            alert('分析过程中出现问题，请稍后重试');
+        }
     })
     .finally(() => {
+        clearTimeout(timeoutId);
+        clearInterval(progressInterval);
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     });

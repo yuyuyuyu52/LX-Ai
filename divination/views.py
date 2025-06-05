@@ -1,5 +1,4 @@
 from django.shortcuts import render, get_object_or_404
-from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -7,6 +6,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 import json
 import random
+import logging
 from datetime import datetime, date
 from .models import BaziElement
 from core.models import DivinationRecord, UserProfile, DailyFortune
@@ -14,6 +14,8 @@ from core.bazi_calculator import bazi_calculator
 from core.fortune_calculator import meihua_calculator, fortune_calculator
 from core.ai_service import ai_service
 from core.decorators import check_usage_limit, membership_info
+
+logger = logging.getLogger(__name__)
 
 
 def parse_chinese_time(time_str):
@@ -103,6 +105,21 @@ def bazi_api(request):
                 if not profile.can_use_ai():
                     return JsonResponse({'success': False, 'error': 'AI增强分析仅限会员使用，请升级会员后再试。'})
 
+            # 🔍 DEBUG: 添加AI模式调试输出
+            print("=" * 60)
+            print(f"🔍 AI模式调试信息:")
+            print(f"   - ai_mode参数: {ai_mode}")
+            print(f"   - 用户已认证: {request.user.is_authenticated}")
+            if request.user.is_authenticated:
+                profile, _ = UserProfile.objects.get_or_create(user=request.user)
+                print(f"   - 用户名: {request.user.username}")
+                print(f"   - VIP状态: {profile.is_vip}")
+                print(f"   - 可使用AI: {profile.can_use_ai()}")
+                print(f"   - AI使用次数: {profile.ai_usage_count}")
+            else:
+                print(f"   - 用户未登录")
+            print("=" * 60)
+            
             # 解析出生时间
             try:
                 if isinstance(birth_time, str):
@@ -126,23 +143,45 @@ def bazi_api(request):
 
             # AI增强分析
             final_analysis = basic_analysis
+            actual_ai_used = False  # 跟踪AI是否真正被使用
             if ai_mode and request.user.is_authenticated:
+                print("🔍 准备调用AI增强分析...")
                 try:
                     birth_info = {
                         'birth_time': birth_time,
                         'gender': gender,
                         'birth_place': birth_place
                     }
+                    print(f"📋 AI分析参数: {birth_info}")
+                    print("🤖 调用 ai_service.enhance_bazi_analysis...")
+                    
                     ai_analysis = ai_service.enhance_bazi_analysis(
                         bazi_result['bazi_string'],
                         basic_analysis,
                         birth_info
                     )
+                    
+                    print(f"✅ AI分析完成，结果长度: {len(ai_analysis)}字符")
                     final_analysis = ai_analysis
+                    actual_ai_used = True  # 标记AI已成功使用
                     profile.ai_usage_count += 1
                     profile.save()
+                    print(f"📊 更新用户AI使用次数: {profile.ai_usage_count}")
                 except Exception as e:
-                    final_analysis = basic_analysis + f"\n\n[AI增强分析暂时不可用，已为您提供基础分析]"
+                    print(f"❌ AI增强分析失败: {str(e)}")
+                    logger.warning(f"AI增强分析失败，使用基础分析: {str(e)}")
+                    # AI失败时提供用户友好的提示，但仍返回基础分析
+                    final_analysis = basic_analysis + f"\n\n[注：AI增强分析暂时不可用，已为您提供完整的基础分析]"
+                    actual_ai_used = False  # 标记AI未成功使用
+            else:
+                if ai_mode:
+                    print("⚠️  AI模式已启用但条件不满足:")
+                    print(f"   - ai_mode: {ai_mode}")
+                    print(f"   - 用户已认证: {request.user.is_authenticated}")
+                    if not request.user.is_authenticated:
+                        print("   - 建议：用户需要登录才能使用AI功能")
+                else:
+                    print("ℹ️  使用普通模式（未启用AI）")
 
             # 保存占卜记录
             if request.user.is_authenticated:
@@ -150,13 +189,13 @@ def bazi_api(request):
                     user=request.user,
                     divination_type='bazi',
                     result=final_analysis,
-                    ai_enhanced=ai_mode
+                    ai_enhanced=actual_ai_used  # 使用实际的AI使用状态
                 )
                 from core.models import Notification
                 Notification.objects.create(
                     user=request.user,
                     title='八字分析完成',
-                    message=f'您的{"AI增强" if ai_mode else ""}八字分析报告已生成完成。',
+                    message=f'您的{"AI增强" if actual_ai_used else ""}八字分析报告已生成完成。',
                     notification_type='success'
                 )
 
@@ -164,7 +203,7 @@ def bazi_api(request):
                 'success': True,
                 'bazi': bazi_result['bazi_string'],
                 'analysis': final_analysis,
-                'ai_enhanced': ai_mode,
+                'ai_enhanced': actual_ai_used,  # 使用实际的AI使用状态
                 'detail_info': {
                     'shengxiao': bazi_result['shengxiao'],
                     'wuxing_count': bazi_result['wuxing_count'],
@@ -199,6 +238,21 @@ def bazi_marriage_api(request):
                 profile, _ = UserProfile.objects.get_or_create(user=request.user)
                 if not profile.can_use_ai():
                     return JsonResponse({'success': False, 'error': 'AI增强分析仅限会员使用，请升级会员后再试。'})
+
+            # 🔍 DEBUG: 添加AI模式调试输出
+            print("=" * 60)
+            print(f"🔍 八字合婚AI模式调试信息:")
+            print(f"   - ai_mode参数: {ai_mode}")
+            print(f"   - 用户已认证: {request.user.is_authenticated}")
+            if request.user.is_authenticated:
+                profile, _ = UserProfile.objects.get_or_create(user=request.user)
+                print(f"   - 用户名: {request.user.username}")
+                print(f"   - VIP状态: {profile.is_vip}")
+                print(f"   - 可使用AI: {profile.can_use_ai()}")
+                print(f"   - AI使用次数: {profile.ai_usage_count}")
+            else:
+                print(f"   - 用户未登录")
+            print("=" * 60)
 
             # 解析出生时间
             try:
@@ -271,20 +325,46 @@ def bazi_marriage_api(request):
 
             # AI增强分析
             final_analysis = basic_analysis
+            actual_ai_used = False  # 跟踪AI是否真正被使用
             if ai_mode and request.user.is_authenticated:
+                print("🔍 准备调用八字合婚AI增强分析...")
                 try:
                     from core.ai_service import AIService
                     ai_service = AIService()
+                    
+                    male_info_for_ai = {
+                        'name': male_name,
+                        'bazi': f"{male_bazi_data['bazi_string']['year']} {male_bazi_data['bazi_string']['month']} {male_bazi_data['bazi_string']['day']} {male_bazi_data['bazi_string']['hour']}",
+                        'birth_time': male_birth_time
+                    }
+                    
+                    female_info_for_ai = {
+                        'name': female_name,
+                        'bazi': f"{female_bazi_data['bazi_string']['year']} {female_bazi_data['bazi_string']['month']} {female_bazi_data['bazi_string']['day']} {female_bazi_data['bazi_string']['hour']}",
+                        'birth_time': female_birth_time
+                    }
+                    
+                    print(f"📋 八字合婚AI分析参数: 男方={male_info_for_ai}, 女方={female_info_for_ai}")
+                    print("🤖 调用 ai_service.enhance_marriage_analysis...")
+                    
                     ai_analysis = ai_service.enhance_marriage_analysis(
-                        male_bazi_data['bazi_string'],
-                        female_bazi_data['bazi_string'],
-                        basic_analysis
+                        basic_analysis,
+                        male_info_for_ai,
+                        female_info_for_ai
                     )
+                    
+                    print(f"✅ 八字合婚AI分析完成，结果长度: {len(ai_analysis)}字符")
                     final_analysis = ai_analysis
+                    actual_ai_used = True  # 标记AI已成功使用
                     profile.ai_usage_count += 1
                     profile.save()
+                    print(f"📊 更新用户AI使用次数: {profile.ai_usage_count}")
                 except Exception as e:
-                    final_analysis = basic_analysis + f"\n\n[AI增强分析暂时不可用，已为您提供基础分析]"
+                    print(f"❌ 八字合婚AI增强分析失败: {str(e)}")
+                    final_analysis = basic_analysis + f"\n\n[注：AI增强分析暂时不可用，已为您提供完整的基础分析]"
+                    actual_ai_used = False  # 标记AI未成功使用
+            else:
+                print("🔍 八字合婚未启用AI模式或用户未登录")
 
             # 保存占卜记录
             if request.user.is_authenticated:
@@ -298,7 +378,7 @@ def bazi_marriage_api(request):
                 Notification.objects.create(
                     user=request.user,
                     title='八字合婚完成',
-                    message=f'{male_name}与{female_name}的{"AI增强" if ai_mode else ""}八字合婚分析已完成。',
+                    message=f'{male_name}与{female_name}的{"AI增强" if actual_ai_used else ""}八字合婚分析已完成。',
                     notification_type='success'
                 )
 
@@ -306,7 +386,7 @@ def bazi_marriage_api(request):
                 'success': True,
                 'compatibility_score': marriage_result['total_score'],
                 'analysis': final_analysis,
-                'ai_enhanced': ai_mode,
+                'ai_enhanced': actual_ai_used,  # 使用实际的AI使用状态
                 'detail_info': {
                     'male_shengxiao': marriage_result['male_shengxiao'],
                     'female_shengxiao': marriage_result['female_shengxiao'],
@@ -383,10 +463,31 @@ def meihua_api(request):
             basic_analysis = generate_basic_meihua_analysis(result)
             
             # AI增强分析
-            if ai_mode:
+            final_analysis = basic_analysis
+            actual_ai_used = False  # 跟踪AI是否真正被使用
+            
+            if ai_mode and request.user.is_authenticated:
+                # 🔍 DEBUG: 添加AI模式调试输出
+                print("=" * 60)
+                print(f"🔍 梅花易数AI模式调试信息:")
+                print(f"   - ai_mode参数: {ai_mode}")
+                print(f"   - 用户已认证: {request.user.is_authenticated}")
+                if request.user.is_authenticated:
+                    profile = request.user.userprofile
+                    print(f"   - 用户名: {request.user.username}")
+                    print(f"   - VIP状态: {profile.is_vip}")
+                    print(f"   - 可使用AI: {profile.can_use_ai()}")
+                    print(f"   - AI使用次数: {profile.ai_usage_count}")
+                print("=" * 60)
+                
+                print("🔍 准备调用梅花易数AI增强分析...")
                 try:
                     from core.ai_service import AIService
                     ai_service = AIService()
+                    
+                    print(f"📋 AI分析参数: 问题={question}, 主卦={result['zhu_gua']['name']}, 变卦={result['bian_gua']['name']}, 动爻={result['dong_yao']}")
+                    print("🤖 调用 ai_service.enhance_meihua_analysis...")
+                    
                     ai_analysis = ai_service.enhance_meihua_analysis(
                         question=question,
                         main_gua=result['zhu_gua'],
@@ -395,17 +496,23 @@ def meihua_api(request):
                         basic_analysis=basic_analysis
                     )
                     
+                    print(f"✅ AI分析完成，结果长度: {len(ai_analysis)}字符")
+                    final_analysis = ai_analysis
+                    actual_ai_used = True  # 标记AI已成功使用
+                    
                     # 更新用户AI使用次数
                     user_profile.ai_usage_count += 1
                     user_profile.save()
+                    print(f"📊 更新用户AI使用次数: {user_profile.ai_usage_count}")
                     
-                    final_analysis = ai_analysis
                 except Exception as e:
-                    # AI服务失败时使用基础分析
-                    final_analysis = basic_analysis
-                    ai_mode = False
+                    print(f"❌ AI增强分析失败: {str(e)}")
+                    logger.warning(f"梅花易数AI增强分析失败，使用基础分析: {str(e)}")
+                    # AI失败时提供用户友好的提示，但仍返回基础分析
+                    final_analysis = basic_analysis + f"\n\n[注：AI增强分析暂时不可用，已为您提供完整的基础分析]"
+                    actual_ai_used = False  # 标记AI未成功使用
             else:
-                final_analysis = basic_analysis
+                print("🔍 梅花易数未启用AI模式或用户未登录")
             
             # 保存占卜记录
             if request.user.is_authenticated:
@@ -414,7 +521,7 @@ def meihua_api(request):
                     divination_type='meihua',
                     question=question,
                     result=final_analysis,
-                    ai_enhanced=ai_mode
+                    ai_enhanced=actual_ai_used  # 使用实际的AI使用状态
                 )
                 
                 # 创建通知
@@ -422,7 +529,7 @@ def meihua_api(request):
                 Notification.objects.create(
                     user=request.user,
                     title='梅花易数完成',
-                    message=f'您关于"{question[:20]}..."的{"AI增强" if ai_mode else ""}梅花易数占卜已完成。',
+                    message=f'您关于"{question[:20]}..."的{"AI增强" if actual_ai_used else ""}梅花易数占卜已完成。',
                     notification_type='success'
                 )
             
@@ -432,7 +539,7 @@ def meihua_api(request):
                 'bian_gua': result['bian_gua'],
                 'dong_yao': result['dong_yao'],
                 'analysis': final_analysis,
-                'ai_enhanced': ai_mode,
+                'ai_enhanced': actual_ai_used,  # 使用实际AI使用状态
                 'detail_info': {
                     'main_gua_name': result['zhu_gua']['name'],
                     'bian_gua_name': result['bian_gua']['name'],
@@ -465,6 +572,21 @@ def daily_fortune_api(request):
                 user_profile = request.user.userprofile
                 if not user_profile.can_use_ai():
                     return JsonResponse({'success': False, 'error': 'AI模式仅限会员使用'})
+
+            # 🔍 DEBUG: 添加AI模式调试输出
+            print("=" * 60)
+            print(f"🔍 每日运势AI模式调试信息:")
+            print(f"   - ai_mode参数: {ai_mode}")
+            print(f"   - 用户已认证: {request.user.is_authenticated}")
+            if request.user.is_authenticated:
+                profile, _ = UserProfile.objects.get_or_create(user=request.user)
+                print(f"   - 用户名: {request.user.username}")
+                print(f"   - VIP状态: {profile.is_vip}")
+                print(f"   - 可使用AI: {profile.can_use_ai()}")
+                print(f"   - AI使用次数: {profile.ai_usage_count}")
+            else:
+                print(f"   - 用户未登录")
+            print("=" * 60)
             
             # 解析出生日期获取生肖
             from datetime import datetime
@@ -484,28 +606,47 @@ def daily_fortune_api(request):
             result = calculator.calculate_daily_fortune(zodiac, user_birth_date=birth_dt.date())
             
             # AI增强分析
-            if ai_mode:
+            final_analysis = result['description']
+            actual_ai_used = False  # 跟踪AI是否真正被使用
+            if ai_mode and request.user.is_authenticated:
+                print("🔍 准备调用每日运势AI增强分析...")
                 try:
                     from core.ai_service import AIService
                     ai_service = AIService()
-                    ai_analysis = ai_service.enhance_daily_fortune(
-                        zodiac=result['zodiac'],
-                        date=result['date'],
-                        basic_fortune=result['description'],
-                        user_birth_date=birth_dt.date()
-                    )
+                    
+                    user_info = {
+                        'shengxiao': zodiac,
+                        'constellation': '',
+                        'gender': '',
+                        'birth_year': str(birth_dt.year)
+                    }
+                    
+                    fortune_data = {
+                        'date': str(result['date']),
+                        'lunar_date': '',
+                        'weekday': result['date'].strftime('%A')
+                    }
+                    
+                    print(f"📋 每日运势AI分析参数: 用户信息={user_info}, 运势数据={fortune_data}")
+                    print("🤖 调用 ai_service.enhance_daily_fortune...")
+                    
+                    ai_analysis = ai_service.enhance_daily_fortune(user_info, fortune_data)
+                    
+                    print(f"✅ 每日运势AI分析完成，结果长度: {len(ai_analysis)}字符")
+                    final_analysis = ai_analysis
+                    actual_ai_used = True  # 标记AI已成功使用
                     
                     # 更新用户AI使用次数
                     user_profile.ai_usage_count += 1
                     user_profile.save()
-                    
-                    final_analysis = ai_analysis
+                    print(f"📊 更新用户AI使用次数: {user_profile.ai_usage_count}")
                 except Exception as e:
+                    print(f"❌ 每日运势AI增强分析失败: {str(e)}")
                     # AI服务失败时使用基础分析
-                    final_analysis = result['description']
-                    ai_mode = False
+                    final_analysis = result['description'] + f"\n\n[注：AI增强分析暂时不可用，已为您提供完整的基础分析]"
+                    actual_ai_used = False  # 标记AI未成功使用
             else:
-                final_analysis = result['description']
+                print("🔍 每日运势未启用AI模式或用户未登录")
             
             # 保存占卜记录
             if request.user.is_authenticated:

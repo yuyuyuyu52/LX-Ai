@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>八字分析按钮修复</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #4e73df;
+        }
+        .button {
+            padding: 10px 15px;
+            background: #4e73df;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .debug-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        h3 {
+            margin-top: 40px;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+        .step {
+            background: #f1f1f1;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-left: 3px solid #4e73df;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            overflow-x: auto;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <h1>八字分析按钮修复</h1>
+    <p>我们已经修复了八字分析按钮点击不响应的问题。问题主要是缺少<code>getCookie</code>函数，现在已经添加了这个函数。</p>
+    
+    <h2>问题分析</h2>
+    <p>通过代码审查，我们发现以下主要问题：</p>
+    <ol>
+        <li>八字分析页面的表单提交使用了<code>getCookie</code>函数获取CSRF令牌，但该函数未定义</li>
+        <li>页面中没有添加控制台日志，导致错误难以跟踪</li>
+    </ol>
+    
+    <h2>修复步骤</h2>
+    <div class="step">
+        <h3>第1步：添加getCookie函数</h3>
+        <p>我们在页面JavaScript中添加了<code>getCookie</code>函数实现：</p>
+        <pre><code>function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}</code></pre>
+    </div>
+    
+    <div class="step">
+        <h3>第2步：添加控制台日志</h3>
+        <p>我们添加了更多控制台日志来跟踪请求过程：</p>
+        <pre><code>console.log('发送八字分析请求:', {
+    birth_time: birthDate + ' ' + birthTime,
+    gender: gender,
+    birth_place: birthPlace,
+    ai_mode: aiMode
+});
+
+// 在fetch回调中添加日志
+.then(response => {
+    console.log('收到响应:', response.status);
+    return response.json();
+})
+.then(data => {
+    console.log('处理数据:', data);
+    if (data.success) {
+        displayResult(data);
+    } else {
+        alert('分析失败：' + data.error);
+    }
+})</code></pre>
+    </div>
+    
+    <h2>测试结果</h2>
+    <p>我们通过Python脚本直接测试了API调用，确认API能够正常工作。目前主要问题已经解决，八字分析按钮应该能够正常工作了。</p>
+    
+    <h3>后续建议</h3>
+    <ol>
+        <li>为其他页面添加更多调试日志，便于追踪问题</li>
+        <li>考虑在前端添加全局的错误处理机制</li>
+        <li>添加更友好的用户反馈，比如加载状态和错误提示</li>
+    </ol>
+    
+    <div class="debug-box">
+        <h3>调试信息</h3>
+        <p>如果仍然遇到问题，请打开浏览器控制台(F12)查看JavaScript错误和网络请求情况。</p>
+        <p>API端点：<code>/divination/api/bazi/</code></p>
+        <p>请求格式：</p>
+        <pre><code>{
+    "birth_time": "1990-01-01 子时",
+    "gender": "male",
+    "birth_place": "北京",
+    "ai_mode": false
+}</code></pre>
+    </div>
+    
+    <a href="http://127.0.0.1:8000/divination/bazi/" class="button">访问八字分析页面测试</a>
+</body>
+</html>
