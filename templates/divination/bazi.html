@@ -467,10 +467,7 @@ function displayResult(data) {
     document.getElementById('hourPillar').textContent = data.bazi.hour;
     
     // 显示分析内容
-    document.getElementById('analysisContent').innerHTML = 
-        '<div class="analysis-text">' + 
-        formatMarkdown(data.analysis) + 
-        '</div>';
+    document.getElementById('analysisContent').innerHTML = formatMarkdown(data.analysis);
     
     // 显示AI增强标识
     if (data.ai_enhanced) {

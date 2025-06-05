@@ -473,20 +473,20 @@ function displayFortuneResult(data) {
         
         if (sections.length > 1) {
             // 第一部分是基础分析，其余是AI增强内容
-            document.getElementById('fortuneAnalysis').innerHTML = formatAnalysisText(sections[0]);
+            document.getElementById('fortuneAnalysis').innerHTML = formatMarkdown(sections[0]);
             
             // AI增强部分
             const aiContent = sections.slice(1).join('\n\n');
-            document.getElementById('aiAnalysisContent').innerHTML = formatAIAnalysis(aiContent);
+            document.getElementById('aiAnalysisContent').innerHTML = formatMarkdown(aiContent);
             document.getElementById('aiAnalysisSection').style.display = 'block';
         } else {
             // 如果没有明确分段，全部作为AI分析显示
-            document.getElementById('fortuneAnalysis').innerHTML = formatAnalysisText(analysisText);
+            document.getElementById('fortuneAnalysis').innerHTML = formatMarkdown(analysisText);
             document.getElementById('aiAnalysisSection').style.display = 'none';
         }
     } else {
         // 基础分析模式
-        document.getElementById('fortuneAnalysis').innerHTML = formatAnalysisText(data.analysis);
+        document.getElementById('fortuneAnalysis').innerHTML = formatMarkdown(data.analysis);
         document.getElementById('aiAnalysisSection').style.display = 'none';
         document.getElementById('aiEnhancedBadge').style.display = 'none';
     }
@@ -515,19 +515,6 @@ function updateFortuneScore(elementId, score) {
     } else {
         element.classList.add('text-danger');
     }
-}
-
-// 这些函数现在使用全局的formatMarkdown和formatAIMarkdown函数，保持兼容性
-function formatAnalysisText(text) {
-    if (!text) return '';
-    
-    return formatMarkdown(text);
-}
-
-function formatAIAnalysis(text) {
-    if (!text) return '';
-    
-    return formatAIMarkdown(text);
 }
 
 function getCookie(name) {
