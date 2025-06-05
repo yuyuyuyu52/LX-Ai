@@ -6,6 +6,7 @@
 
 from datetime import datetime, timedelta
 import math
+from lunar_python import Lunar  # 引入农历转换库
 
 class BaziCalculator:
     """八字计算器"""
@@ -36,6 +37,50 @@ class BaziCalculator:
     # 生肖对应
     SHENGXIAO = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪']
     
+    # 五行生克关系
+    WUXING_SHENG = {
+        '木': '火', '火': '土', '土': '金', '金': '水', '水': '木'
+    }
+    
+    WUXING_KE = {
+        '木': '土', '土': '水', '水': '火', '火': '金', '金': '木'
+    }
+    
+    # 五行相生相克解释
+    WUXING_RELATIONS = {
+        '木生火': '木生火，表示生机勃勃，充满活力',
+        '火生土': '火生土，表示温暖滋养，孕育万物',
+        '土生金': '土生金，表示厚德载物，孕育财富',
+        '金生水': '金生水，表示刚柔并济，智慧通达',
+        '水生木': '水生木，表示滋养生长，生机无限',
+        '木克土': '木克土，表示破土而出，突破束缚',
+        '土克水': '土克水，表示固守本分，稳重踏实',
+        '水克火': '水克火，表示冷静克制，理性思考',
+        '火克金': '火克金，表示热情奔放，勇于创新',
+        '金克木': '金克木，表示刚毅果断，雷厉风行'
+    }
+    
+    # 十神解释
+    SHISHEN_INTERPRETATIONS = {
+        '比肩': '表示同辈、朋友、竞争对手，性格独立自主',
+        '劫财': '表示争夺、竞争、压力，性格好胜要强',
+        '食神': '表示才华、智慧、创造力，性格聪明伶俐',
+        '伤官': '表示叛逆、创新、突破，性格特立独行',
+        '偏财': '表示意外之财、投机、冒险，性格灵活多变',
+        '正财': '表示稳定收入、理财、储蓄，性格踏实稳重',
+        '七杀': '表示压力、挑战、竞争，性格坚强果断',
+        '正官': '表示权威、地位、责任，性格正直严谨',
+        '偏印': '表示学习、思考、研究，性格好学上进',
+        '正印': '表示贵人、帮助、支持，性格温和善良'
+    }
+    
+    # 格局解释
+    GEJU_INTERPRETATIONS = {
+        '身旺格': '日主力量强，性格坚强，有领导才能，但需注意控制脾气',
+        '身弱格': '日主力量弱，性格温和，善于合作，但需注意增强自信',
+        '中和格': '日主力量适中，性格平和，处事圆融，但需注意把握分寸'
+    }
+    
     def __init__(self):
         pass
     
@@ -50,10 +95,19 @@ class BaziCalculator:
         Returns:
             dict: 包含完整八字信息的字典
         """
-        # 转换为农历时间（简化处理，实际应使用专业农历转换）
-        year_gan, year_zhi = self._get_year_ganzhi(birth_time.year)
-        month_gan, month_zhi = self._get_month_ganzhi(birth_time.year, birth_time.month)
+        # 转换为农历时间
+        lunar = Lunar.fromDate(birth_time)
+        
+        # 获取年柱
+        year_gan, year_zhi = self._get_year_ganzhi(lunar.getYear())
+        
+        # 获取月柱
+        month_gan, month_zhi = self._get_month_ganzhi(lunar.getYear(), lunar.getMonth())
+        
+        # 获取日柱
         day_gan, day_zhi = self._get_day_ganzhi(birth_time)
+        
+        # 获取时柱
         hour_gan, hour_zhi = self._get_hour_ganzhi(birth_time.hour, day_gan)
         
         bazi = {
@@ -76,7 +130,16 @@ class BaziCalculator:
         geju = self._determine_geju(bazi, ri_zhu, wuxing_count)
         
         # 生肖
-        shengxiao = self.SHENGXIAO[(birth_time.year - 4) % 12]
+        shengxiao = self.SHENGXIAO[(lunar.getYear() - 4) % 12]
+        
+        # 五行关系分析
+        wuxing_relations = self._analyze_wuxing_relations(bazi)
+        
+        # 十神详细分析
+        shishen_details = self._analyze_shishen_details(shishen_analysis)
+        
+        # 格局详细分析
+        geju_details = self._analyze_geju_details(geju, wuxing_count)
         
         result = {
             'bazi': bazi,
@@ -91,7 +154,10 @@ class BaziCalculator:
             'shishen': shishen_analysis,
             'geju': geju,
             'shengxiao': shengxiao,
-            'gender': gender
+            'gender': gender,
+            'wuxing_relations': wuxing_relations,
+            'shishen_details': shishen_details,
+            'geju_details': geju_details
         }
         
         return result
@@ -126,11 +192,11 @@ class BaziCalculator:
     
     def _get_day_ganzhi(self, birth_time):
         """计算日柱干支"""
-        # 以1900年1月1日庚辰日为基准
-        base_date = datetime(1900, 1, 1)
+        # 以1900年1月31日庚辰日为基准
+        base_date = datetime(1900, 1, 31)
         days_diff = (birth_time.date() - base_date.date()).days
         
-        # 1900年1月1日是庚辰日，庚=6，辰=4
+        # 1900年1月31日是庚辰日，庚=6，辰=4
         gan_index = (6 + days_diff) % 10
         zhi_index = (4 + days_diff) % 12
         
@@ -140,16 +206,23 @@ class BaziCalculator:
         """计算时柱干支"""
         # 时辰地支
         hour_zhi_map = {
-            range(23, 24): '子', range(0, 1): '子',
-            range(1, 3): '丑', range(3, 5): '寅', range(5, 7): '卯',
-            range(7, 9): '辰', range(9, 11): '巳', range(11, 13): '午',
-            range(13, 15): '未', range(15, 17): '申', range(17, 19): '酉',
-            range(19, 21): '戌', range(21, 23): '亥'
+            (23, 0): '子',  # 23:00-01:00
+            (1, 2): '丑',   # 01:00-03:00
+            (3, 4): '寅',   # 03:00-05:00
+            (5, 6): '卯',   # 05:00-07:00
+            (7, 8): '辰',   # 07:00-09:00
+            (9, 10): '巳',  # 09:00-11:00
+            (11, 12): '午', # 11:00-13:00
+            (13, 14): '未', # 13:00-15:00
+            (15, 16): '申', # 15:00-17:00
+            (17, 18): '酉', # 17:00-19:00
+            (19, 20): '戌', # 19:00-21:00
+            (21, 22): '亥'  # 21:00-23:00
         }
         
         zhi = None
-        for time_range, zhi_name in hour_zhi_map.items():
-            if hour in time_range:
+        for (start, end), zhi_name in hour_zhi_map.items():
+            if start <= hour <= end:
                 zhi = zhi_name
                 break
         
@@ -236,13 +309,22 @@ class BaziCalculator:
         """判断格局"""
         ri_zhu_wuxing = self.WUXING_TIANGAN[ri_zhu]
         
-        # 简化的格局判断
-        total_count = sum(wuxing_count.values())
-        ri_zhu_strength = wuxing_count[ri_zhu_wuxing] / total_count
+        # 计算日主五行力量
+        ri_zhu_strength = wuxing_count[ri_zhu_wuxing]
         
-        if ri_zhu_strength >= 0.4:
+        # 计算生助日主的五行力量
+        sheng_ri_zhu = wuxing_count.get(self.WUXING_SHENG.get(ri_zhu_wuxing), 0)
+        
+        # 计算克制日主的五行力量
+        ke_ri_zhu = wuxing_count.get(self.WUXING_KE.get(ri_zhu_wuxing), 0)
+        
+        # 计算总力量
+        total_strength = ri_zhu_strength + sheng_ri_zhu - ke_ri_zhu
+        
+        # 判断格局
+        if total_strength >= 4:
             return '身旺格'
-        elif ri_zhu_strength <= 0.2:
+        elif total_strength <= 1:
             return '身弱格'
         else:
             return '中和格'
@@ -399,6 +481,108 @@ class BaziCalculator:
         }
         
         return geju_scores.get((male_geju, female_geju), 70)
+    
+    def _analyze_wuxing_relations(self, bazi):
+        """分析五行关系"""
+        relations = []
+        
+        # 分析天干五行关系
+        for pillar in ['year', 'month', 'day', 'hour']:
+            gan = bazi[pillar]['gan']
+            gan_wuxing = self.WUXING_TIANGAN[gan]
+            
+            for other_pillar in ['year', 'month', 'day', 'hour']:
+                if pillar != other_pillar:
+                    other_gan = bazi[other_pillar]['gan']
+                    other_wuxing = self.WUXING_TIANGAN[other_gan]
+                    
+                    # 分析生克关系
+                    if self.WUXING_SHENG[gan_wuxing] == other_wuxing:
+                        relations.append({
+                            'type': '生',
+                            'from': f'{pillar}干{gan}',
+                            'to': f'{other_pillar}干{other_gan}',
+                            'interpretation': self.WUXING_RELATIONS[f'{gan_wuxing}生{other_wuxing}']
+                        })
+                    elif self.WUXING_KE[gan_wuxing] == other_wuxing:
+                        relations.append({
+                            'type': '克',
+                            'from': f'{pillar}干{gan}',
+                            'to': f'{other_pillar}干{other_gan}',
+                            'interpretation': self.WUXING_RELATIONS[f'{gan_wuxing}克{other_wuxing}']
+                        })
+        
+        # 分析地支五行关系
+        for pillar in ['year', 'month', 'day', 'hour']:
+            zhi = bazi[pillar]['zhi']
+            zhi_wuxing = self.WUXING_DIZHI[zhi]
+            
+            for other_pillar in ['year', 'month', 'day', 'hour']:
+                if pillar != other_pillar:
+                    other_zhi = bazi[other_pillar]['zhi']
+                    other_wuxing = self.WUXING_DIZHI[other_zhi]
+                    
+                    # 分析生克关系
+                    if self.WUXING_SHENG[zhi_wuxing] == other_wuxing:
+                        relations.append({
+                            'type': '生',
+                            'from': f'{pillar}支{zhi}',
+                            'to': f'{other_pillar}支{other_zhi}',
+                            'interpretation': self.WUXING_RELATIONS[f'{zhi_wuxing}生{other_wuxing}']
+                        })
+                    elif self.WUXING_KE[zhi_wuxing] == other_wuxing:
+                        relations.append({
+                            'type': '克',
+                            'from': f'{pillar}支{zhi}',
+                            'to': f'{other_pillar}支{other_zhi}',
+                            'interpretation': self.WUXING_RELATIONS[f'{zhi_wuxing}克{other_wuxing}']
+                        })
+        
+        return relations
+    
+    def _analyze_shishen_details(self, shishen_analysis):
+        """分析十神详细含义"""
+        details = {}
+        
+        for pillar, shishen in shishen_analysis.items():
+            details[pillar] = {
+                'name': shishen,
+                'interpretation': self.SHISHEN_INTERPRETATIONS[shishen]
+            }
+        
+        return details
+    
+    def _analyze_geju_details(self, geju, wuxing_count):
+        """分析格局详细含义"""
+        return {
+            'name': geju,
+            'interpretation': self.GEJU_INTERPRETATIONS[geju],
+            'wuxing_analysis': self._analyze_geju_wuxing(geju, wuxing_count)
+        }
+    
+    def _analyze_geju_wuxing(self, geju, wuxing_count):
+        """分析格局的五行特征"""
+        total = sum(wuxing_count.values())
+        wuxing_ratios = {k: v/total for k, v in wuxing_count.items()}
+        
+        if geju == '身旺格':
+            return {
+                'strength': '强',
+                'characteristics': '五行力量集中，气势强盛',
+                'suggestions': '宜发挥优势，但需注意控制'
+            }
+        elif geju == '身弱格':
+            return {
+                'strength': '弱',
+                'characteristics': '五行力量分散，气势较弱',
+                'suggestions': '宜寻求帮助，增强实力'
+            }
+        else:  # 中和格
+            return {
+                'strength': '中',
+                'characteristics': '五行力量均衡，气势平和',
+                'suggestions': '宜顺势而为，保持平衡'
+            }
 
 # 全局八字计算器实例
 bazi_calculator = BaziCalculator()

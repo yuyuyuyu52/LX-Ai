@@ -68,31 +68,6 @@
                             </div>
                         </div>
 
-                        <!-- AI模式选择 -->
-                        {% if user.is_authenticated and user.userprofile.is_vip %}
-                        <div class="mb-4 p-3 bg-light rounded">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="aiMode">
-                                <label class="form-check-label" for="aiMode">
-                                    <i class="fas fa-robot me-2 text-primary"></i>
-                                    <strong>AI增强分析</strong> 
-                                    <span class="badge bg-primary ms-2">会员专享</span>
-                                </label>
-                                <div class="form-text">使用AI技术提供更详细和个性化的八字分析</div>
-                            </div>
-                        </div>
-                        {% elif user.is_authenticated %}
-                        <div class="mb-4 p-3 bg-light rounded">
-                            <p class="mb-2"><i class="fas fa-robot me-2 text-muted"></i>AI增强分析 <span class="badge bg-secondary">会员专享</span></p>
-                            <p class="text-muted small mb-0">升级会员即可享受AI增强的个性化八字分析</p>
-                        </div>
-                        {% else %}
-                        <div class="mb-4 p-3 bg-light rounded">
-                            <p class="mb-2"><i class="fas fa-robot me-2 text-muted"></i>AI增强分析 <span class="badge bg-secondary">需要登录</span></p>
-                            <p class="text-muted small mb-0">登录并升级会员即可享受AI增强分析</p>
-                        </div>
-                        {% endif %}
-
                         <div class="d-grid">
                             <button type="submit" class="zen-btn zen-btn-primary zen-btn-lg">
                                 <i class="fas fa-yin-yang me-2"></i>开始八字分析
@@ -149,9 +124,26 @@
                             <!-- 分析结果将通过JavaScript填充 -->
                         </div>
 
-                        <!-- AI增强标识 -->
-                        <div id="aiEnhancedBadge" class="text-center mt-4" style="display: none;">
-                            <span class="badge bg-primary"><i class="fas fa-robot me-1"></i>AI增强分析</span>
+                        <!-- AI深度分析按钮 -->
+                        <div id="aiAnalysisButton" class="text-center mt-4" style="display: none;">
+                            <button class="zen-btn zen-btn-primary" onclick="requestAIAnalysis()">
+                                <i class="fas fa-robot me-2"></i>AI深度分析
+                            </button>
+                        </div>
+
+                        <!-- AI分析内容 -->
+                        <div id="aiAnalysisContent" class="zen-analysis-content mt-4" style="display: none;">
+                            <div class="d-flex align-items-center mb-3">
+                                <h5 class="text-zen-primary mb-0">
+                                    <i class="fas fa-robot me-2"></i>AI深度分析
+                                </h5>
+                                <div class="ms-auto">
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-brain me-1"></i>AI智能分析
+                                    </span>
+                                </div>
+                            </div>
+                            <div id="aiAnalysisText"></div>
                         </div>
 
                         <div class="text-center mt-5">
@@ -340,7 +332,6 @@ document.getElementById('baziForm').addEventListener('submit', function(e) {
     const birthTime = document.getElementById('birthTime').value;
     const gender = document.getElementById('gender').value;
     const birthPlace = document.getElementById('birthPlace').value;
-    const aiMode = document.getElementById('aiMode') ? document.getElementById('aiMode').checked : false;
     
     // 验证表单
     if (!birthDate || !birthTime || !gender) {
@@ -376,31 +367,22 @@ document.getElementById('baziForm').addEventListener('submit', function(e) {
         '解读十神关系...',
         '计算格局配置...',
         '分析性格特征...',
-        'AI增强分析中...',
-        '优化分析结果...',
-        '生成最终报告...'
+        '生成分析报告...'
     ];
     let currentProgress = 0;
     
     const progressInterval = setInterval(() => {
         currentProgress = (currentProgress + 1) % progressMessages.length;
         submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>${progressMessages[currentProgress]}`;
-    }, 2500); // 缩短到2.5秒更新一次，增加动态感
+    }, 2500);
     
     // 创建超时控制的fetch请求
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
         controller.abort();
-    }, 100000); // 100秒超时 - 配合后端90秒超时 - 匹配后端75秒配置
+    }, 100000);
     
-    console.log('发送八字分析请求:', {
-        birth_time: birthDate + ' ' + birthTime,
-        gender: gender,
-        birth_place: birthPlace,
-        ai_mode: aiMode
-    });
-    
-    // 发送分析请求
+    // 发送分析请求（默认使用普通模式）
     fetch('/divination/api/bazi/', {
         method: 'POST',
         headers: {
@@ -411,7 +393,7 @@ document.getElementById('baziForm').addEventListener('submit', function(e) {
             birth_time: birthDate + ' ' + birthTime,
             gender: gender,
             birth_place: birthPlace,
-            ai_mode: aiMode
+            ai_mode: false
         }),
         signal: controller.signal
     })
@@ -430,11 +412,7 @@ document.getElementById('baziForm').addEventListener('submit', function(e) {
     .catch(error => {
         console.error('Error:', error);
         if (error.name === 'AbortError') {
-            // 超时错误 - 提供更友好的提示
-            const errorMsg = aiMode ? 
-                'AI增强分析需要较长时间，请稍候再试，或选择普通模式获得快速结果。' : 
-                '八字分析超时，请检查网络连接后重试。';
-            alert(errorMsg);
+            alert('八字分析超时，请检查网络连接后重试。');
         } else if (error.message && error.message.includes('fetch')) {
             alert('网络连接异常，请检查网络后重试');
         } else {
@@ -466,13 +444,11 @@ function displayResult(data) {
     document.getElementById('dayPillar').textContent = data.bazi.day;
     document.getElementById('hourPillar').textContent = data.bazi.hour;
     
-    // 显示分析内容
+    // 显示基础分析内容
     document.getElementById('analysisContent').innerHTML = formatMarkdown(data.analysis);
     
-    // 显示AI增强标识
-    if (data.ai_enhanced) {
-        document.getElementById('aiEnhancedBadge').style.display = 'block';
-    }
+    // 显示AI深度分析按钮
+    document.getElementById('aiAnalysisButton').style.display = 'block';
     
     // 显示结果区域
     document.getElementById('resultSection').style.display = 'block';
@@ -480,6 +456,55 @@ function displayResult(data) {
     // 滚动到结果区域
     document.getElementById('resultSection').scrollIntoView({ 
         behavior: 'smooth' 
+    });
+}
+
+function requestAIAnalysis() {
+    // 获取当前分析数据
+    const birthDate = document.getElementById('birthDate').value;
+    const birthTime = document.getElementById('birthTime').value;
+    const gender = document.getElementById('gender').value;
+    const birthPlace = document.getElementById('birthPlace').value;
+    
+    // 显示加载状态
+    const aiButton = document.getElementById('aiAnalysisButton');
+    const originalButtonText = aiButton.innerHTML;
+    aiButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>AI分析中...';
+    aiButton.disabled = true;
+    
+    // 发送AI分析请求
+    fetch('/divination/api/bazi/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            birth_time: birthDate + ' ' + birthTime,
+            gender: gender,
+            birth_place: birthPlace,
+            ai_mode: true
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // 显示AI分析内容
+            document.getElementById('aiAnalysisText').innerHTML = formatMarkdown(data.analysis);
+            document.getElementById('aiAnalysisContent').style.display = 'block';
+            // 隐藏AI分析按钮
+            document.getElementById('aiAnalysisButton').style.display = 'none';
+        } else {
+            alert('AI分析失败：' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('AI分析请求失败，请稍后重试');
+    })
+    .finally(() => {
+        aiButton.innerHTML = originalButtonText;
+        aiButton.disabled = false;
     });
 }
 

@@ -182,35 +182,65 @@ class MeihuaCalculator:
     def _interpret_ti_yong_relation(self, relation):
         """解释体用关系"""
         interpretations = {
-            '生': '用生体，大吉，事情发展顺利，会有贵人相助',
-            '克': '用克体，不利，事情阻碍较多，需要谨慎应对',
-            '同': '体用同类，平稳，事情发展平缓，按部就班即可',
-            '泄': '体生用，有耗损，付出较多，收获相对较少'
+            '生': '用生体，大吉之象。表示事情发展顺利，有贵人相助，外部环境对自身有利。建议把握机会，积极进取，但也要注意不要过于依赖外部助力。',
+            '克': '用克体，不利之象。表示事情阻碍较多，外部环境对自身不利。建议谨慎行事，避免正面冲突，可以采取迂回策略，等待时机。',
+            '同': '体用同类，平稳之象。表示事情发展平缓，内外力量平衡。建议按部就班，循序渐进，保持稳定发展，不宜冒进。',
+            '泄': '体生用，有耗损之象。表示付出较多，收获相对较少。建议量力而行，注意节约资源，避免过度消耗，可以适当调整策略。'
         }
-        return interpretations.get(relation, '关系复杂，需要综合分析')
+        return interpretations.get(relation, '体用关系复杂，需要结合具体卦象和动爻位置综合分析。')
     
     def _interpret_wuxing_relation(self, relation, upper_element, lower_element):
         """解释五行关系"""
         interpretations = {
-            '生': f'{upper_element}生{lower_element}，上下和谐，发展顺利',
-            '克': f'{upper_element}克{lower_element}，上压下制，需要调和',
-            '同': f'上下同为{upper_element}，力量集中，但需防过犹不及',
-            '泄': f'{lower_element}泄{upper_element}，下耗上力，注意节制'
+            '生': f'{upper_element}生{lower_element}，上下和谐，发展顺利。表示上层力量滋养下层，整体发展良好。建议顺势而为，把握机遇。',
+            '克': f'{upper_element}克{lower_element}，上压下制，需要调和。表示上层力量压制下层，可能造成内部矛盾。建议寻找平衡点，化解冲突。',
+            '同': f'上下同为{upper_element}，力量集中，但需防过犹不及。表示力量过于集中，可能造成失衡。建议适当分散，保持平衡。',
+            '泄': f'{lower_element}泄{upper_element}，下耗上力，注意节制。表示下层消耗上层力量，需要控制。建议合理分配资源，避免过度消耗。'
         }
-        return interpretations.get(relation, '五行关系复杂')
+        return interpretations.get(relation, '五行关系复杂，需要结合具体卦象和动爻位置综合分析。')
     
     def _predict_time(self, ti_yong_analysis, wuxing_analysis):
         """预测时间"""
         relation = ti_yong_analysis['relation']
+        wuxing_relation = wuxing_analysis['relation']
         
-        time_predictions = {
-            '生': '1-3个月内见效果，春夏季更佳',
-            '克': '3-6个月内需谨慎，秋冬季注意',
-            '同': '2-4个月内平稳发展',
-            '泄': '4-8个月内需要耐心等待'
+        # 基础时间预测
+        base_predictions = {
+            '生': '1-3个月内见效果，春夏季更佳。',
+            '克': '3-6个月内需谨慎，秋冬季注意。',
+            '同': '2-4个月内平稳发展。',
+            '泄': '4-8个月内需要耐心等待。'
         }
         
-        return time_predictions.get(relation, '时间难以确定，建议综合考虑')
+        # 五行关系对时间的影响
+        wuxing_time_effects = {
+            '生': '时间可能提前，进展加快。',
+            '克': '时间可能延长，进展受阻。',
+            '同': '时间相对稳定，按预期发展。',
+            '泄': '时间可能延长，需要更多耐心。'
+        }
+        
+        base_time = base_predictions.get(relation, '时间难以确定，建议综合考虑。')
+        wuxing_effect = wuxing_time_effects.get(wuxing_relation, '')
+        
+        # 结合体用关系和五行关系给出更详细的时间预测
+        detailed_prediction = f"{base_time}\n{wuxing_effect}\n"
+        
+        # 根据五行属性给出具体建议
+        upper_wuxing = wuxing_analysis['upper_wuxing']
+        lower_wuxing = wuxing_analysis['lower_wuxing']
+        
+        wuxing_timing = {
+            '木': '春季（2-4月）',
+            '火': '夏季（5-7月）',
+            '土': '长夏（7-9月）',
+            '金': '秋季（8-10月）',
+            '水': '冬季（11-1月）'
+        }
+        
+        detailed_prediction += f"建议关注{wuxing_timing.get(upper_wuxing, '')}和{wuxing_timing.get(lower_wuxing, '')}的时间节点。"
+        
+        return detailed_prediction
 
 
 class FortuneCalculator:
