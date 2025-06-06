@@ -95,34 +95,6 @@
                         <h3 class="mb-0 text-zen-primary"><i class="fas fa-heart me-2"></i>八字合婚结果</h3>
                     </div>
                     <div class="p-5">
-                        <!-- 匹配度展示 -->
-                        <div class="text-center mb-5">
-                            <div class="marriage-score-circle mx-auto mb-3">
-                                <div class="score-text">
-                                    <span id="compatibilityScore" class="score-number">0</span>
-                                    <span class="score-label">分</span>
-                                </div>
-                            </div>
-                            <h4 class="text-zen-primary">缘分匹配度</h4>
-                            <p id="compatibilityLevel" class="text-muted"></p>
-                        </div>
-
-                        <!-- 双方基本信息 -->
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <div class="p-3 border rounded">
-                                    <h5 class="text-zen-primary"><i class="fas fa-mars me-2"></i><span id="maleNameDisplay"></span></h5>
-                                    <p class="mb-1"><strong>生肖：</strong><span id="maleZodiac"></span></p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="p-3 border rounded">
-                                    <h5 class="text-zen-primary"><i class="fas fa-venus me-2"></i><span id="femaleNameDisplay"></span></h5>
-                                    <p class="mb-1"><strong>生肖：</strong><span id="femaleZodiac"></span></p>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- 详细分析 -->
                         <div class="analysis-content">
                             <h5 class="text-zen-primary mb-3"><i class="fas fa-chart-line me-2"></i>详细分析</h5>
@@ -285,39 +257,6 @@ document.getElementById('marriageForm').addEventListener('submit', function(e) {
 });
 
 function displayMarriageResult(data) {
-    // 更新匹配度
-    const score = data.compatibility_score;
-    document.getElementById('compatibilityScore').textContent = score;
-    
-    // 更新匹配度等级
-    let level = '';
-    if (score >= 90) level = '天作之合';
-    else if (score >= 80) level = '缘分深厚';
-    else if (score >= 70) level = '较为合适';
-    else if (score >= 60) level = '尚需磨合';
-    else level = '需要谨慎';
-    
-    document.getElementById('compatibilityLevel').textContent = level;
-    
-    // 更新圆形进度条
-    const circle = document.querySelector('.marriage-score-circle');
-    const percentage = score;
-    let color = '#dc3545'; // 红色
-    if (score >= 80) color = '#28a745'; // 绿色
-    else if (score >= 60) color = '#ffc107'; // 黄色
-    
-    circle.style.background = `conic-gradient(${color} 0% ${percentage}%, #f8f9fa ${percentage}% 100%)`;
-    
-    // 更新基本信息
-    if (data.detail_info && data.detail_info.male_shengxiao) {
-        document.getElementById('maleNameDisplay').textContent = data.detail_info.male_shengxiao.split('(')[0] || maleName;
-        document.getElementById('maleZodiac').textContent = data.detail_info.male_shengxiao;
-    }
-    if (data.detail_info && data.detail_info.female_shengxiao) {
-        document.getElementById('femaleNameDisplay').textContent = data.detail_info.female_shengxiao.split('(')[0] || femaleName;
-        document.getElementById('femaleZodiac').textContent = data.detail_info.female_shengxiao;
-    }
-    
     // 更新分析内容
     document.getElementById('marriageAnalysis').innerHTML = formatMarkdown(data.analysis);
     

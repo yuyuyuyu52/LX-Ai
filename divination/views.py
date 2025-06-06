@@ -222,7 +222,7 @@ def bazi_api(request):
 @check_usage_limit()
 @membership_info
 def bazi_marriage_api(request):
-    """八字合婚API - 支持普通模式和AI增强模式"""
+    """八字合婚API - 只返回八字信息"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -235,28 +235,6 @@ def bazi_marriage_api(request):
             female_birth_time = female_info.get('birth_time')
             male_name = male_info.get('name', '男方')
             female_name = female_info.get('name', '女方')
-            ai_mode = data.get('ai_mode', False)
-
-            # 检查AI模式权限
-            if ai_mode and request.user.is_authenticated:
-                profile, _ = UserProfile.objects.get_or_create(user=request.user)
-                if not profile.can_use_ai():
-                    return JsonResponse({'success': False, 'error': 'AI增强分析仅限会员使用，请升级会员后再试。'})
-
-            # 🔍 DEBUG: 添加AI模式调试输出
-            print("=" * 60)
-            print(f"🔍 八字合婚AI模式调试信息:")
-            print(f"   - ai_mode参数: {ai_mode}")
-            print(f"   - 用户已认证: {request.user.is_authenticated}")
-            if request.user.is_authenticated:
-                profile, _ = UserProfile.objects.get_or_create(user=request.user)
-                print(f"   - 用户名: {request.user.username}")
-                print(f"   - VIP状态: {profile.is_vip}")
-                print(f"   - 可使用AI: {profile.can_use_ai()}")
-                print(f"   - AI使用次数: {profile.ai_usage_count}")
-            else:
-                print(f"   - 用户未登录")
-            print("=" * 60)
 
             # 解析出生时间
             try:
@@ -290,113 +268,48 @@ def bazi_marriage_api(request):
             male_bazi_data = bazi_calculator.calculate_bazi(male_dt, '男')
             female_bazi_data = bazi_calculator.calculate_bazi(female_dt, '女')
             
-            # 八字合婚计算
-            marriage_result = bazi_calculator.calculate_marriage_compatibility(male_bazi_data, female_bazi_data)
-            
-            # 基础分析结果
+            # 生成基本八字信息展示
             basic_analysis = f"""
-【八字合婚分析报告】
+【八字合婚基本信息】
 
-【基本信息】
-{male_name}：{male_bazi_data['bazi_string']['year']} {male_bazi_data['bazi_string']['month']} {male_bazi_data['bazi_string']['day']} {male_bazi_data['bazi_string']['hour']}
-生肖：{male_bazi_data['shengxiao']}  日主：{male_bazi_data['ri_zhu']}
+【男方信息】
+姓名：{male_name}
+八字：{male_bazi_data['bazi_string']['year']} {male_bazi_data['bazi_string']['month']} {male_bazi_data['bazi_string']['day']} {male_bazi_data['bazi_string']['hour']}
+生肖：{male_bazi_data['shengxiao']}
+日主：{male_bazi_data['ri_zhu']}
 
-{female_name}：{female_bazi_data['bazi_string']['year']} {female_bazi_data['bazi_string']['month']} {female_bazi_data['bazi_string']['day']} {female_bazi_data['bazi_string']['hour']}
-生肖：{female_bazi_data['shengxiao']}  日主：{female_bazi_data['ri_zhu']}
-
-【匹配度评分】
-综合匹配度：{marriage_result['total_score']}分 - {marriage_result['level']}
-{marriage_result['description']}
-
-【详细分析】
-生肖配对：{marriage_result['details']['shengxiao_score']}分
-五行互补：{marriage_result['details']['wuxing_score']}分
-日柱匹配：{marriage_result['details']['rizhu_score']}分
-格局配合：{marriage_result['details']['geju_score']}分
-
-【合婚建议】
-根据八字分析，你们的匹配度为{marriage_result['total_score']}分，属于{marriage_result['level']}婚配。
-{marriage_result['description']}
-
-【注意事项】
-- 夫妻相处要互相理解包容
-- 保持良好的沟通和信任
-- 在重要决策上多商量讨论
-- 彼此支持对方的事业发展
-
-* 以上合婚分析基于传统命理学，仅供参考娱乐。
+【女方信息】
+姓名：{female_name}
+八字：{female_bazi_data['bazi_string']['year']} {female_bazi_data['bazi_string']['month']} {female_bazi_data['bazi_string']['day']} {female_bazi_data['bazi_string']['hour']}
+生肖：{female_bazi_data['shengxiao']}
+日主：{female_bazi_data['ri_zhu']}
             """
-
-            # AI增强分析
-            final_analysis = basic_analysis
-            actual_ai_used = False  # 跟踪AI是否真正被使用
-            if ai_mode and request.user.is_authenticated:
-                print("🔍 准备调用八字合婚AI增强分析...")
-                try:
-                    from core.ai_service import AIService
-                    ai_service = AIService()
-                    
-                    male_info_for_ai = {
-                        'name': male_name,
-                        'bazi': f"{male_bazi_data['bazi_string']['year']} {male_bazi_data['bazi_string']['month']} {male_bazi_data['bazi_string']['day']} {male_bazi_data['bazi_string']['hour']}",
-                        'birth_time': male_birth_time
-                    }
-                    
-                    female_info_for_ai = {
-                        'name': female_name,
-                        'bazi': f"{female_bazi_data['bazi_string']['year']} {female_bazi_data['bazi_string']['month']} {female_bazi_data['bazi_string']['day']} {female_bazi_data['bazi_string']['hour']}",
-                        'birth_time': female_birth_time
-                    }
-                    
-                    print(f"📋 八字合婚AI分析参数: 男方={male_info_for_ai}, 女方={female_info_for_ai}")
-                    print("🤖 调用 ai_service.enhance_marriage_analysis...")
-                    
-                    ai_analysis = ai_service.enhance_marriage_analysis(
-                        basic_analysis,
-                        male_info_for_ai,
-                        female_info_for_ai
-                    )
-                    
-                    print(f"✅ 八字合婚AI分析完成，结果长度: {len(ai_analysis)}字符")
-                    final_analysis = ai_analysis
-                    actual_ai_used = True  # 标记AI已成功使用
-                    profile.ai_usage_count += 1
-                    profile.save()
-                    print(f"📊 更新用户AI使用次数: {profile.ai_usage_count}")
-                except Exception as e:
-                    print(f"❌ 八字合婚AI增强分析失败: {str(e)}")
-                    final_analysis = basic_analysis + f"\n\n[注：AI增强分析暂时不可用，已为您提供完整的基础分析]"
-                    actual_ai_used = False  # 标记AI未成功使用
-            else:
-                print("🔍 八字合婚未启用AI模式或用户未登录")
-
+            
             # 保存占卜记录
             if request.user.is_authenticated:
                 DivinationRecord.objects.create(
                     user=request.user,
                     divination_type='marriage',
-                    result=final_analysis,
-                    ai_enhanced=ai_mode
+                    result=basic_analysis,
+                    ai_enhanced=False
                 )
                 from core.models import Notification
                 Notification.objects.create(
                     user=request.user,
                     title='八字合婚完成',
-                    message=f'{male_name}与{female_name}的{"AI增强" if actual_ai_used else ""}八字合婚分析已完成。',
+                    message=f'{male_name}与{female_name}的八字合婚分析已完成。',
                     notification_type='success'
                 )
 
             return JsonResponse({
                 'success': True,
-                'compatibility_score': marriage_result['total_score'],
-                'analysis': final_analysis,
-                'ai_enhanced': actual_ai_used,  # 使用实际的AI使用状态
-                'detail_info': {
-                    'male_shengxiao': marriage_result['male_shengxiao'],
-                    'female_shengxiao': marriage_result['female_shengxiao'],
-                    'zodiac_score': marriage_result['details']['shengxiao_score'],
-                    'wuxing_score': marriage_result['details']['wuxing_score']
-                }
+                'male_bazi': male_bazi_data['bazi_string'],
+                'female_bazi': female_bazi_data['bazi_string'],
+                'male_shengxiao': male_bazi_data['shengxiao'],
+                'female_shengxiao': female_bazi_data['shengxiao'],
+                'male_rizhu': male_bazi_data['ri_zhu'],
+                'female_rizhu': female_bazi_data['ri_zhu'],
+                'analysis': basic_analysis
             })
         except Exception as e:
             return JsonResponse({'success': False, 'error': f'合婚分析过程中出现错误：{str(e)}'})
