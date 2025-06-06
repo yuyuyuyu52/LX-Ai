@@ -14,6 +14,7 @@ from core.bazi_calculator import bazi_calculator
 from core.fortune_calculator import meihua_calculator, fortune_calculator
 from core.ai_service import ai_service
 from core.decorators import check_usage_limit, membership_info
+from lunar_python import Lunar
 
 logger = logging.getLogger(__name__)
 
@@ -138,8 +139,10 @@ def bazi_api(request):
 
             # 八字计算
             bazi_result = bazi_calculator.calculate_bazi(birth_dt, gender)
+            da_yun = bazi_result.get('da_yun', {})
+            gender_display = '男' if gender in ['male', '男'] else '女'
             basic_analysis = f"""
-【八字排盘】\n年柱：{bazi_result['bazi_string']['year']}    月柱：{bazi_result['bazi_string']['month']}    日柱：{bazi_result['bazi_string']['day']}    时柱：{bazi_result['bazi_string']['hour']}\n\n【基本信息】\n性别：{gender}\n生肖：{bazi_result['shengxiao']}\n日主：{bazi_result['ri_zhu']}（{bazi_calculator.WUXING_TIANGAN[bazi_result['ri_zhu']]}）\n格局：{bazi_result['geju']}\n\n【五行统计】\n金：{bazi_result['wuxing_count']['金']}个  木：{bazi_result['wuxing_count']['木']}个  水：{bazi_result['wuxing_count']['水']}个  火：{bazi_result['wuxing_count']['火']}个  土：{bazi_result['wuxing_count']['土']}个\n\n【十神分析】\n年干：{bazi_result['shishen'].get('year_gan', '未知')}\n月干：{bazi_result['shishen'].get('month_gan', '未知')}\n时干：{bazi_result['shishen'].get('hour_gan', '未知')}\n\n【性格特点】\n日主{bazi_result['ri_zhu']}，五行属{bazi_calculator.WUXING_TIANGAN[bazi_result['ri_zhu']]}，性格特征明显。\n\n【事业财运】\n根据五行配置，适合发展相关行业。\n\n【感情婚姻】\n感情运势与个人格局密切相关。\n\n【健康运势】\n需要注意五行平衡，保持身心健康。\n\n* 以上分析基于传统八字命理学，仅供参考娱乐。\n"""
+【八字排盘】\n年柱：{bazi_result['bazi_string']['year']}    月柱：{bazi_result['bazi_string']['month']}    日柱：{bazi_result['bazi_string']['day']}    时柱：{bazi_result['bazi_string']['hour']}\n\n【基本信息】\n性别：{gender_display}\n生肖：{bazi_result['shengxiao']}\n大运起运时间：{da_yun.get('start_age', '-')}岁 {da_yun.get('start_date', '-')}\n"""
 
             # AI增强分析
             final_analysis = basic_analysis
@@ -207,7 +210,8 @@ def bazi_api(request):
                 'detail_info': {
                     'shengxiao': bazi_result['shengxiao'],
                     'wuxing_count': bazi_result['wuxing_count'],
-                    'geju': bazi_result['geju']
+                    'geju': bazi_result['geju'],
+                    'da_yun': da_yun  # 新增大运起运信息
                 }
             })
         except Exception as e:
@@ -711,3 +715,8 @@ def daily_fortune_api(request):
         except Exception as e:
             return JsonResponse({'success': False, 'error': f'运势分析过程中出现错误：{str(e)}'})
     return JsonResponse({'success': False, 'error': '请求方法错误'})
+
+def _get_day_ganzhi(self, birth_time):
+    lunar = Lunar.fromDate(birth_time)
+    gan_zhi = lunar.getDayGanZhi()  # 例如 '丙午'
+    return gan_zhi[0], gan_zhi[1]

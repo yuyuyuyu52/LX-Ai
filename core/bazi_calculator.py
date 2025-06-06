@@ -7,6 +7,7 @@
 from datetime import datetime, timedelta
 import math
 from lunar_python import Lunar  # 引入农历转换库
+from dateutil.relativedelta import relativedelta
 
 class BaziCalculator:
     """八字计算器"""
@@ -141,6 +142,9 @@ class BaziCalculator:
         # 格局详细分析
         geju_details = self._analyze_geju_details(geju, wuxing_count)
         
+        # 计算大运起运年龄和起运时间
+        da_yun_info = self.calculate_da_yun_start(birth_time, gender, day_gan)
+        
         result = {
             'bazi': bazi,
             'bazi_string': {
@@ -157,7 +161,8 @@ class BaziCalculator:
             'gender': gender,
             'wuxing_relations': wuxing_relations,
             'shishen_details': shishen_details,
-            'geju_details': geju_details
+            'geju_details': geju_details,
+            'da_yun': da_yun_info
         }
         
         return result
@@ -191,16 +196,13 @@ class BaziCalculator:
         return gan, zhi
     
     def _get_day_ganzhi(self, birth_time):
-        """计算日柱干支"""
-        # 以1900年1月31日庚辰日为基准
-        base_date = datetime(1900, 1, 31)
-        days_diff = (birth_time.date() - base_date.date()).days
-        
-        # 1900年1月31日是庚辰日，庚=6，辰=4
-        gan_index = (6 + days_diff) % 10
-        zhi_index = (4 + days_diff) % 12
-        
-        return self.TIANGAN[gan_index], self.DIZHI[zhi_index]
+        lunar = Lunar.fromDate(birth_time)
+        # 兼容不同版本的lunar_python
+        if hasattr(lunar, 'getDayInGanZhi'):
+            gan_zhi = lunar.getDayInGanZhi()  # 例如 '丙午'
+        else:
+            gan_zhi = lunar.getDayGanZhi()    # 例如 '丙午'
+        return gan_zhi[0], gan_zhi[1]
     
     def _get_hour_ganzhi(self, hour, day_gan):
         """计算时柱干支"""
@@ -583,6 +585,108 @@ class BaziCalculator:
                 'characteristics': '五行力量均衡，气势平和',
                 'suggestions': '宜顺势而为，保持平衡'
             }
+    
+    def calculate_da_yun_start(self, birth_time, gender='男', day_gan=None):
+        """
+        权威大运起运时间算法：
+        1. 以日主阴阳判顺逆（阳干顺行取下一个节气，阴干逆行取上一个节气）
+        2. 精确到年月日
+        3. 自动查找节气表并计算起运时间
+        """
+        from lunar_python import Lunar
+        from datetime import datetime
+
+        def solar_to_datetime(dt):
+            """统一将Solar对象或datetime/date对象转为datetime"""
+            if hasattr(dt, 'toDatetime'):
+                return dt.toDatetime()
+            elif hasattr(dt, 'toDate'):
+                return datetime.combine(dt.toDate(), datetime.min.time())
+            elif isinstance(dt, datetime):
+                return dt
+            elif hasattr(dt, 'getYear') and hasattr(dt, 'getMonth') and hasattr(dt, 'getDay'):
+                # 处理Solar对象
+                year = dt.getYear()
+                month = dt.getMonth()
+                day = dt.getDay()
+                if hasattr(dt, 'getHour'):
+                    hour = dt.getHour()
+                    minute = dt.getMinute() if hasattr(dt, 'getMinute') else 0
+                    second = dt.getSecond() if hasattr(dt, 'getSecond') else 0
+                    return datetime(year, month, day, hour, minute, second)
+                else:
+                    return datetime(year, month, day)
+            elif hasattr(dt, 'year') and hasattr(dt, 'month') and hasattr(dt, 'day'):
+                # 处理date对象
+                return datetime(dt.year, dt.month, dt.day)
+            else:
+                raise ValueError(f"无法识别的节气时间类型: {type(dt)}")
+
+        # 1. 判断日主阴阳
+        if day_gan is None:
+            # 若未传入日主天干，自动推算
+            lunar = Lunar.fromDate(birth_time)
+            gan_zhi = lunar.getDayInGanZhi() if hasattr(lunar, 'getDayInGanZhi') else lunar.getDayGanZhi()
+            day_gan = gan_zhi[0]
+        yang_gan = ['甲', '丙', '戊', '庚', '壬']
+        is_yang = day_gan in yang_gan
+
+        # 2. 获取节气表
+        lunar = Lunar.fromDate(birth_time)
+        jieqi_table = lunar.getJieQiTable()  # {节气名: datetime}
+
+        # 3. 找到最近的节气
+        birth_dt = birth_time
+        after = []
+        before = []
+        for name, dt in jieqi_table.items():
+            dt_obj = solar_to_datetime(dt)
+            if dt_obj > birth_dt:
+                after.append((dt_obj, name))
+            else:
+                before.append((dt_obj, name))
+
+        if is_yang:
+            # 顺行，取下一个节气
+            if after:
+                next_jieqi_dt, next_jieqi_name = min(after, key=lambda x: x[0])
+            else:
+                next_year_lunar = Lunar.fromDate(birth_dt.replace(year=birth_dt.year+1))
+                next_jieqi_table = next_year_lunar.getJieQiTable()
+                after_next = []
+                for name, dt in next_jieqi_table.items():
+                    dt_obj = solar_to_datetime(dt)
+                    after_next.append((dt_obj, name))
+                next_jieqi_dt, next_jieqi_name = min(after_next, key=lambda x: x[0])
+            delta = next_jieqi_dt - birth_dt
+            total_days = delta.days + delta.seconds / 86400
+        else:
+            # 逆行，取上一个节气
+            if before:
+                prev_jieqi_dt, prev_jieqi_name = max(before, key=lambda x: x[0])
+            else:
+                prev_year_lunar = Lunar.fromDate(birth_dt.replace(year=birth_dt.year-1))
+                prev_jieqi_table = prev_year_lunar.getJieQiTable()
+                before_prev = []
+                for name, dt in prev_jieqi_table.items():
+                    dt_obj = solar_to_datetime(dt)
+                    before_prev.append((dt_obj, name))
+                prev_jieqi_dt, prev_jieqi_name = max(before_prev, key=lambda x: x[0])
+            delta = birth_dt - prev_jieqi_dt
+            total_days = delta.days + delta.seconds / 86400
+
+        # 4. 换算虚月数、起运年龄
+        xu_yue = total_days * 4
+        start_age = int(xu_yue // 12)
+        left_month = int(xu_yue % 12)
+        left_day = int((xu_yue % 1) * 30)
+
+        # 5. 计算大运起运公历时间
+        start_date = birth_dt + relativedelta(years=start_age, months=left_month, days=left_day)
+        return {
+            'start_age': f'{start_age}岁{left_month}个月{left_day}天',
+            'start_date': start_date.strftime('%Y-%m-%d %H:%M')
+        }
 
 # 全局八字计算器实例
 bazi_calculator = BaziCalculator()

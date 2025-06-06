@@ -93,31 +93,7 @@
                         </div>
 
                         <!-- 八字显示 -->
-                        <div class="text-center mb-5">
-                            <h4 class="text-zen-primary mb-4">您的八字</h4>
-                            <div class="bazi-display">
-                                <div class="zen-bazi-pillar">
-                                    <div class="pillar-label">年柱</div>
-                                    <div class="pillar-value" id="yearPillar">甲子</div>
-                                    <div class="pillar-desc">祖业根基</div>
-                                </div>
-                                <div class="zen-bazi-pillar">
-                                    <div class="pillar-label">月柱</div>
-                                    <div class="pillar-value" id="monthPillar">乙丑</div>
-                                    <div class="pillar-desc">父母宫位</div>
-                                </div>
-                                <div class="zen-bazi-pillar">
-                                    <div class="pillar-label">日柱</div>
-                                    <div class="pillar-value" id="dayPillar">丙寅</div>
-                                    <div class="pillar-desc">自身命格</div>
-                                </div>
-                                <div class="zen-bazi-pillar">
-                                    <div class="pillar-label">时柱</div>
-                                    <div class="pillar-value" id="hourPillar">丁卯</div>
-                                    <div class="pillar-desc">子女后代</div>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- 移除八字大方块展示 -->
 
                         <!-- 分析内容 -->
                         <div id="analysisContent" class="zen-analysis-content">
@@ -437,12 +413,6 @@ function displayResult(data) {
     document.getElementById('displayBirthInfo').textContent = birthDate + ' ' + birthTime;
     document.getElementById('displayGender').textContent = gender === 'male' ? '男' : '女';
     document.getElementById('displayBirthPlace').textContent = birthPlace;
-    
-    // 显示八字
-    document.getElementById('yearPillar').textContent = data.bazi.year;
-    document.getElementById('monthPillar').textContent = data.bazi.month;
-    document.getElementById('dayPillar').textContent = data.bazi.day;
-    document.getElementById('hourPillar').textContent = data.bazi.hour;
     
     // 显示基础分析内容
     document.getElementById('analysisContent').innerHTML = formatMarkdown(data.analysis);
