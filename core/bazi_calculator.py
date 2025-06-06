@@ -6,7 +6,7 @@
 
 from datetime import datetime, timedelta
 import math
-from lunar_python import Lunar  # 引入农历转换库
+from .solar_terms import solar_term_date, SOLAR_TERMS
 
 class BaziCalculator:
     """八字计算器"""
@@ -95,14 +95,11 @@ class BaziCalculator:
         Returns:
             dict: 包含完整八字信息的字典
         """
-        # 转换为农历时间
-        lunar = Lunar.fromDate(birth_time)
-        
         # 获取年柱
-        year_gan, year_zhi = self._get_year_ganzhi(lunar.getYear())
-        
+        year_gan, year_zhi = self._get_year_ganzhi(birth_time)
+
         # 获取月柱
-        month_gan, month_zhi = self._get_month_ganzhi(lunar.getYear(), lunar.getMonth())
+        month_gan, month_zhi = self._get_month_ganzhi(birth_time, year_gan)
         
         # 获取日柱
         day_gan, day_zhi = self._get_day_ganzhi(birth_time)
@@ -130,7 +127,7 @@ class BaziCalculator:
         geju = self._determine_geju(bazi, ri_zhu, wuxing_count)
         
         # 生肖
-        shengxiao = self.SHENGXIAO[(lunar.getYear() - 4) % 12]
+        shengxiao = self.SHENGXIAO[self.DIZHI.index(year_zhi)]
         
         # 五行关系分析
         wuxing_relations = self._analyze_wuxing_relations(bazi)
@@ -162,33 +159,69 @@ class BaziCalculator:
         
         return result
     
-    def _get_year_ganzhi(self, year):
-        """计算年柱干支"""
-        # 以1864年甲子年为基准
+    def _get_year_ganzhi(self, birth_time):
+        """根据立春计算年柱干支"""
+        year = birth_time.year
+        lichun = solar_term_date(year, "立春")
+        if birth_time.date() < lichun:
+            year -= 1
+
         base_year = 1864
         offset = (year - base_year) % 60
         gan_index = offset % 10
         zhi_index = offset % 12
         return self.TIANGAN[gan_index], self.DIZHI[zhi_index]
     
-    def _get_month_ganzhi(self, year, month):
-        """计算月柱干支"""
-        # 月柱地支固定：正月寅，二月卯...
-        month_zhi_map = {
-            1: '寅', 2: '卯', 3: '辰', 4: '巳', 5: '午', 6: '未',
-            7: '申', 8: '酉', 9: '戌', 10: '亥', 11: '子', 12: '丑'
+    def _get_month_ganzhi(self, birth_time, year_gan):
+        """根据节气计算月柱干支"""
+        # 节气作为月份开始的界限
+        month_terms = [
+            "立春", "惊蛰", "清明", "立夏", "芒种", "小暑",
+            "立秋", "白露", "寒露", "立冬", "大雪", "小寒"
+        ]
+        month_branches = [
+            '寅', '卯', '辰', '巳', '午', '未',
+            '申', '酉', '戌', '亥', '子', '丑'
+        ]
+
+        year = birth_time.year
+        lichun = solar_term_date(year, "立春")
+        if birth_time.date() < lichun:
+            year -= 1
+
+        # 构建当前节气开始日期列表
+        boundaries = []
+        for i, term in enumerate(month_terms):
+            if term == "小寒":
+                boundaries.append((solar_term_date(year + 1, term), month_branches[i]))
+            else:
+                boundaries.append((solar_term_date(year, term), month_branches[i]))
+        # 下一年立春作为结束
+        boundaries.append((solar_term_date(year + 1, "立春"), None))
+
+        month_index = 12
+        month_branch = '丑'
+        for i in range(len(boundaries) - 1):
+            start, branch = boundaries[i]
+            end, _ = boundaries[i + 1]
+            if start <= birth_time.date() < end:
+                month_index = i + 1
+                month_branch = branch
+                break
+
+        # 计算月干
+        month_gan_start_map = {
+            '甲': 2, '己': 2,
+            '乙': 4, '庚': 4,
+            '丙': 6, '辛': 6,
+            '丁': 8, '壬': 8,
+            '戊': 0, '癸': 0
         }
-        
-        zhi = month_zhi_map[month]
-        
-        # 月干计算：甲己之年丙作首
-        year_gan_index = (year - 4) % 10
-        month_gan_starts = [2, 4, 6, 8, 0, 2, 4, 6, 8, 0]  # 对应甲乙丙丁戊己庚辛壬癸年的正月天干
-        
-        gan_index = (month_gan_starts[year_gan_index] + month - 1) % 10
+        start_index = month_gan_start_map[year_gan]
+        gan_index = (start_index + month_index - 1) % 10
         gan = self.TIANGAN[gan_index]
-        
-        return gan, zhi
+
+        return gan, month_branch
     
     def _get_day_ganzhi(self, birth_time):
         """计算日柱干支"""
